@@ -1,8 +1,7 @@
 'use client';
 
-import ChatBox from "./components/ChatBox";
 import { useState } from "react";
-
+import ChatBox from "./components/ChatBox";
 
 export default function Home() {
   const [query, setQuery] = useState<string>("");

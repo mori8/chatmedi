@@ -8,9 +8,17 @@ const config: Config = {
   ],
   theme: {
     extend: {
+      fontFamily: {
+        'pretendard': 'Pretendard, sans-serif',
+        'ibm-3270': 'IBM 3270 Condenced, monospace',
+      },
       colors: {
         'mint': '#B2DFCF',
         'turquiose': '#50A385',
+        'lightgray': '#F6F6F6'
+      },
+      boxShadow: {
+        'solid': '0 2px 0 2px',
       }
     },
   },
