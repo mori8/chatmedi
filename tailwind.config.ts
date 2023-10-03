@@ -18,7 +18,7 @@ const config: Config = {
         'lightgray': '#F6F6F6'
       },
       boxShadow: {
-        'solid': '0 2px 0 2px',
+        'solid': '0 4px 0 0px',
       }
     },
   },
