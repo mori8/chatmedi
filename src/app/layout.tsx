@@ -17,7 +17,7 @@ export default function RootLayout({
       <body>
         <div className="flex flex-row overflow-hidden w-full h-full z-0 relative">
           <SideBar />
-          <div className="relative flex h-full max-w-full flex-1 overflow-hidden bg-lightgray">
+          <div className="relative h-full flex-1 overflow-hidden bg-lightgray flex flex-col">
             {children}
           </div>
         </div>

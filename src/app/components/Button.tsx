@@ -29,8 +29,8 @@ export default function Button({
           "shadow-white": shadowColor === "white",
           "shadow-black": shadowColor === "black",
         }, {
-          "px-3 py-3 rounded-2xl": size === "default",
-          "px-2 py-1 rounded-md": size === "sm",
+          "px-3 py-3 rounded-xl": size === "default",
+          "px-3 py-2 rounded-md": size === "sm",
         }
       )}
       onClick={onClick}
