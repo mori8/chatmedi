@@ -38,7 +38,9 @@ export default function ChatBox({
             </div>
           )
         }
+        <div className="rounded-full flex items-center p-3 hover:bg-turquiose hover:text-white transition ease-in-out">
         <PaperAirplaneIcon width="24" />
+        </div>
       </div>
     </div>
   );

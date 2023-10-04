@@ -74,7 +74,7 @@ export default function SideBar({}: Props) {
         >
           <div className="flex flex-col p-5 pt-8">
             <div className="flex flex-row gap-4">
-              <Bars3Icon width="24" />
+              <Bars3Icon width="24" className="cursor-pointer" />
               <div className="flex-1">
                 <h1 className="font-mono">CHATMEDI</h1>
               </div>
@@ -125,7 +125,7 @@ export default function SideBar({}: Props) {
           className="fixed top-8 left-6 z-10"
           onClick={() => toggleSideBar()}
         >
-          <Bars3Icon width="24" color="black" />
+          <Bars3Icon width="24" color="black" className="cursor-pointer" />
         </div>
       )}
     </>
