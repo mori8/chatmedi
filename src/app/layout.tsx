@@ -1,6 +1,8 @@
 import "./globals.css";
 import type { Metadata } from "next";
+
 import SideBar from "./components/SideBar";
+import Navigation from "./components/Navigation";
 
 export const metadata: Metadata = {
   title: "ChatMedi",
@@ -15,9 +17,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <div className="flex flex-row overflow-hidden w-full h-full z-0 relative">
+        <div className="flex flex-row overflow-hidden w-full h-full z-0 relative bg-lightgray">
           <SideBar />
-          <div className="relative h-full flex-1 overflow-hidden bg-lightgray flex flex-col">
+          <div className="relative h-full flex-1 overflow-hidden flex flex-col">
+            <Navigation />
             {children}
           </div>
         </div>

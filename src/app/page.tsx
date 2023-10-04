@@ -19,8 +19,8 @@ export default function Home() {
   }, []);
 
   return (
-    <main className="flex min-h-screen flex-col items-center p-24 gap-12">
-      <div className="max-w-[64rem] w-full">
+    <main className="flex min-h-screen flex-col items-center p-12 gap-12">
+      <div className="chatbox-wrapper max-w-[64rem] w-full mt-24">
         <ChatBox
           isFileAttachEnabled={true}
           getQuery={(text: string) => {
