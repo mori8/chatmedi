@@ -19,7 +19,7 @@ const config: Config = {
       },
       boxShadow: {
         'solid': '0 4px 0 0px',
-      }
+      },
     },
   },
   plugins: [],

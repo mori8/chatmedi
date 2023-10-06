@@ -5,9 +5,15 @@ interface Chat {
   createdAt: string;
 }
 
+interface Model {
+  name: string;
+  shortDescription: string;
+  task: string;
+}
+
 interface Module {
   messageId: number;
   moduleName: string;
-  models: { name: string; shortDescription: string; task: string }[];
+  models: Model[];
   summary: string;
 }

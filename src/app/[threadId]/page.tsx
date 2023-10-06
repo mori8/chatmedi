@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
+
+import SurfingSVG from "../icons/SurfingSVG";
 import ChatBox from "../components/ChatBox";
 import ModuleGroupBox from "./ModuleGroupBox";
 
@@ -11,10 +13,11 @@ type Props = {
 };
 
 export default function page({ params }: Props) {
+  const [hasFetched, setHasFetched] = useState(false);
   const [threadId, setThreadId] = useState<string | null>(null);
   const [message, setMessage] = useState<
     { messageId: number; message: string }[]
-    >([]);
+  >([]);
   const [modules, setModules] = useState<Module[]>([]);
   // 난 무섭다 데이터가 어떻게 생겼을지 가늠도 안된다
 
@@ -75,50 +78,69 @@ ADL - 혼자 위생관리 잘하며 적절한 옷도 잘 골라 입음, 농사�
           {
             name: "SPMM",
             shortDescription: "model for molecule generation",
-            task: "property_to_molecule"
-          }, {
+            task: "property_to_molecule",
+          },
+          {
             name: "DEMO1",
             shortDescription: "demo model",
-            task: "property_to_molecule"
-          }, {
+            task: "property_to_molecule",
+          },
+          {
             name: "DEMO2",
             shortDescription: "demo model",
-            task: "property_to_molecule"
-          }, {
+            task: "property_to_molecule",
+          },
+          {
             name: "DEMO3",
             shortDescription: "demo model",
-            task: "property_to_molecule"
-          }, {
+            task: "property_to_molecule",
+          },
+          {
             name: "DEMO4",
             shortDescription: "demo model",
-            task: "property_to_molecule"
-          }
+            task: "property_to_molecule",
+          },
         ],
-        summary: "Lorem ipsum dolor sit amet consectetur. Arcu euismod ornare vel ut aliquet et lacus vel. Accumsan ante cursus pellentesque nunc duis. Et blandit malesuada non facilisis. Potenti enim morbi gravida sit. Gravida tortor bibendum orci sit elit in tempus ante accumsan. Luctus eget faucibus congue tempor egestas volutpat interdum viverra."
-      }
-    ])
-  }, [])
+        summary:
+          "Lorem ipsum dolor sit amet consectetur. Arcu euismod ornare vel ut aliquet et lacus vel. Accumsan ante cursus pellentesque nunc duis. Et blandit malesuada non facilisis. Potenti enim morbi gravida sit. Gravida tortor bibendum orci sit elit in tempus ante accumsan. Luctus eget faucibus congue tempor egestas volutpat interdum viverra.",
+      },
+    ]);
+  }, []);
 
   return (
     <div className="flex flex-col items-center p-12 gap-12">
-      <div className="chatbox-wrapper max-w-[64rem] w-full">
+      <div className="max-w-[64rem] w-full">
         {message.map((message) => (
           <>
-            <ChatBox
-              key={message.messageId}
-              getQuery={() => {}}
-              query={message.message}
-            />
-            <div className="mt-12 flex flex-col gap-6">
-              {
-                modules.length && <ModuleGroupBox {
-                  ...(modules?.find((module) => module.messageId === message.messageId))
-                } />
-              }
+            <div className="chatbox-wrapper w-full mb-12">
+              <ChatBox
+                key={message.messageId}
+                getQuery={() => {}}
+                query={message.message}
+              />
+            </div>
+            <SectionTitle>Analyzing ...{hasFetched && "Done"}</SectionTitle>
+            <div className="mt-8 flex flex-col gap-6">
+              {modules.length && (
+                <ModuleGroupBox
+                  {...modules?.find(
+                    (module) => module.messageId === message.messageId
+                  )}
+                />
+              )}
             </div>
           </>
         ))}
       </div>
+    </div>
+  );
+}
+
+function SectionTitle({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="flex flex-row items-center gap-4">
+      <SurfingSVG />
+      <h3 className="text-lg font-bold">{children}</h3>
     </div>
   );
 }
