@@ -15,7 +15,7 @@ export default function Navigation({ }: Props) {
     }
   ]
   return (
-    <div className='fixed z-10 w-full pt-6 px-12'>
+    <div className='z-10 w-full pt-6 px-12'>
       <ul className='flex flex-row gap-10'>
         {
           tabList.map((tab, index) => (
