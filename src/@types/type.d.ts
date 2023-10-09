@@ -17,3 +17,9 @@ interface Module {
   models: Model[];
   summary: string;
 }
+
+interface Result {
+  messageId: number;
+  image: string | null
+  text: string
+}

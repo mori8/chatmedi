@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import SurfingSVG from "../icons/SurfingSVG";
 import ChatBox from "../components/ChatBox";
 import ModuleGroupBox from "./ModuleGroupBox";
+import Result from "./Result";
 
 type Props = {
   params: {
@@ -19,6 +20,7 @@ export default function page({ params }: Props) {
     { messageId: number; message: string }[]
   >([]);
   const [modules, setModules] = useState<Module[]>([]);
+  const [results, setResults] = useState<Result[]>([]);
   // 난 무섭다 데이터가 어떻게 생겼을지 가늠도 안된다
 
   useEffect(() => {
@@ -105,31 +107,66 @@ ADL - 혼자 위생관리 잘하며 적절한 옷도 잘 골라 입음, 농사�
           "Lorem ipsum dolor sit amet consectetur. Arcu euismod ornare vel ut aliquet et lacus vel. Accumsan ante cursus pellentesque nunc duis. Et blandit malesuada non facilisis. Potenti enim morbi gravida sit. Gravida tortor bibendum orci sit elit in tempus ante accumsan. Luctus eget faucibus congue tempor egestas volutpat interdum viverra.",
       },
     ]);
+
+    setResults([
+      {
+        messageId: 1,
+        image: null,
+        text: `This is a treatment suggestion for the patient you described:
+IVIG instead of high-dose steroids for DM comorbidities
+- IVIG 0.5 g/kg/day * 4 days (2022-04-13 to 2022-04-16), total 2 g/kg
+- Reported significant improvement in symptoms of dizziness and night sweats at discharge after receiving IVIG
+Psychiatric consultation performed for insomnia and past diagnosis of depression
+- Findings: r/o adjustment disorder, r/o sleep disorder, mild depression, and insomnia confirmed
+- Insomnia improved after addition of mirtazapine 3.75 mg bedtime
+Discharge meds: donepezil d/c and choline alfoscerate, maintained on mirtazapine only`,
+      },
+    ]);
   }, []);
 
   return (
-    <div className="flex flex-col items-center p-12 gap-12">
+    <div className="flex flex-col items-center p-12">
       <div className="max-w-[64rem] w-full">
         {message.map((message) => (
-          <>
-            <div className="chatbox-wrapper w-full mb-12">
+          <div className="flex flex-col gap-16">
+            <section className="section-chatbox w-full">
               <ChatBox
                 key={message.messageId}
                 getQuery={() => {}}
                 query={message.message}
               />
-            </div>
-            <SectionTitle>Analyzing ...{hasFetched && "Done"}</SectionTitle>
-            <div className="mt-8 flex flex-col gap-6">
-              {modules.length && (
-                <ModuleGroupBox
-                  {...modules?.find(
-                    (module) => module.messageId === message.messageId
-                  )}
-                />
-              )}
-            </div>
-          </>
+            </section>
+
+            <section className="section-modules">
+              <SectionTitle>Analyzing ...{hasFetched && "Done"}</SectionTitle>
+              <div className="flex flex-col gap-6 mt-8">
+                {modules.length &&
+                  modules
+                    .filter((module) => module.messageId === message.messageId)
+                    .map((module) => (
+                      <ModuleGroupBox key={module.moduleName} {...module} />
+                    ))}
+              </div>
+            </section>
+
+            <section className="section-result">
+              <SectionTitle>Result</SectionTitle>
+              {results
+                .filter((result) => result.messageId === message.messageId)
+                .map((message) => (
+                  <div className="flex flex-col gap-6 mt-8">
+                    {results.length &&
+                      results
+                        .filter(
+                          (result) => result.messageId === message.messageId
+                        )
+                        .map((result) => (
+                          <Result key={result.messageId} {...result} />
+                        ))}
+                  </div>
+                ))}
+            </section>
+          </div>
         ))}
       </div>
     </div>
