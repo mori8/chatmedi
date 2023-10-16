@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import 'react-tooltip/dist/react-tooltip.css'
 
 import ChatBox from "./components/ChatBox";
 import { ArrowRightCircleIcon } from "@heroicons/react/24/outline";
@@ -19,7 +20,7 @@ export default function Home() {
   }, []);
 
   return (
-    <main className="flex flex-col items-center p-12 gap-12">
+    <main className="flex flex-col items-center gap-12 py-12">
       <div className="chatbox-wrapper max-w-[64rem] w-full mt-24">
         <ChatBox
           isFileAttachEnabled={true}

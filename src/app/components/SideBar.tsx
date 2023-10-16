@@ -2,6 +2,7 @@
 
 import classNames from "classnames";
 import { useEffect, useState } from "react";
+import Link from "next/link";
 
 import Button from "./Button";
 import PlusChatSVG from "../icons/PlusChatSVG";
@@ -41,7 +42,7 @@ export default function SideBar({}: Props) {
       date: key,
       chats: grouped[key],
     }));
-  }
+  };
 
   useEffect(() => {
     // TODO: fetch chat history
@@ -51,12 +52,14 @@ export default function SideBar({}: Props) {
         title: "The Best Chat I ever experienced",
         type: "chat",
         createdAt: "2023-07-21T01:43:11.999824",
-      },{
+      },
+      {
         threadId: "2",
         title: "This is sample chat",
         type: "chat",
         createdAt: "2023-07-21T13:43:11.999824",
-      },{
+      },
+      {
         threadId: "3",
         title: "raspberry greek yogurt",
         type: "chat",
@@ -68,10 +71,7 @@ export default function SideBar({}: Props) {
   return (
     <>
       {isOpened ? (
-        <div
-          className="bg-black w-[260px] text-white flex-shrink-0 overflow-x-hidden rounded-se-3xl"
-          onClick={() => toggleSideBar()}
-        >
+        <div className="bg-black w-[260px] text-white flex-shrink-0 overflow-x-hidden rounded-se-3xl">
           <div className="flex flex-col p-5 pt-8">
             <div className="flex flex-row gap-4">
               <Bars3Icon width="24" className="cursor-pointer" />
@@ -95,14 +95,14 @@ export default function SideBar({}: Props) {
               <ArrowTopRightOnSquareIcon width="20" />
             </div>
             <div className="chat-history">
-              {
-                groupByDate(chatHistory).map(({ date, chats }) => (
-                  <div key={date} className="mt-6">
-                    <h1 className="text-xs font-medium">{
-                      date === new Date().toLocaleDateString() ? "Today" : date
-                    }</h1>
-                    <div className="mt-2">
-                      {chats.map((chat) => (
+              {groupByDate(chatHistory).map(({ date, chats }) => (
+                <div key={date} className="mt-6">
+                  <h1 className="text-xs font-medium">
+                    {date === new Date().toLocaleDateString() ? "Today" : date}
+                  </h1>
+                  <div className="mt-2">
+                    {chats.map((chat) => (
+                      <Link href={`/${chat.threadId}`}>
                         <div
                           key={chat.threadId}
                           className="flex flex-row gap-2 cursor-pointer hover:bg-white hover:text-black transition ease-out rounded-2xl px-3 py-3"
@@ -112,11 +112,11 @@ export default function SideBar({}: Props) {
                             <h1 className="text-sm truncate">{chat.title}</h1>
                           </div>
                         </div>
-                      ))}
-                    </div>
+                      </Link>
+                    ))}
                   </div>
-                ))
-              }
+                </div>
+              ))}
             </div>
           </div>
         </div>
