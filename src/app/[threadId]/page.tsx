@@ -145,7 +145,7 @@ Discharge meds: donepezil d/c and choline alfoscerate, maintained on mirtazapine
       <div className="max-w-[56rem] prose lg:prose-lg prose-slate">
         {message.map((message) => (
           <div className="flex flex-col gap-4">
-            <section className="section-chatbox w-full">
+            <section className="section-chatbox w-full mb-4">
               <ChatBox
                 key={message.messageId}
                 getQuery={() => {}}
