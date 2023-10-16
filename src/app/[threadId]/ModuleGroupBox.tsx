@@ -15,7 +15,7 @@ export default function ModuleGroupBox({
 }: Module) {
   return (
     <div className="flex flex-row gap-6">
-      <div className="min-w-[10rem] font-bold">{moduleName}</div>
+      <div className="min-w-[6rem] font-bold">{moduleName}</div>
       <div className="flex flex-wrap min-w-[8rem] content-start relative">
         {models.map((model) => {
           return (

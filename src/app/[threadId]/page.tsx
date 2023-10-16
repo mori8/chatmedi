@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import SurfingSVG from "../icons/SurfingSVG";
 import ChatBox from "../components/ChatBox";
 import ModuleGroupBox from "./ModuleGroupBox";
+import RunHistory from "../components/RunHistory";
 import Result from "./Result";
 
 type Props = {
@@ -14,6 +15,7 @@ type Props = {
 };
 
 export default function page({ params }: Props) {
+  // now selected query -> 전역 상태로 관리
   const [hasFetched, setHasFetched] = useState(false);
   const [threadId, setThreadId] = useState<string | null>(null);
   const [message, setMessage] = useState<
@@ -21,7 +23,7 @@ export default function page({ params }: Props) {
   >([]);
   const [modules, setModules] = useState<Module[]>([]);
   const [results, setResults] = useState<Result[]>([]);
-  // 난 무섭다 데이터가 어떻게 생겼을지 가늠도 안된다
+  // 질문 레벨에 따라 한 번 메세지 묶는 작업 필요
 
   useEffect(() => {
     setThreadId(params.threadId);
@@ -125,8 +127,8 @@ Discharge meds: donepezil d/c and choline alfoscerate, maintained on mirtazapine
   }, []);
 
   return (
-    <div className="flex flex-col items-center p-12">
-      <div className="max-w-[64rem] w-full">
+    <div className="flex-1 w-full flex flex-row items-start gap-12 p-12">
+      <div className="max-w-[64rem]">
         {message.map((message) => (
           <div className="flex flex-col gap-16">
             <section className="section-chatbox w-full">
@@ -168,6 +170,9 @@ Discharge meds: donepezil d/c and choline alfoscerate, maintained on mirtazapine
             </section>
           </div>
         ))}
+      </div>
+      <div className="flex-shrink-0">
+        <RunHistory />
       </div>
     </div>
   );

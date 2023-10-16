@@ -23,3 +23,11 @@ interface Result {
   image: string | null
   text: string
 }
+
+interface querySummaryHistory {
+  level: number;
+  querySummary: string;
+  messageId: number;
+  date: string;
+  parentMessageId: number | null;
+}

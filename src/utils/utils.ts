@@ -8,3 +8,10 @@ export const hash = (str: string) => {
   } 
   return hash;
 }
+
+export const numberSuffix = (num: number) => {
+  if (num === 1) return `${num}st`
+  if (num === 2) return `${num}nd`
+  if (num === 3) return `${num}rd`
+  return `${num}th`
+}
