@@ -60,7 +60,7 @@ export default function RunHistory({}: Props) {
             <QueryBox
               {...query}
               isExpanded={isExpanded[index]}
-              changeIsExpanded={ChangeIsExpanded}
+              ChangeIsExpanded={ChangeIsExpanded}
               key={index}
             />
           ))}

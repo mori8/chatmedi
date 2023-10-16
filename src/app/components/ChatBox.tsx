@@ -46,7 +46,7 @@ export default function ChatBox({
   };
 
   return (
-    <div className="flex flex-col border-mint border bg-white rounded-2xl px-8 pt-6 pb-4 w-full shadow-solid shadow-black leading-7">
+    <div className="flex flex-col border-mint border bg-white rounded-2xl px-8 pt-4 pb-4 w-full shadow-solid shadow-black leading-7 lg:leading-8">
       {editable ? (
         <textarea
           className={classNames("w-full resize-none outline-none border-none")}

@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { ArrowRightCircleIcon } from "@heroicons/react/24/outline";
 
-import SurfingSVG from "../icons/SurfingSVG";
 import ChatBox from "../components/ChatBox";
 import ModuleGroupBox from "./ModuleGroupBox";
 import RunHistory from "../components/RunHistory";
@@ -23,6 +23,10 @@ export default function page({ params }: Props) {
   >([]);
   const [modules, setModules] = useState<Module[]>([]);
   const [results, setResults] = useState<Result[]>([]);
+  const [notes, setNotes] = useState<String[]>([]);
+  const [recomendedFollowUpQuestions, setRecomendedFollowUpQuestions] =
+    useState<String[]>([]);
+
   // 질문 레벨에 따라 한 번 메세지 묶는 작업 필요
 
   useEffect(() => {
@@ -124,13 +128,23 @@ Psychiatric consultation performed for insomnia and past diagnosis of depression
 Discharge meds: donepezil d/c and choline alfoscerate, maintained on mirtazapine only`,
       },
     ]);
+
+    setNotes([
+      "If you have information about the patient's weight, you can provide more accurate guidance.",
+      "We've categorized this patient's symptoms as Disease A, but it's also possible that it's Disease B, or even Disease C.",
+    ]);
+
+    setRecomendedFollowUpQuestions([
+      "What are the typical radiological findings one might expect to see in a patient with early-stage rheumatoid arthritis?",
+      "Can you list the diagnostic criteria for Systemic Lupus Erythematosus?",
+    ]);
   }, []);
 
   return (
-    <div className="flex-1 w-full flex flex-row items-start gap-12 p-12">
-      <div className="max-w-[64rem]">
+    <div className="flex-1 w-full flex flex-row items-start justify-evenly gap-12 p-12">
+      <div className="max-w-[56rem] prose lg:prose-lg prose-slate">
         {message.map((message) => (
-          <div className="flex flex-col gap-16">
+          <div className="flex flex-col gap-4">
             <section className="section-chatbox w-full">
               <ChatBox
                 key={message.messageId}
@@ -139,7 +153,7 @@ Discharge meds: donepezil d/c and choline alfoscerate, maintained on mirtazapine
               />
             </section>
 
-            <section className="section-modules">
+            <section className="section-modules leading-normal">
               <SectionTitle>Analyzing ...{hasFetched && "Done"}</SectionTitle>
               <div className="flex flex-col gap-6 mt-8">
                 {modules.length &&
@@ -151,12 +165,12 @@ Discharge meds: donepezil d/c and choline alfoscerate, maintained on mirtazapine
               </div>
             </section>
 
-            <section className="section-result">
+            <section className="section-result leading-normal">
               <SectionTitle>Result</SectionTitle>
               {results
                 .filter((result) => result.messageId === message.messageId)
                 .map((message) => (
-                  <div className="flex flex-col gap-6 mt-8">
+                  <div className="flex flex-col gap-6">
                     {results.length &&
                       results
                         .filter(
@@ -167,6 +181,29 @@ Discharge meds: donepezil d/c and choline alfoscerate, maintained on mirtazapine
                         ))}
                   </div>
                 ))}
+            </section>
+
+            <section className="section-notes leading-normal">
+              <SectionTitle>Notes</SectionTitle>
+              <ul className="">
+                {notes.map((note) => (
+                  <li>{note}</li>
+                ))}
+              </ul>
+            </section>
+
+            <section className="section-recomend-follow-up-q leading-normal">
+              <SectionTitle>Recommandation for next question</SectionTitle>
+              <ul className="list-disc text-turquiose underline cursor-pointer p-0 not-prose">
+                {recomendedFollowUpQuestions.map((question) => (
+                  <li className="flex justify-between my-3 gap-12">
+                    {question}
+                    <span className="">
+                      <ArrowRightCircleIcon width="24" />
+                    </span>
+                  </li>
+                ))}
+              </ul>
             </section>
           </div>
         ))}
@@ -180,9 +217,8 @@ Discharge meds: donepezil d/c and choline alfoscerate, maintained on mirtazapine
 
 function SectionTitle({ children }: { children: React.ReactNode }) {
   return (
-    <div className="flex flex-row items-center gap-4">
-      <SurfingSVG />
-      <h3 className="text-lg font-bold">{children}</h3>
+    <div className="flex flex-row items-center gap-4 not-prose mt-5 mb-4">
+      <h3 className="text-xl lg:text-2xl font-bold">{children}</h3>
     </div>
   );
 }
