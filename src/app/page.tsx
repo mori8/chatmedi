@@ -20,7 +20,7 @@ export default function Home() {
   }, []);
 
   return (
-    <main className="flex flex-col items-center gap-12 py-12">
+    <main className="flex flex-col items-center gap-12 p-12">
       <div className="chatbox-wrapper max-w-[64rem] w-full mt-24">
         <ChatBox
           isFileAttachEnabled={true}
