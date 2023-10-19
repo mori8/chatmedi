@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import React from "react";
 import Image from "next/image";
@@ -54,7 +54,7 @@ function AccountInfoBox({
   email: string;
 }) {
   return (
-    <div className="bg-white rounded-full px-3 py-2 shadow-solid flex items-center gap-6">
+    <div className="bg-white rounded-full pl-3 pr-4 py-2 shadow-solid flex items-center gap-6">
       <div className="flex flex-row gap-2 item-center">
         <div className="flex-shrink-0 rounded-full overflow-hidden">
           {/* <Image src={profileImage} width="32" height="32" alt="profile-image" /> */}
@@ -65,10 +65,15 @@ function AccountInfoBox({
           <p className="text-xs text-gray-400 leading-none">{email}</p>
         </div>
       </div>
-      <div className="cursor-pointer" data-tooltip-id="settings" data-tooltip-content="settings">
-        <Cog6ToothIcon width="24"/>
+      <div
+        className="cursor-pointer"
+        data-tooltip-id="settings"
+        data-tooltip-content="settings"
+      >
+        <Link href="/account">
+          <Cog6ToothIcon width="24" />
+        </Link>
       </div>
-      <Tooltip id="settings"/>
     </div>
   );
 }

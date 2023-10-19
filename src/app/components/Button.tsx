@@ -18,7 +18,7 @@ export default function Button({
   return (
     <div
       className={classNames(
-        "cursor-pointer text-sm shadow-solid font-medium flex flex-row items-center gap-2",
+        "cursor-pointer text-sm shadow-solid font-medium flex flex-row items-center gap-2 border border-black",
         {
           "bg-mint text-black": color === "mint",
           "bg-white text-black": color === "white",

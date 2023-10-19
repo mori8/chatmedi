@@ -7,10 +7,12 @@ import classNames from "classnames";
 import {
   PaperAirplaneIcon,
   ArrowUpOnSquareIcon,
+  XMarkIcon,
   PencilSquareIcon,
-  PhotoIcon
+  PhotoIcon,
 } from "@heroicons/react/24/outline";
 import Button from "./Button";
+import FileInfoModal from "./FileInfoModal";
 
 type Props = {
   isFileAttachEnabled?: boolean;
@@ -26,6 +28,7 @@ export default function ChatBox({
 }: Props) {
   const [editable, setEditable] = useState(query === "");
   const [files, setFiles] = useState<File[]>([]);
+  const [isFileInfoModalOpen, setIsFileInfoModalOpen] = useState(false);
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
 
   const textAreaAutoResize = (e: any) => {
@@ -81,7 +84,12 @@ export default function ChatBox({
               Click to upload
             </Button>
             <p>or drag & drop a file here</p> */}
-            <FileDropZone files={files} setFiles={setFiles} />
+            <FileDropZone
+              files={files}
+              setFiles={setFiles}
+              setIsFileInfoModalOpen={setIsFileInfoModalOpen}
+            />
+            {isFileInfoModalOpen && <FileInfoModal />}
           </div>
         )}
         <div className="flex-1"></div>
@@ -105,14 +113,17 @@ export default function ChatBox({
 function FileDropZone({
   files,
   setFiles,
+  setIsFileInfoModalOpen,
 }: {
   files: File[];
   setFiles: (files: File[]) => void;
+  setIsFileInfoModalOpen: (isOpen: boolean) => void;
 }) {
   // TODO: acceptedFiles -> File[] 맞는지 확인
   const onDrop = useCallback((acceptedFiles: File[]) => {
     console.log(acceptedFiles);
     setFiles(acceptedFiles);
+    setIsFileInfoModalOpen(true);
   }, []);
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
@@ -131,22 +142,8 @@ function FileDropZone({
           htmlFor="dropzone-file"
           className="flex items-center justify-center w-full py-2 border-2 px-6 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50"
         >
-          <div className="flex items-center justify-center">
-            <svg
-              className="w-6 h-4 text-gray-500 dark:text-gray-400"
-              aria-hidden="true"
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 20 16"
-            >
-              <path
-                stroke="currentColor"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2"
-              />
-            </svg>
+          <div className="flex items-center justify-center gap-2">
+            <ArrowUpOnSquareIcon width="20" color="gray" />
             <p className="text-sm text-gray-500 dark:text-gray-400">
               <span className="font-semibold">Click to upload</span> or drag and
               drop
@@ -158,7 +155,10 @@ function FileDropZone({
   ) : (
     <div>
       {files.map((file) => (
-        <div key={file.name} className="flex items-center gap-2 max-w-[280px] shadow-solid rounded-md px-2 py-1 border border-black">
+        <div
+          key={file.name}
+          className="flex items-center gap-2 max-w-[280px] shadow-solid rounded-md px-2 py-1 border border-black"
+        >
           <PhotoIcon width="20" color="#D37A47" />
           <p className="text-sm truncate">{file.name}</p>
           <button
@@ -167,21 +167,7 @@ function FileDropZone({
               setFiles([]);
             }}
           >
-            <svg
-              className="w-3 h-3 text-gray-500 dark:text-gray-400"
-              aria-hidden="true"
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 20 20"
-            >
-              <path
-                stroke="currentColor"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M6 18L18 6M6 6l12 12"
-              />
-            </svg>
+            <XMarkIcon width="16" />
           </button>
         </div>
       ))}
