@@ -30,7 +30,7 @@ export default function Navigation({}: Props) {
 
   return (
     <div className="z-10 w-full pt-6 px-12 flex justify-between">
-      <ul className="flex flex-row gap-10">
+      <ul className="flex flex-row gap-10 text-sm">
         {tabList.map((tab, index) => (
           <li key={index} className="rounded-full hover:bg-white px-4 py-1">
             <Link href={tab.path}>
