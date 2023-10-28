@@ -1,8 +1,10 @@
 import "./globals.css";
 import type { Metadata } from "next";
+import { usePathname } from "next/navigation";
 
-import SideBar from "./components/SideBar";
 import Navigation from "./components/Navigation";
+import SideBar from "./SideBar";
+
 
 export const metadata: Metadata = {
   title: "ChatMedi",
@@ -13,7 +15,7 @@ export default function RootLayout({
   children,
 }: {
   children: React.ReactNode;
-}) {
+  }) {
   return (
     <html lang="en">
       <body>

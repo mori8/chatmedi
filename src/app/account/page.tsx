@@ -1,7 +1,9 @@
+import SideBar from "./AccountSideBar"
+
 type Props = {}
 
 export default function page({}: Props) {
   return (
-    <div>page</div>
+    <div className="flex">page</div>
   )
 }

@@ -15,7 +15,7 @@ import {
 
 type Props = {};
 
-export default function SideBar({}: Props) {
+export default function ChatSideBar({}: Props) {
   const [isOpened, setIsOpened] = useState(true);
   const [chatHistory, setChatHistory] = useState<Chat[]>([]);
 
