@@ -13,8 +13,8 @@ export default function SideBar({ }: Props) {
   const isAccount = pathname.startsWith('/account')
 
   return (
-    <div>
+    <>
       {isAccount ? <AccountSideBar /> : <ChatSideBar />}
-    </div>
+    </>
   )
 }
