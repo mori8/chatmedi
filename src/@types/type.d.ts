@@ -31,3 +31,9 @@ interface querySummaryHistory {
   date: string;
   parentMessageId: number | null;
 }
+
+interface ApiKey {
+  id: number;
+  name: string;
+  key: string;
+}

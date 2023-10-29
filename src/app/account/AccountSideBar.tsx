@@ -17,7 +17,7 @@ export default function AccountSideBar({}: Props) {
   }, [pathname]);
 
   return (
-    <div className="w-[260px] p-5 pt-8 flex flex-col gap-8">
+    <div className="w-[260px] p-5 pt-8 flex flex-col gap-14">
       <div>
         <div className="">
           <span className="font-mono">CHATMEDI</span>
@@ -35,7 +35,7 @@ export default function AccountSideBar({}: Props) {
             ) + " cursor-pointer"
           }
         >
-          <span className="text-slate-900">{item.name}</span>
+          <span className="text-slate-900 text-sm">{item.name}</span>
         </div>
       ))}
     </div>
