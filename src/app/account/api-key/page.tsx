@@ -21,7 +21,7 @@ export default function page({}: Props) {
       },
     ]);
 
-    setApiKeysVisibility(Array(apiKeys.length).fill(false));
+    setApiKeysVisibility(Array(1).fill(false));
   }, []);
 
   const copyToClipboard = (text: string) => {
@@ -35,6 +35,15 @@ export default function page({}: Props) {
   const createApiKey = () => {
     // fetch api
   };
+
+  const changeVisibility = (index: number) => {
+    setApiKeysVisibility((prev) => {
+      const newVisibility = [...prev];
+      // 로직이상함.. 데이터 들어오는 거 보고 다시 짜야할듯
+      newVisibility[index - 1] = !newVisibility[index - 1];
+      return newVisibility;
+    });
+  }
 
   return (
     <div className="pl-16 pr-16 lg:pr-96 py-8">
@@ -72,8 +81,12 @@ export default function page({}: Props) {
                 <span className="text-slate-800">{apiKey.name}</span>
               </div>
               <div className="flex-1 flex items-center">
-                <span className="text-slate-800">{apiKey.key}</span>
-                <button>
+                <span className="text-slate-800">
+                  <input value={apiKey.key} className="bg-transparent" type={
+                    apiKeysVisibility[index] ? "text" : "password"
+                  } />
+                </span>
+                <button onClick={() => changeVisibility(apiKey.id)}>
                   <EyeIcon width="20" className="ml-2" />
                 </button>
               </div>
