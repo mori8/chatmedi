@@ -4,13 +4,15 @@ import { useState, useEffect } from "react";
 
 import { ClipboardIcon, TrashIcon, EyeIcon, PlusSmallIcon } from "@heroicons/react/24/outline";
 import Button from "@/app/components/Button";
-import { create } from "domain";
+import CreateNewKeyModal from "./CreateNewKeyModal";
+
 
 type Props = {};
 
 export default function page({}: Props) {
   const [apiKeys, setApiKeys] = useState<ApiKey[]>([]);
   const [apiKeysVisibility, setApiKeysVisibility] = useState<boolean[]>([]);
+  const [isCreateNewKeyModalOpened, setIsCreateNewKeyModalOpened] = useState<boolean>(false);
 
   useEffect(() => {
     setApiKeys([
@@ -32,9 +34,9 @@ export default function page({}: Props) {
     // fetch api
   };
 
-  const createApiKey = () => {
-    // fetch api
-  };
+  const openCreateNewKeyModal = () => {
+    setIsCreateNewKeyModalOpened(true);
+  }
 
   const changeVisibility = (index: number) => {
     setApiKeysVisibility((prev) => {
@@ -47,6 +49,13 @@ export default function page({}: Props) {
 
   return (
     <div className="pl-16 pr-16 lg:pr-96 py-8">
+      {
+        isCreateNewKeyModalOpened && (
+          <CreateNewKeyModal
+            onClose={() => setIsCreateNewKeyModalOpened(false)}
+          />
+        )
+      }
       <div>
         <h2 className="font-bold text-lg">API Keys</h2>
         <p className="mt-4 text-slate-800 leading-6">
@@ -55,7 +64,7 @@ export default function page({}: Props) {
         </p>
       </div>
       <div className="flex mt-12">
-        <Button onClick={() => createApiKey()} size="sm">
+        <Button onClick={() => openCreateNewKeyModal()} size="sm">
           <PlusSmallIcon width="20"/>
           create a new API Key
         </Button>
