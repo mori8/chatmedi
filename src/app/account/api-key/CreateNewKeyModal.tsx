@@ -1,7 +1,6 @@
 "use client";
 import { useState, useRef, useEffect } from "react";
 
-import { XMarkIcon } from "@heroicons/react/24/outline";
 import Button from "@/app/components/Button";
 
 type Props = {
