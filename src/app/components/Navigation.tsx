@@ -32,11 +32,14 @@ export default function Navigation({}: Props) {
     <div className="z-10 w-full pt-6 px-12 flex justify-between">
       <ul className="flex flex-row gap-10 text-sm">
         {tabList.map((tab, index) => (
-          <li key={index} className="rounded-full hover:bg-white px-4 py-1">
-            <Link href={tab.path}>
+          <Link href={tab.path}>
+            <li
+              key={index}
+              className="rounded-full hover:bg-white px-6 py-3 flex items-center leading-none"
+            >
               <span className="font-mono">{tab.name}</span>
-            </Link>
-          </li>
+            </li>
+          </Link>
         ))}
       </ul>
       <AccountInfoBox {...userInfo} />
