@@ -43,6 +43,10 @@ export default function ChatBox({
     }
   };
 
+  const closeFileInfoModal = () => {
+    setIsFileInfoModalOpen(false);
+  }
+
   useEffect(() => {
     textAreaSizeFitToContent();
   }, [editable]);
@@ -89,7 +93,7 @@ export default function ChatBox({
               setFiles={setFiles}
               setIsFileInfoModalOpen={setIsFileInfoModalOpen}
             />
-            {isFileInfoModalOpen && <FileInfoModal />}
+            {isFileInfoModalOpen && <FileInfoModal onClose={closeFileInfoModal} />}
           </div>
         )}
         <div className="flex-1"></div>
