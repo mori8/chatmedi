@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import Image from "next/image";
 import classNames from "classnames";
 
-import ModelDetailsModal from "./ModelIconWithModal";
+import ModelIconWithModal from "./ModelIconWithModal";
 import { hash } from "../../utils/utils";
 
 export default function ModuleGroupBox({
@@ -19,7 +19,7 @@ export default function ModuleGroupBox({
       <div className="flex flex-wrap min-w-[8rem] content-start relative">
         {models.map((model) => {
           return (
-            <ModelDetailsModal {...model} key={model.name} />
+            <ModelIconWithModal {...model} key={model.name} />
           );
         })}
       </div>

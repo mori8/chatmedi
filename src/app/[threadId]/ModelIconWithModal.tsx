@@ -61,9 +61,9 @@ export default function ModelDetailsModal({
 
 function InfoModal({ name, shortDescription, task }: Model) {
   return (
-    <div className="model-info absolute top-5 left-5 z-10 w-72 bg-white shadow-solid shadow-black px-6 py-4 rounded-xl flex flex-col gap-3">
+    <div className="model-info absolute top-5 left-5 z-10 w-72 bg-white shadow-solid shadow-black px-6 py-4 rounded-xl flex flex-col gap-3 not-prose">
       <div>
-        <p className="font-bold">{name}</p>
+        <p className="font-bold text-sm">{name}</p>
         <p className="text-xs text-slate-600">{task}</p>
       </div>
       <div className="text-sm text-slate-800">{shortDescription}</div>

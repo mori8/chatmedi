@@ -1,15 +1,19 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
+import { redirect } from 'next/navigation'
 import 'react-tooltip/dist/react-tooltip.css'
 
 import ChatBox from "./components/ChatBox";
 import { ArrowRightCircleIcon } from "@heroicons/react/24/outline";
+import { useSession } from "next-auth/react";
+
 
 export default function Home() {
   const [query, setQuery] = useState<string>("");
   const [quickStartQuestions, setQuickStartQuestions] = useState<string[]>([]);
+  const { data: session } = useSession();
+  
 
   useEffect(() => {
     setQuickStartQuestions([
