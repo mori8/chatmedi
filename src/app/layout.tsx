@@ -24,7 +24,7 @@ export default function RootLayout({
         <AuthContext>
           <div className="flex flex-row overflow-hidden w-full h-full z-0 relative bg-lightgray">
             <SideBar />
-            <div className="relative h-full min-h-screen flex-1 overflow-hidden flex flex-col pb-24">
+            <div className="relative h-screen min-h-screen overflow-y-scroll flex-1 overflow-hidden flex flex-col pb-24">
               <Navigation />
               {children}
             </div>

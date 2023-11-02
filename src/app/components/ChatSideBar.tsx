@@ -3,6 +3,7 @@
 import classNames from "classnames";
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { signOut } from "next-auth/react";
 
 import Button from "./Button";
 import PlusChatSVG from "../icons/PlusChatSVG";
@@ -71,8 +72,8 @@ export default function ChatSideBar({}: Props) {
   return (
     <>
       {isOpened ? (
-        <div className="bg-black w-[260px] text-white flex-shrink-0 overflow-x-hidden rounded-se-3xl">
-          <div className="flex flex-col p-5 pt-8">
+        <div className="bg-black w-[260px] text-white flex-shrink-0 overflow-x-hidden rounded-se-3xl h-screen">
+          <div className="flex flex-col p-5 pt-8 h-full">
             <div className="flex flex-row gap-4">
               <Bars3Icon width="24" className="cursor-pointer" />
               <div className="flex-1">
@@ -117,6 +118,12 @@ export default function ChatSideBar({}: Props) {
                   </div>
                 </div>
               ))}
+            </div>
+            <div className="flex-1"></div>
+            <div>
+              <button onClick={() => signOut()}>
+                <span>Logout</span>
+              </button>
             </div>
           </div>
         </div>
