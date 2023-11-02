@@ -25,7 +25,7 @@ export default function SocialLoginButton({ platform, onClick }: Props) {
           alt="google logo"
         />
       </div>
-      <span className="font-medium">sign in with {platform}</span>
+      <span className="font-medium">Log in with {platform}</span>
     </button>
   );
 }

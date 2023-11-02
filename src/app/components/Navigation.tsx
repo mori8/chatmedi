@@ -3,13 +3,16 @@
 import React from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 import { Cog6ToothIcon } from "@heroicons/react/24/outline";
 import { Tooltip } from "react-tooltip";
 
 type Props = {};
 
-export default function Navigation({}: Props) {
+export default function Navigation({ }: Props) {
+  const isLogin = usePathname().startsWith("/auth/login");
+
   const tabList = [
     {
       name: "PLAYGROUND",
@@ -29,7 +32,7 @@ export default function Navigation({}: Props) {
   };
 
   return (
-    <div className="z-10 w-full pt-6 px-12 flex justify-between">
+    !isLogin && <div className="z-10 w-full pt-6 px-12 flex justify-between">
       <ul className="flex flex-row gap-10 text-sm">
         {tabList.map((tab, index) => (
           <Link href={tab.path}>

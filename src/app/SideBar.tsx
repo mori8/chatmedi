@@ -1,20 +1,17 @@
-'use client';
+"use client";
 
-import React from 'react'
-import { usePathname } from 'next/navigation'
+import React from "react";
+import { usePathname } from "next/navigation";
 
-import ChatSideBar from './components/ChatSideBar'
-import AccountSideBar from './account/AccountSideBar'
+import ChatSideBar from "./components/ChatSideBar";
+import AccountSideBar from "./account/AccountSideBar";
 
-type Props = {}
+type Props = {};
 
-export default function SideBar({ }: Props) {
-  const pathname = usePathname()
-  const isAccount = pathname.startsWith('/account')
+export default function SideBar({}: Props) {
+  const pathname = usePathname();
+  const isAccount = pathname.startsWith("/account");
+  const isLogin = pathname.startsWith("/auth/login");
 
-  return (
-    <>
-      {isAccount ? <AccountSideBar /> : <ChatSideBar />}
-    </>
-  )
+  return <>{!isLogin && (isAccount ? <AccountSideBar /> : <ChatSideBar />)}</>;
 }
