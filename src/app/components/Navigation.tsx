@@ -1,7 +1,6 @@
 "use client";
 
 import React from "react";
-import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useSession } from "next-auth/react";
@@ -58,7 +57,6 @@ function AccountInfoBox({
     <div className="bg-white rounded-full pl-3 pr-4 py-2 shadow-solid flex items-center gap-6">
       <div className="flex flex-row gap-2 item-center">
         <div className="flex-shrink-0 rounded-full overflow-hidden">
-          {/* <Image src={profileImage} width="32" height="32" alt="profile-image" /> */}
           <img src={image || '/user.svg'} width="36" height="36" alt="profile-image" />
         </div>
         <div className="flex-1 flex flex-col justify-evenly">
