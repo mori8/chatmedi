@@ -16,10 +16,7 @@ const handler = NextAuth({
     maxAge: 60 * 60 * 24 * 30,
   },
   callbacks: {
-
-  },
-  events: {
-    signIn: async ({ user }) => {
+    async signIn({ user }) {
       const res = await fetch(`${process.env.SERVER_URL}/user`, {
         method: "POST",
         headers: {
@@ -33,9 +30,24 @@ const handler = NextAuth({
       });
 
       if (!res.ok) {
-        throw new Error("[route.ts: events/signIn] Failed to save new user to server");
+        throw new Error("[callbacks/signIn] Failed to save new user to server");
       }
+
+      user.id = (await res.json()).id;
+      return true;
     },
+    async jwt({ token, user }) {
+      if (user) {
+        token.userId = user.id;
+      }
+      return token;
+    },
+    async session({ session, user, token }) {
+      if (session.user && token.userId) {
+        session.user.id = token.userId;
+      }
+      return session;
+    }
   },
 });
 
