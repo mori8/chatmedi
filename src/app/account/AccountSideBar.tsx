@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Link from "next/link";
 import { usePathname } from "next/navigation";
 import classNames from "classnames";
 
@@ -18,11 +19,11 @@ export default function AccountSideBar({}: Props) {
 
   return (
     <div className="w-[260px] p-5 pt-8 flex flex-col gap-14">
-      <div>
+      <Link href="/">
         <div className="">
           <span className="font-mono">CHATMEDI</span>
         </div>
-      </div>
+      </Link>
       {menuItems.map((item, index) => (
         <div
           key={index}

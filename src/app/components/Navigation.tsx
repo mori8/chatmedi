@@ -27,7 +27,7 @@ export default function Navigation({ }: Props) {
 
   return (
     !isLogin && <div className="z-10 w-full pt-6 px-12 flex justify-between">
-      <ul className="flex flex-row gap-10 text-sm">
+      <ul className="flex flex-row gap-6 text-sm">
         {tabList.map((tab, index) => (
           <Link href={tab.path}>
             <li

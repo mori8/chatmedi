@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useDropzone } from "react-dropzone";
 import classNames from "classnames";
+import { useSession } from "next-auth/react";
 
 import {
   PaperAirplaneIcon,
@@ -11,7 +12,6 @@ import {
   PencilSquareIcon,
   PhotoIcon,
 } from "@heroicons/react/24/outline";
-import Button from "./Button";
 import FileInfoModal from "./FileInfoModal";
 
 type Props = {
@@ -30,6 +30,7 @@ export default function ChatBox({
   const [files, setFiles] = useState<File[]>([]);
   const [isFileInfoModalOpen, setIsFileInfoModalOpen] = useState(false);
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
+  const { data: session } = useSession();
 
   const textAreaAutoResize = (e: any) => {
     e.target.style.height = "inherit";
@@ -53,6 +54,7 @@ export default function ChatBox({
 
   const sendQuery = () => {
     // TODO: send query to server
+    
   };
 
   return (
