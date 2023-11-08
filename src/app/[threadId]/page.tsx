@@ -15,12 +15,12 @@ type Props = {
 };
 
 export default function page({ params }: Props) {
-  // now selected query -> 전역 상태로 관리
   const [hasFetched, setHasFetched] = useState(false);
   const [threadId, setThreadId] = useState<string | null>(null);
-  const [message, setMessage] = useState<
-    { messageId: number; message: string }[]
-  >([]);
+  const [nowDisplayedMessages, setNowDisplayedMessages] = useState<
+    { messageId: string; query: string, file: File | undefined }[]
+    >([]);
+  const [messageEditHistories, setMessageEditHistories] = useState<ChatEditHistory[]>([]);
   const [modules, setModules] = useState<Module[]>([]);
   const [results, setResults] = useState<Result[]>([]);
   const [notes, setNotes] = useState<String[]>([]);
@@ -33,18 +33,26 @@ export default function page({ params }: Props) {
     setThreadId(params.threadId);
   }, [params.threadId]);
 
-  const editMessage = (messageId: number, text: string) => {
+  const fetchMessage = (query: string, file: File | undefined) => {
+    // fetch query to server
+    const newMessageId = "newMessageId";
+    return newMessageId;
+  };
+
+  const editMessage = (oldMessageId: string, newMessageId: string, newQuery: string, newFile: File | undefined) => {
     // TODO: fetch edited query to server
 
     // TODO: (then) update message state
-    setMessage((prev) => {
+    setNowDisplayedMessages((prev) => {
       const index = prev.findIndex(
-        (message) => message.messageId === messageId
+        (message) => message.messageId === oldMessageId
       );
       if (index !== -1) {
-        const newMessage = [...prev];
-        newMessage[index].message = text;
-        return newMessage;
+        const newDisplayedMessages = [...prev];
+        newDisplayedMessages[index].messageId = newMessageId;
+        newDisplayedMessages[index].query = newQuery;
+        newDisplayedMessages[index].file = newFile;
+        return newDisplayedMessages;
       }
       return prev;
     });
@@ -53,10 +61,10 @@ export default function page({ params }: Props) {
   useEffect(() => {
     if (threadId) {
       // TODO: fetch thread
-      setMessage([
+      setNowDisplayedMessages([
         {
-          messageId: 1,
-          message: `Based on this diagnostic history, give your opinion on what prescription you would give this patient.
+          messageId: "el2940-53nf39-242ab4",
+          query: `Based on this diagnostic history, give your opinion on what prescription you would give this patient.
 
 2021-03 Visual hallucination
 수면과 관계없이 밤낮으로 귀신이나 괴물이 보인다
@@ -72,6 +80,17 @@ Language - 문맹이지만 아들 이름은 쓸 수 있었는데 최근에는 �
 Visuospatial - 이전과 크게 다르지 않음, 혼자 길을 잘 찾아다님
 Executive - 집안일 이전처럼 잘 하고 혼자 대중교통 이용도 가능
 ADL - 혼자 위생관리 잘하며 적절한 옷도 잘 골라 입음, 농사일도 유지`,
+          file: undefined,
+        },
+        {
+          messageId: "bx3394-zgp93b-24nk3b",
+          query: `Raspberries are an excellent source of vitamin C, manganese and dietary fiber. They are a very good source of copper and a good source of vitamin K, pantothenic acid, biotin, vitamin E, magnesium, folate, omega-3 fatty acids, and potassium.`,
+          file: undefined,
+        },
+        {
+          messageId: "q5j880-hx4lkn-8095h1",
+          query: `Based on this diagnostic history, give your opinion on what prescription you would give this patient.`,
+          file: undefined,
         },
       ]);
     }
@@ -143,13 +162,13 @@ Discharge meds: donepezil d/c and choline alfoscerate, maintained on mirtazapine
   return (
     <div className="flex-1 w-full flex flex-row items-start justify-evenly gap-12 p-12">
       <div className="max-w-[56rem] prose lg:prose-lg prose-slate">
-        {message.map((message) => (
+        {nowDisplayedMessages.map((message) => (
           <div className="flex flex-col gap-4">
             <section className="section-chatbox w-full mb-4">
               <ChatBox
                 key={message.messageId}
                 getQuery={() => {}}
-                query={message.message}
+                query={message.query}
               />
             </section>
 
@@ -186,8 +205,8 @@ Discharge meds: donepezil d/c and choline alfoscerate, maintained on mirtazapine
             <section className="section-notes leading-normal">
               <SectionTitle>Notes</SectionTitle>
               <ul className="">
-                {notes.map((note) => (
-                  <li>{note}</li>
+                {notes.map((note, index) => (
+                  <li key={index}>{note}</li>
                 ))}
               </ul>
             </section>
@@ -195,8 +214,8 @@ Discharge meds: donepezil d/c and choline alfoscerate, maintained on mirtazapine
             <section className="section-recomend-follow-up-q leading-normal">
               <SectionTitle>Recommandation for next question</SectionTitle>
               <ul className="list-disc text-turquiose underline cursor-pointer p-0 not-prose">
-                {recomendedFollowUpQuestions.map((question) => (
-                  <li className="flex justify-between my-3 gap-12">
+                {recomendedFollowUpQuestions.map((question, index) => (
+                  <li className="flex justify-between my-3 gap-12" key={index}>
                     {question}
                     <span className="">
                       <ArrowRightCircleIcon width="24" />
@@ -205,6 +224,12 @@ Discharge meds: donepezil d/c and choline alfoscerate, maintained on mirtazapine
                 ))}
               </ul>
             </section>
+
+            {
+              hasFetched && (
+                <ChatBox isFileAttachEnabled={false} getQuery={() => {}} />
+              )
+            }
           </div>
         ))}
       </div>

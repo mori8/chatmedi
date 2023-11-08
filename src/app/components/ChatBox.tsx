@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useDropzone } from "react-dropzone";
 import classNames from "classnames";
+import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 
 import {
@@ -15,22 +16,27 @@ import {
 import FileInfoModal from "./FileInfoModal";
 
 type Props = {
+  threadId: string | null;
   isFileAttachEnabled?: boolean;
   rows?: number;
   query?: string;
-  getQuery: (text: string) => void;
+  mode?: "edit" | "create";
+  // editQuery: (oldMessageId: string, newMessageId: string, newQuery: string, newFile: File | undefined) => void;
 };
 
 export default function ChatBox({
   isFileAttachEnabled = false,
   rows = 6,
   query = "",
+  mode,
 }: Props) {
   const [editable, setEditable] = useState(query === "");
   const [files, setFiles] = useState<File[]>([]);
   const [isFileInfoModalOpen, setIsFileInfoModalOpen] = useState(false);
+  const [textInput, setTextInput] = useState(query);
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
   const { data: session } = useSession();
+  const { push } = useRouter();
 
   const textAreaAutoResize = (e: any) => {
     e.target.style.height = "inherit";
@@ -46,16 +52,22 @@ export default function ChatBox({
 
   const closeFileInfoModal = () => {
     setIsFileInfoModalOpen(false);
-  }
+  };
+
+  const changeTextInput = (e: any) => {
+    setTextInput(e.target.value);
+  };
+
+  const sendQuery = (query: string, file: File | undefined) => {
+    // TODO: fetch query to server
+    const newthreadId = "1";
+    // console.log(newthreadId);
+    push(`/${newthreadId}`);
+  };
 
   useEffect(() => {
     textAreaSizeFitToContent();
   }, [editable]);
-
-  const sendQuery = () => {
-    // TODO: send query to server
-    
-  };
 
   return (
     <div className="flex flex-col border-mint border bg-white rounded-2xl px-8 pt-4 pb-4 w-full shadow-solid shadow-black leading-7 lg:leading-8">
@@ -66,11 +78,12 @@ export default function ChatBox({
           rows={rows}
           onChange={(e) => {
             textAreaAutoResize(e);
+            changeTextInput(e);
           }}
           ref={textAreaRef}
-        >
-          {query}
-        </textarea>
+          defaultValue={query}
+          value={textInput}
+        />
       ) : (
         <div className="w-full resize-none outline-none border-none">
           <p className="whitespace-pre-line">{query}</p>
@@ -95,18 +108,21 @@ export default function ChatBox({
               setFiles={setFiles}
               setIsFileInfoModalOpen={setIsFileInfoModalOpen}
             />
-            {isFileInfoModalOpen && <FileInfoModal onClose={closeFileInfoModal} />}
+            {isFileInfoModalOpen && (
+              <FileInfoModal onClose={closeFileInfoModal} />
+            )}
           </div>
         )}
         <div className="flex-1"></div>
         <div
           className="rounded-full flex items-center p-3 hover:bg-turquiose hover:text-white transition ease-in-out cursor-pointer"
-          onClick={() => {
-            setEditable(!editable);
-          }}
+          onClick={() => sendQuery(textInput ?? "", files[0])}
         >
           {editable ? (
-            <PaperAirplaneIcon width="24" />
+            <PaperAirplaneIcon
+              width="24"
+              
+            />
           ) : (
             <PencilSquareIcon width="24" />
           )}

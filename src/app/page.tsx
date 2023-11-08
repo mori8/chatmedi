@@ -10,10 +10,9 @@ import { useSession } from "next-auth/react";
 
 
 export default function Home() {
-  const [query, setQuery] = useState<string>("");
   const [quickStartQuestions, setQuickStartQuestions] = useState<string[]>([]);
   const { data: session } = useSession();
-  
+
 
   useEffect(() => {
     setQuickStartQuestions([
@@ -27,18 +26,17 @@ export default function Home() {
     <main className="flex flex-col items-center gap-12 p-12">
       <div className="chatbox-wrapper max-w-[64rem] w-full mt-24">
         <ChatBox
+          threadId={null}
+          mode="create"
           isFileAttachEnabled={true}
-          getQuery={(text: string) => {
-            setQuery(text);
-          }}
         />
       </div>
       <div className="text-center">
         <p className="text-sm font-bold">QUICK START</p>
         <div className="mt-4">
           <ul className="quick-start-question-list">
-            {quickStartQuestions.map((question) => (
-              <li className="quick-start-question-item text-turquiose flex gap-2 mb-2 hover:underline cursor-pointer">
+            {quickStartQuestions.map((question, index) => (
+              <li className="quick-start-question-item text-turquiose flex gap-2 mb-2 hover:underline cursor-pointer" key={index}>
                 <p>
                   {/* 새 채팅 생성 */}
                   {question}

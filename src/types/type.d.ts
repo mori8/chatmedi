@@ -12,14 +12,14 @@ interface Model {
 }
 
 interface Module {
-  messageId: number;
+  messageId: string;
   moduleName: string;
   models: Model[];
   summary: string;
 }
 
 interface Result {
-  messageId: number;
+  messageId: string;
   image: string | null
   text: string
 }
@@ -27,13 +27,22 @@ interface Result {
 interface querySummaryHistory {
   level: number;
   querySummary: string;
-  messageId: number;
+  messageId: string;
   date: string;
-  parentMessageId: number | null;
+  parentMessageId: string | null;
 }
 
 interface ApiKey {
   id: number;
   name: string;
   key: string;
+}
+
+interface ChatEditHistory {
+  history: {
+    messageId: number;
+    text: string;
+    file: File | undefined;
+    createdAt: string;
+  }[];
 }

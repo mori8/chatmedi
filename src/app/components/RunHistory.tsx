@@ -9,7 +9,7 @@ import { numberSuffix } from "../../utils/utils";
 type Props = {};
 
 export default function RunHistory({}: Props) {
-  const [queryHistory, setQueryHistory] = useState<QueryHistory[]>([]);
+  const [queryHistory, setQueryHistory] = useState<querySummaryHistory[]>([]);
   const [isExpanded, setisExpanded] = useState<boolean[]>([]);
   const caution = "Follow-up questions are dependent on previous questions.";
 
@@ -20,7 +20,7 @@ export default function RunHistory({}: Props) {
         date: "2023.08.23 13:13:13",
         querySummary:
           "Based on this diagnostic history, give your opinion on what prescription you would give this patient.",
-        messageId: 1,
+        messageId: "1",
         parentMessageId: null,
       },
       {
@@ -28,7 +28,7 @@ export default function RunHistory({}: Props) {
         date: "2023.08.23 13:31:31",
         querySummary:
           "Raspberries are an excellent source of vitamin C, manganese and dietary fiber. They are a very good source of copper and a good source of vitamin K, pantothenic acid, biotin, vitamin E, magnesium, folate, omega-3 fatty acids, and potassium.",
-        messageId: 2,
+        messageId: "2",
         parentMessageId: null,
       },
       {
@@ -36,8 +36,8 @@ export default function RunHistory({}: Props) {
         date: "2023.08.23 13:31:31",
         querySummary:
           "Based on this diagnostic history, give your opinion on what prescription you would give this patient.",
-        messageId: 2,
-        parentMessageId: 1,
+        messageId: "3",
+        parentMessageId: "1",
       },
     ]);
 
