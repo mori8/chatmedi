@@ -18,9 +18,11 @@ export default function page({ params }: Props) {
   const [hasFetched, setHasFetched] = useState(false);
   const [threadId, setThreadId] = useState<string | null>(null);
   const [nowDisplayedMessages, setNowDisplayedMessages] = useState<
-    { messageId: string; query: string, file: File | undefined }[]
-    >([]);
-  const [messageEditHistories, setMessageEditHistories] = useState<ChatEditHistory[]>([]);
+    { messageId: string; query: string; file: File | undefined }[]
+  >([]);
+  const [messageEditHistories, setMessageEditHistories] = useState<
+    ChatEditHistory[]
+  >([]);
   const [modules, setModules] = useState<Module[]>([]);
   const [results, setResults] = useState<Result[]>([]);
   const [notes, setNotes] = useState<String[]>([]);
@@ -39,7 +41,12 @@ export default function page({ params }: Props) {
     return newMessageId;
   };
 
-  const editMessage = (oldMessageId: string, newMessageId: string, newQuery: string, newFile: File | undefined) => {
+  const editMessage = (
+    oldMessageId: string,
+    newMessageId: string,
+    newQuery: string,
+    newFile: File | undefined
+  ) => {
     // TODO: fetch edited query to server
 
     // TODO: (then) update message state
@@ -99,7 +106,7 @@ ADL - 혼자 위생관리 잘하며 적절한 옷도 잘 골라 입음, 농사�
   useEffect(() => {
     setModules([
       {
-        messageId: 1,
+        messageId: "1",
         moduleName: "Dementia diagnosis",
         models: [
           {
@@ -135,7 +142,7 @@ ADL - 혼자 위생관리 잘하며 적절한 옷도 잘 골라 입음, 농사�
 
     setResults([
       {
-        messageId: 1,
+        messageId: "1",
         image: null,
         text: `This is a treatment suggestion for the patient you described:
 IVIG instead of high-dose steroids for DM comorbidities
@@ -157,17 +164,19 @@ Discharge meds: donepezil d/c and choline alfoscerate, maintained on mirtazapine
       "What are the typical radiological findings one might expect to see in a patient with early-stage rheumatoid arthritis?",
       "Can you list the diagnostic criteria for Systemic Lupus Erythematosus?",
     ]);
+
+    setHasFetched(true);
   }, []);
 
   return (
     <div className="flex-1 w-full flex flex-row items-start justify-evenly gap-12 p-12">
       <div className="max-w-[56rem] prose lg:prose-lg prose-slate">
         {nowDisplayedMessages.map((message) => (
-          <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-4 mb-16">
             <section className="section-chatbox w-full mb-4">
               <ChatBox
+                threadId={threadId}
                 key={message.messageId}
-                getQuery={() => {}}
                 query={message.query}
               />
             </section>
@@ -224,14 +233,18 @@ Discharge meds: donepezil d/c and choline alfoscerate, maintained on mirtazapine
                 ))}
               </ul>
             </section>
-
-            {
-              hasFetched && (
-                <ChatBox isFileAttachEnabled={false} getQuery={() => {}} />
-              )
-            }
           </div>
         ))}
+        <div>
+          {hasFetched && (
+            <ChatBox
+              isFileAttachEnabled={false}
+              threadId={threadId}
+              mode="create"
+              rows={4}
+            />
+          )}
+        </div>
       </div>
       <div className="flex-shrink-0">
         <RunHistory />

@@ -29,9 +29,8 @@ export default function Navigation({ }: Props) {
     !isLogin && <div className="z-10 w-full pt-6 px-12 flex justify-between">
       <ul className="flex flex-row gap-6 text-sm">
         {tabList.map((tab, index) => (
-          <Link href={tab.path}>
+          <Link href={tab.path} key={index}>
             <li
-              key={index}
               className="rounded-full hover:bg-white px-6 py-3 flex items-center leading-none"
             >
               <span className="font-mono">{tab.name}</span>

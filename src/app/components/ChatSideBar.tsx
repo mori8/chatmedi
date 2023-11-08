@@ -4,6 +4,7 @@ import classNames from "classnames";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { signOut } from "next-auth/react";
+import { useSession } from "next-auth/react";
 
 import Button from "./Button";
 import PlusChatSVG from "../icons/PlusChatSVG";
@@ -14,11 +15,13 @@ import {
   ChatBubbleLeftIcon,
 } from "@heroicons/react/24/outline";
 
+
 type Props = {};
 
 export default function ChatSideBar({}: Props) {
   const [isOpened, setIsOpened] = useState(true);
   const [chatHistory, setChatHistory] = useState<Chat[]>([]);
+  const { data: session } = useSession();
 
   const toggleSideBar = () => {
     setIsOpened(!isOpened);
@@ -47,26 +50,16 @@ export default function ChatSideBar({}: Props) {
 
   useEffect(() => {
     // TODO: fetch chat history
-    setChatHistory([
-      {
-        threadId: "1",
-        title: "The Best Chat I ever experienced",
-        type: "chat",
-        createdAt: "2023-07-21T01:43:11.999824",
+    const userId = session?.user.id;
+    const res = fetch(`${process.env.SERVER_URL}/threads`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
       },
-      {
-        threadId: "2",
-        title: "This is sample chat",
-        type: "chat",
-        createdAt: "2023-07-21T13:43:11.999824",
-      },
-      {
-        threadId: "3",
-        title: "raspberry greek yogurt",
-        type: "chat",
-        createdAt: "2023-10-03T01:43:11.999824",
-      },
-    ]);
+      body: JSON.stringify({
+        user_id: userId,
+      }),
+    }).then((res) => res.json());
   }, []);
 
   return (
@@ -76,9 +69,11 @@ export default function ChatSideBar({}: Props) {
           <div className="flex flex-col p-5 pt-8 h-full">
             <div className="flex flex-row gap-4">
               <Bars3Icon width="24" className="cursor-pointer" />
-              <div className="flex-1">
-                <h1 className="font-mono">CHATMEDI</h1>
-              </div>
+              <Link href="/">
+                <div className="flex-1">
+                  <h1 className="font-mono">CHATMEDI</h1>
+                </div>
+              </Link>
             </div>
             <div className="mt-6">
               <Button

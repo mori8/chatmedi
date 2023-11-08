@@ -81,7 +81,6 @@ export default function ChatBox({
             changeTextInput(e);
           }}
           ref={textAreaRef}
-          defaultValue={query}
           value={textInput}
         />
       ) : (
