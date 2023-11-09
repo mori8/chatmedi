@@ -14,7 +14,7 @@ type Props = {
   };
 };
 
-export default function page({ params }: Props) {
+export default function Home({ params }: Props) {
   const [hasFetched, setHasFetched] = useState(false);
   const [threadId, setThreadId] = useState<string | null>(null);
   const [nowDisplayedMessages, setNowDisplayedMessages] = useState<
@@ -173,6 +173,12 @@ Discharge meds: donepezil d/c and choline alfoscerate, maintained on mirtazapine
       <div className="max-w-[56rem] prose lg:prose-lg prose-slate">
         {nowDisplayedMessages.map((message) => (
           <div className="flex flex-col gap-4 mb-16">
+            <div className="self-end flex flex-row w-fit">
+              <div>
+
+              </div>
+
+            </div>
             <section className="section-chatbox w-full mb-4">
               <ChatBox
                 threadId={threadId}
@@ -197,8 +203,8 @@ Discharge meds: donepezil d/c and choline alfoscerate, maintained on mirtazapine
               <SectionTitle>Result</SectionTitle>
               {results
                 .filter((result) => result.messageId === message.messageId)
-                .map((message) => (
-                  <div className="flex flex-col gap-6">
+                .map((message, index) => (
+                  <div className="flex flex-col gap-6" key={index}>
                     {results.length &&
                       results
                         .filter(
