@@ -171,8 +171,8 @@ Discharge meds: donepezil d/c and choline alfoscerate, maintained on mirtazapine
   return (
     <div className="flex-1 w-full flex flex-row items-start justify-evenly gap-12 p-12">
       <div className="max-w-[56rem] prose lg:prose-lg prose-slate">
-        {nowDisplayedMessages.map((message) => (
-          <div className="flex flex-col gap-4 mb-16">
+        {nowDisplayedMessages.map((message, index) => (
+          <div className="flex flex-col gap-4 mb-16" key={index}>
             <div className="self-end flex flex-row w-fit">
               <div>
 

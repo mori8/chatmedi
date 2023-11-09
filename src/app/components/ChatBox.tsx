@@ -175,7 +175,7 @@ function FileDropZone({
     </div>
   ) : (
     <div>
-      {files.map((file) => (
+      {files.map((file, index) => (
         <div
           key={file.name}
           className="flex items-center gap-2 max-w-[280px] shadow-solid rounded-md px-2 py-1 border border-black"

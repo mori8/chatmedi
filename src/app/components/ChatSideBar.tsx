@@ -97,8 +97,8 @@ export default function ChatSideBar({}: Props) {
                     {date === new Date().toLocaleDateString() ? "Today" : date}
                   </h1>
                   <div className="mt-2">
-                    {chats.map((chat) => (
-                      <Link href={`/${chat.threadId}`}>
+                    {chats.map((chat, index) => (
+                      <Link href={`/${chat.threadId}`} key={index}>
                         <div
                           key={chat.threadId}
                           className="flex flex-row gap-2 cursor-pointer hover:bg-white hover:text-black transition ease-out rounded-2xl px-3 py-3"

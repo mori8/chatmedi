@@ -9,7 +9,7 @@ import CreateNewKeyModal from "./CreateNewKeyModal";
 
 type Props = {};
 
-export default function page({}: Props) {
+export default function Home({}: Props) {
   const [apiKeys, setApiKeys] = useState<ApiKey[]>([]);
   const [apiKeysVisibility, setApiKeysVisibility] = useState<boolean[]>([]);
   const [isCreateNewKeyModalOpened, setIsCreateNewKeyModalOpened] = useState<boolean>(false);
