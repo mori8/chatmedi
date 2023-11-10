@@ -9,7 +9,7 @@ type Props = {};
 export default function Home({ }: Props) {
   const { data: session } = useSession();
 
-  if (session) {
+  if (session?.user) {
     redirect("/");
   }
 
