@@ -3,9 +3,9 @@
 import { useEffect, useState } from "react";
 import { ArrowRightCircleIcon } from "@heroicons/react/24/outline";
 
-import ChatBox from "../components/ChatBox";
+import ChatBox from "../../components/ChatBox";
 import ModuleGroupBox from "./ModuleGroupBox";
-import RunHistory from "../components/RunHistory";
+import RunHistory from "../../components/RunHistory";
 import Result from "./Result";
 
 type Props = {
@@ -88,7 +88,7 @@ Visuospatial - 이전과 크게 다르지 않음, 혼자 길을 잘 찾아다님
 Executive - 집안일 이전처럼 잘 하고 혼자 대중교통 이용도 가능
 ADL - 혼자 위생관리 잘하며 적절한 옷도 잘 골라 입음, 농사일도 유지`,
           file: undefined,
-        }
+        },
       ]);
     }
   }, [threadId]);
@@ -164,10 +164,7 @@ Discharge meds: donepezil d/c and choline alfoscerate, maintained on mirtazapine
         {nowDisplayedMessages.map((message, index) => (
           <div className="flex flex-col gap-4 mb-16" key={index}>
             <div className="self-end flex flex-row w-fit">
-              <div>
-
-              </div>
-
+              <div></div>
             </div>
             <section className="section-chatbox w-full mb-4">
               <ChatBox

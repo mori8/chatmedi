@@ -2,7 +2,7 @@ import { useState } from "react";
 import classNames from "classnames";
 import Image from "next/image";
 
-import { hash } from "../../utils/utils";
+import { hash } from "../../../utils/utils";
 
 export default function ModelDetailsModal({
   name,
@@ -69,7 +69,9 @@ function InfoModal({ name, shortDescription, task }: Model) {
       <div className="text-sm text-slate-800">{shortDescription}</div>
       <div className="flex flex-row justify-between text-sm">
         <p className="underline cursor-pointer">View details</p>
-        <p className="underline text-rose-700 cursor-pointer">Delete this result</p>
+        <p className="underline text-rose-700 cursor-pointer">
+          Delete this result
+        </p>
       </div>
     </div>
   );

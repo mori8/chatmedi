@@ -1,8 +1,8 @@
 interface Chat {
-  threadId: string;
+  id: string;
   title: string;
-  type: string;
-  createdAt: string;
+  created_at: string;
+  updated_at: string;
 }
 
 interface Model {

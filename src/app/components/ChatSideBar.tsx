@@ -29,7 +29,7 @@ export default function ChatSideBar({}: Props) {
 
   const groupByDate = (chatHistory: Chat[]) => {
     const grouped = chatHistory.reduce((acc, chat) => {
-      const date = new Date(chat.createdAt).toLocaleDateString();
+      const date = new Date(chat.created_at).toLocaleDateString();
       if (!acc[date]) {
         acc[date] = [];
       }
@@ -50,16 +50,28 @@ export default function ChatSideBar({}: Props) {
 
   useEffect(() => {
     // TODO: fetch chat history
-    const userId = session?.user.id;
-    const res = fetch(`${process.env.SERVER_URL}/threads`, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        user_id: userId,
-      }),
-    }).then((res) => res.json());
+    async function fetchChatHistory() {
+      await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/threads?` + new URLSearchParams({
+        user_id: session?.user.id as string,
+      }).toString(), {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: 'include'
+      }).then((res) => {
+        if (res.ok) {
+          return res.json();
+        } else {
+          throw new Error("[ChatSideBar/ERROR] Failed to fetch chat history");
+        }
+      }).then((json) => {
+        setChatHistory(json.data);
+        console.log(json.data);
+      })
+    }
+
+    fetchChatHistory();
   }, []);
 
   return (
@@ -98,9 +110,9 @@ export default function ChatSideBar({}: Props) {
                   </h1>
                   <div className="mt-2">
                     {chats.map((chat, index) => (
-                      <Link href={`/${chat.threadId}`} key={index}>
+                      <Link href={`/${chat.id}`} key={index}>
                         <div
-                          key={chat.threadId}
+                          key={chat.id}
                           className="flex flex-row gap-2 cursor-pointer hover:bg-white hover:text-black transition ease-out rounded-2xl px-3 py-3"
                         >
                           <ChatBubbleLeftIcon width="20" />

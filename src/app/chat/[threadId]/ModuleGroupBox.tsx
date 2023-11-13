@@ -5,7 +5,7 @@ import Image from "next/image";
 import classNames from "classnames";
 
 import ModelIconWithModal from "./ModelIconWithModal";
-import { hash } from "../../utils/utils";
+import { hash } from "../../../utils/utils";
 
 export default function ModuleGroupBox({
   messageId,
@@ -18,9 +18,7 @@ export default function ModuleGroupBox({
       <div className="min-w-[6rem] font-bold">{moduleName}</div>
       <div className="flex flex-wrap min-w-[8rem] content-start relative">
         {models.map((model) => {
-          return (
-            <ModelIconWithModal {...model} key={model.name} />
-          );
+          return <ModelIconWithModal {...model} key={model.name} />;
         })}
       </div>
       <div>{summary}</div>
