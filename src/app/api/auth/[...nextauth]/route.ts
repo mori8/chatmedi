@@ -17,24 +17,23 @@ const handler = NextAuth({
   },
   callbacks: {
     async signIn({ user }) {
-      // const res = await fetch(`${process.env.SERVER_URL}/user`, {
-      //   method: "POST",
-      //   headers: {
-      //     "Content-Type": "application/json",
-      //   },
-      //   body: JSON.stringify({
-      //     email: user.email,
-      //     full_name: user.name,
-      //     avatar_url: user.image,
-      //   }),
-      // });
+      const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/user`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email: user.email,
+          full_name: user.name,
+          avatar_url: user.image,
+        }),
+      });
 
-      // if (!res.ok) {
-      //   throw new Error("[callbacks/signIn] Failed to save new user to server");
-      // }
+      if (!res.ok) {
+        throw new Error("[callbacks/signIn] Failed to save new user to server");
+      }
 
-      // user.id = (await res.json()).id;
-      user.id = "Hello";
+      user.id = (await res.json()).id;
       return true;
     },
     async jwt({ token, user }) {
