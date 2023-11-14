@@ -1,10 +1,8 @@
-"use client";
+'use client';
 
-import classNames from "classnames";
-import { useEffect, useState } from "react";
 import Link from "next/link";
-import { signOut } from "next-auth/react";
-import { useSession } from "next-auth/react";
+import { redirect } from "next/navigation";
+import { signOut, getSession } from "next-auth/react";
 
 import Button from "./Button";
 import PlusChatSVG from "../icons/PlusChatSVG";
@@ -16,17 +14,40 @@ import {
 } from "@heroicons/react/24/outline";
 
 
-type Props = {};
+async function fetchChatHistory(userId: string) {
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_SERVER_URL}/threads?` +
+    new URLSearchParams({
+      user_id: userId,
+    }).toString(),
+    {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      }
+    }
+  )
+  const json = await res.json();
+  return json.data;
+}
 
-export default function ChatSideBar({}: Props) {
-  const [isOpened, setIsOpened] = useState(true);
-  const [chatHistory, setChatHistory] = useState<Chat[]>([]);
-  const { data: session } = useSession();
 
-  const toggleSideBar = () => {
-    setIsOpened(!isOpened);
-  };
+export default async function ChatSideBar() {
+  const session = await getSession();
+  // 몽총한 코드임 그치만 지금 당장 이거 외의 방법이 떠오르지 않음
+  if (!session) {
+    redirect('/auth/login');
+  }
+  const userId = session?.user.id as string;
+  const chatHistory = await fetchChatHistory(userId);
+  // const [chatHistory, setChatHistory] = useState<Chat[]>([]);
 
+  // useEffect(() => {
+  //   fetchChatHistory(userId).then((data) => {
+  //     setChatHistory(data);
+  //   });
+  // }, []);
+  
   const groupByDate = (chatHistory: Chat[]) => {
     const grouped = chatHistory.reduce((acc, chat) => {
       const date = new Date(chat.created_at).toLocaleDateString();
@@ -48,35 +69,8 @@ export default function ChatSideBar({}: Props) {
     }));
   };
 
-  useEffect(() => {
-    // TODO: fetch chat history
-    async function fetchChatHistory() {
-      await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/threads?` + new URLSearchParams({
-        user_id: session?.user.id as string,
-      }).toString(), {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: 'include'
-      }).then((res) => {
-        if (res.ok) {
-          return res.json();
-        } else {
-          throw new Error("[ChatSideBar/ERROR] Failed to fetch chat history");
-        }
-      }).then((json) => {
-        setChatHistory(json.data);
-        console.log(json.data);
-      })
-    }
-
-    fetchChatHistory();
-  }, []);
-
   return (
     <>
-      {isOpened ? (
         <div className="bg-black w-[260px] text-white flex-shrink-0 overflow-x-hidden rounded-se-3xl h-screen">
           <div className="flex flex-col p-5 pt-8 h-full">
             <div className="flex flex-row gap-4">
@@ -89,7 +83,7 @@ export default function ChatSideBar({}: Props) {
             </div>
             <div className="mt-6">
               <Button
-                onClick={() => toggleSideBar()}
+                onClick={() => redirect('/')}
                 color="mint"
                 shadowColor="white"
               >
@@ -134,14 +128,6 @@ export default function ChatSideBar({}: Props) {
             </div>
           </div>
         </div>
-      ) : (
-        <div
-          className="fixed top-8 left-6 z-10"
-          onClick={() => toggleSideBar()}
-        >
-          <Bars3Icon width="24" color="black" className="cursor-pointer" />
-        </div>
-      )}
     </>
   );
 }
