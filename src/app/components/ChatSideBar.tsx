@@ -1,8 +1,7 @@
-'use client';
-
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { signOut, getSession } from "next-auth/react";
+import { useEffect, useState } from "react";
 
 import Button from "./Button";
 import PlusChatSVG from "../icons/PlusChatSVG";
@@ -14,40 +13,33 @@ import {
 } from "@heroicons/react/24/outline";
 
 
-async function fetchChatHistory(userId: string) {
-  const res = await fetch(
-    `${process.env.NEXT_PUBLIC_SERVER_URL}/threads?` +
-    new URLSearchParams({
-      user_id: userId,
-    }).toString(),
-    {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      }
+export default function ChatSideBar({ userId }: { userId: string }) {
+  console.log("hi");
+  const [chatHistory, setChatHistory] = useState<Chat[]>([]);
+
+  useEffect(() => {
+    async function fetchChatHistory(userId: string) {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_SERVER_URL}/threads?` +
+        new URLSearchParams({
+          user_id: userId,
+        }).toString(),
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          }
+        }
+      )
+      const json = await res.json();
+      return json.data;
     }
-  )
-  const json = await res.json();
-  return json.data;
-}
 
+    fetchChatHistory(userId).then((data) => {
+      setChatHistory(data);
+    });
+  }, []);
 
-export default async function ChatSideBar() {
-  const session = await getSession();
-  // 몽총한 코드임 그치만 지금 당장 이거 외의 방법이 떠오르지 않음
-  if (!session) {
-    redirect('/auth/login');
-  }
-  const userId = session?.user.id as string;
-  const chatHistory = await fetchChatHistory(userId);
-  // const [chatHistory, setChatHistory] = useState<Chat[]>([]);
-
-  // useEffect(() => {
-  //   fetchChatHistory(userId).then((data) => {
-  //     setChatHistory(data);
-  //   });
-  // }, []);
-  
   const groupByDate = (chatHistory: Chat[]) => {
     const grouped = chatHistory.reduce((acc, chat) => {
       const date = new Date(chat.created_at).toLocaleDateString();
@@ -71,63 +63,63 @@ export default async function ChatSideBar() {
 
   return (
     <>
-        <div className="bg-black w-[260px] text-white flex-shrink-0 overflow-x-hidden rounded-se-3xl h-screen">
-          <div className="flex flex-col p-5 pt-8 h-full">
-            <div className="flex flex-row gap-4">
-              <Bars3Icon width="24" className="cursor-pointer" />
-              <Link href="/">
-                <div className="flex-1">
-                  <h1 className="font-mono">CHATMEDI</h1>
-                </div>
-              </Link>
-            </div>
-            <div className="mt-6">
-              <Button
-                onClick={() => redirect('/')}
-                color="mint"
-                shadowColor="white"
-              >
-                <PlusChatSVG width="20" />
-                <span>New Chat</span>
-              </Button>
-            </div>
-            <div className="flex flex-row gap-2 mt-3 cursor-pointer hover:bg-white hover:text-black transition ease-out rounded-2xl px-3 py-3">
-              <LightBulbIcon width="20" />
-              <p className="text-sm font-medium flex-1">Templates</p>
-              <ArrowTopRightOnSquareIcon width="20" />
-            </div>
-            <div className="chat-history">
-              {groupByDate(chatHistory).map(({ date, chats }) => (
-                <div key={date} className="mt-6">
-                  <h1 className="text-xs font-medium">
-                    {date === new Date().toLocaleDateString() ? "Today" : date}
-                  </h1>
-                  <div className="mt-2">
-                    {chats.map((chat, index) => (
-                      <Link href={`/${chat.id}`} key={index}>
-                        <div
-                          key={chat.id}
-                          className="flex flex-row gap-2 cursor-pointer hover:bg-white hover:text-black transition ease-out rounded-2xl px-3 py-3"
-                        >
-                          <ChatBubbleLeftIcon width="20" />
-                          <div className="flex-1 overflow-hidden whitespace-nowrap">
-                            <h1 className="text-sm truncate">{chat.title}</h1>
-                          </div>
+      <div className="bg-black w-[260px] text-white flex-shrink-0 overflow-x-hidden rounded-se-3xl h-screen">
+        <div className="flex flex-col p-5 pt-8 h-full">
+          <div className="flex flex-row gap-4">
+            <Bars3Icon width="24" className="cursor-pointer" />
+            <Link href="/">
+              <div className="flex-1">
+                <h1 className="font-mono">CHATMEDI</h1>
+              </div>
+            </Link>
+          </div>
+          <div className="mt-6">
+            <Button
+              onClick={() => redirect("/")}
+              color="mint"
+              shadowColor="white"
+            >
+              <PlusChatSVG width="20" />
+              <span>New Chat</span>
+            </Button>
+          </div>
+          <div className="flex flex-row gap-2 mt-3 cursor-pointer hover:bg-white hover:text-black transition ease-out rounded-2xl px-3 py-3">
+            <LightBulbIcon width="20" />
+            <p className="text-sm font-medium flex-1">Templates</p>
+            <ArrowTopRightOnSquareIcon width="20" />
+          </div>
+          <div className="chat-history">
+            {groupByDate(chatHistory).map(({ date, chats }) => (
+              <div key={date} className="mt-6">
+                <h1 className="text-xs font-medium">
+                  {date === new Date().toLocaleDateString() ? "Today" : date}
+                </h1>
+                <div className="mt-2">
+                  {chats.map((chat, index) => (
+                    <Link href={`/${chat.id}`} key={index}>
+                      <div
+                        key={chat.id}
+                        className="flex flex-row gap-2 cursor-pointer hover:bg-white hover:text-black transition ease-out rounded-2xl px-3 py-3"
+                      >
+                        <ChatBubbleLeftIcon width="20" />
+                        <div className="flex-1 overflow-hidden whitespace-nowrap">
+                          <h1 className="text-sm truncate">{chat.title}</h1>
                         </div>
-                      </Link>
-                    ))}
-                  </div>
+                      </div>
+                    </Link>
+                  ))}
                 </div>
-              ))}
-            </div>
-            <div className="flex-1"></div>
-            <div>
-              <button onClick={() => signOut()}>
-                <span>Logout</span>
-              </button>
-            </div>
+              </div>
+            ))}
+          </div>
+          <div className="flex-1"></div>
+          <div>
+            <button onClick={() => signOut()}>
+              <span>Logout</span>
+            </button>
           </div>
         </div>
+      </div>
     </>
   );
 }

@@ -1,18 +1,17 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { redirect } from 'next/navigation'
-import 'react-tooltip/dist/react-tooltip.css'
+import "react-tooltip/dist/react-tooltip.css";
 
 import ChatBox from "./components/ChatBox";
 import { ArrowRightCircleIcon } from "@heroicons/react/24/outline";
 import { useSession } from "next-auth/react";
-
+import ChatSideBar from "./components/ChatSideBar";
+import Navigation from "./components/Navigation";
 
 export default function Home() {
   const [quickStartQuestions, setQuickStartQuestions] = useState<string[]>([]);
-  const { data: session } = useSession();
-
+  const { data: session, status } = useSession();
 
   useEffect(() => {
     setQuickStartQuestions([
@@ -23,30 +22,35 @@ export default function Home() {
   }, []);
 
   return (
-    <main className="flex flex-col items-center gap-12 p-12">
-      <div className="chatbox-wrapper max-w-[64rem] w-full mt-24">
-        <ChatBox
-          threadId={null}
-          mode="create"
-          isFileAttachEnabled={true}
-        />
-      </div>
-      <div className="text-center">
-        <p className="text-sm font-bold">QUICK START</p>
-        <div className="mt-4">
-          <ul className="quick-start-question-list">
-            {quickStartQuestions.map((question, index) => (
-              <li className="quick-start-question-item text-turquiose flex gap-2 mb-2 hover:underline cursor-pointer" key={index}>
-                <p>
-                  {/* 새 채팅 생성 */}
-                  {question}
-                </p>
-                <ArrowRightCircleIcon width="24" />
-              </li>
-            ))}
-          </ul>
+    status === "authenticated" && (
+      <main className="flex flex-row items-center gap-12 h-full w-full">
+        <ChatSideBar userId={session.user.id} />
+        <div className="flex flex-col flex-1 h-full">
+          <Navigation />
+          <div className="chatbox-wrapper max-w-[64rem] h-full mt-24 p-12">
+            <ChatBox threadId={null} mode="create" isFileAttachEnabled={true} />
+          </div>
+          <div className="text-center">
+            <p className="text-sm font-bold">QUICK START</p>
+            <div className="mt-4">
+              <ul className="quick-start-question-list">
+                {quickStartQuestions.map((question, index) => (
+                  <li
+                    className="quick-start-question-item text-turquiose flex gap-2 mb-2 hover:underline cursor-pointer"
+                    key={index}
+                  >
+                    <p>
+                      {/* 새 채팅 생성 */}
+                      {question}
+                    </p>
+                    <ArrowRightCircleIcon width="24" />
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
         </div>
-      </div>
-    </main>
+      </main>
+    )
   );
 }
