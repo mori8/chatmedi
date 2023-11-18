@@ -25,14 +25,14 @@ export default function Home() {
     status === "authenticated" && (
       <main className="flex flex-row items-center gap-12 h-full w-full">
         <ChatSideBar userId={session.user.id} />
-        <div className="flex flex-col flex-1 h-full">
+        <div className="flex flex-col flex-1 h-full items-center">
           <Navigation />
-          <div className="chatbox-wrapper max-w-[64rem] h-full mt-24 p-12">
+          <div className="chatbox-wrapper max-w-[64rem] w-full mt-24 p-12">
             <ChatBox threadId={null} mode="create" isFileAttachEnabled={true} />
           </div>
-          <div className="text-center">
+          <div className="text-center flex-1">
             <p className="text-sm font-bold">QUICK START</p>
-            <div className="mt-4">
+            <div className="mt-4 w-fit">
               <ul className="quick-start-question-list">
                 {quickStartQuestions.map((question, index) => (
                   <li
