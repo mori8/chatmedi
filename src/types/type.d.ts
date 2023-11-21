@@ -5,6 +5,38 @@ interface Chat {
   updated_at: string;
 }
 
+interface ChatInfo {
+  message_id: string;
+  role: string;
+  content: {
+    image: string;
+  };
+  data: {
+    image: string;
+  };
+  created_at: string;
+  updated_at: string;
+  thread: Thread;
+  tool?: Tool;
+}
+
+interface Thread {
+  id: string;
+  title: string;
+  created_at: string;
+  updated_at: string;
+}
+
+interface Tool {
+  id: string;
+  name: string;
+  enabled: false;
+  card_url: string;
+  created_at: string;
+  updated_at: string;
+  parameters: [{}];
+}
+
 interface Model {
   name: string;
   shortDescription: string;
@@ -20,8 +52,8 @@ interface Module {
 
 interface Result {
   messageId: string;
-  image: string | null
-  text: string
+  image: string | null;
+  text: string;
 }
 
 interface querySummaryHistory {
