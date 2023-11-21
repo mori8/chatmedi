@@ -1,12 +1,14 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { ArrowRightCircleIcon } from "@heroicons/react/24/outline";
+import { useSession } from "next-auth/react";
 
 import ChatBox from "../../components/ChatBox";
-import ModuleGroupBox from "./ModuleGroupBox";
 import RunHistory from "../../components/RunHistory";
-import Result from "./Result";
+import ModuleGroupBox from "./ModuleGroupBox";
+import ResultTextWrapper from "./ResultTextWrapper";
+import Navigation from "../../components/Navigation";
+import ChatSideBar from "../../components/ChatSideBar";
 
 type Props = {
   params: {
@@ -17,19 +19,11 @@ type Props = {
 export default function Home({ params }: Props) {
   const [hasFetched, setHasFetched] = useState(false);
   const [threadId, setThreadId] = useState<string | null>(null);
+  const [chats, setChats] = useState<ChatInfo[]>([]); // user / controller가 항상 짝으로 들어가야 함
   const [nowDisplayedMessages, setNowDisplayedMessages] = useState<
     { messageId: string; query: string; file: File | undefined }[]
   >([]);
-  const [messageEditHistories, setMessageEditHistories] = useState<
-    ChatEditHistory[]
-  >([]);
-  const [modules, setModules] = useState<Module[]>([]);
-  const [results, setResults] = useState<Result[]>([]);
-  const [notes, setNotes] = useState<String[]>([]);
-  const [recomendedFollowUpQuestions, setRecomendedFollowUpQuestions] =
-    useState<String[]>([]);
-
-  // 질문 레벨에 따라 한 번 메세지 묶는 작업 필요
+  const { data: session, status } = useSession();
 
   useEffect(() => {
     setThreadId(params.threadId);
@@ -66,190 +60,146 @@ export default function Home({ params }: Props) {
   };
 
   useEffect(() => {
-    if (threadId) {
-      // TODO: fetch thread
-      setNowDisplayedMessages([
-        {
-          messageId: "el2940-53nf39-242ab4",
-          query: `Based on this diagnostic history, give your opinion on what prescription you would give this patient.
+    if (session && threadId) {
+      const userId = session.user.id;
 
-2021-03 Visual hallucination
-수면과 관계없이 밤낮으로 귀신이나 괴물이 보인다
-눈을 감으면 귀신이 보이고 말을 하는 것 같아 입면이 어려움
-
-2021-05 Cognitive impairment
-인지저하 증상이 발생
-Memory - 하려던 행동을 기억하지 못하거나, 전날 있었던 일을 힌트를 주어도 떠올리지 못하는
-short term memory loss 발생
-- 원래 잘 외우던 지인들 전화번호를 기억하지 못함
-Language - 문맹이지만 아들 이름은 쓸 수 있었는데 최근에는 쓰지 못함
-- 말할 때 단어를 빨리 떠올리지 못하여 더듬는 모습을 보이고 이전에 비해 말수가 줄어듦
-Visuospatial - 이전과 크게 다르지 않음, 혼자 길을 잘 찾아다님
-Executive - 집안일 이전처럼 잘 하고 혼자 대중교통 이용도 가능
-ADL - 혼자 위생관리 잘하며 적절한 옷도 잘 골라 입음, 농사일도 유지`,
-          file: undefined,
-        },
-      ]);
+      const fetchExecutions = async () => {
+        const res = await fetch(
+          `${process.env.NEXT_PUBLIC_SERVER_URL}/chats?` +
+            new URLSearchParams({
+              thread_id: threadId,
+              user_id: userId,
+            }).toString(),
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
+        );
+        const json = await res.json();
+        return json.data;
+      };
+
+      fetchExecutions().then((data) => {
+        setChats(data);
+        setHasFetched(true);
+      });
     }
-  }, [threadId]);
+  }, [session, threadId]);
 
   useEffect(() => {
-    setModules([
-      {
-        messageId: "el2940-53nf39-242ab4",
-        moduleName: "Dementia diagnosis",
-        models: [
-          {
-            name: "SPMM",
-            shortDescription: "model for molecule generation",
-            task: "property_to_molecule",
-          },
-          {
-            name: "DEMO1",
-            shortDescription: "demo model",
-            task: "property_to_molecule",
-          },
-          {
-            name: "DEMO2",
-            shortDescription: "demo model",
-            task: "property_to_molecule",
-          },
-          {
-            name: "DEMO3",
-            shortDescription: "demo model",
-            task: "property_to_molecule",
-          },
-          {
-            name: "DEMO4",
-            shortDescription: "demo model",
-            task: "property_to_molecule",
-          },
-        ],
-        summary:
-          "Lorem ipsum dolor sit amet consectetur. Arcu euismod ornare vel ut aliquet et lacus vel. Accumsan ante cursus pellentesque nunc duis. Et blandit malesuada non facilisis. Potenti enim morbi gravida sit. Gravida tortor bibendum orci sit elit in tempus ante accumsan. Luctus eget faucibus congue tempor egestas volutpat interdum viverra.",
-      },
-    ]);
+    if (chats.length > 0) {
+      const lastChat = chats[chats.length - 1];
+      console.log("lastChat:", lastChat);
 
-    setResults([
-      {
-        messageId: "el2940-53nf39-242ab4",
-        image: null,
-        text: `This is a treatment suggestion for the patient you described:
-IVIG instead of high-dose steroids for DM comorbidities
-- IVIG 0.5 g/kg/day * 4 days (2022-04-13 to 2022-04-16), total 2 g/kg
-- Reported significant improvement in symptoms of dizziness and night sweats at discharge after receiving IVIG
-Psychiatric consultation performed for insomnia and past diagnosis of depression
-- Findings: r/o adjustment disorder, r/o sleep disorder, mild depression, and insomnia confirmed
-- Insomnia improved after addition of mirtazapine 3.75 mg bedtime
-Discharge meds: donepezil d/c and choline alfoscerate, maintained on mirtazapine only`,
-      },
-    ]);
+      if (lastChat.role === "controller") {
+        const executePlan = async () => {
+          const res = await fetch(
+            `${process.env.NEXT_PUBLIC_SERVER_URL}/chat/plan-execute`,
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                chat_id: lastChat.message_id,
+              }),
+            }
+          )
+            .then((res) => res.json())
+            .catch((err) => {
+              console.log(err);
+            });
+          return res.data;
+        };
 
-    setNotes([
-      "If you have information about the patient's weight, you can provide more accurate guidance.",
-      "We've categorized this patient's symptoms as Disease A, but it's also possible that it's Disease B, or even Disease C.",
-    ]);
+        executePlan().then((data) => {
+          setChats((prev) => {
+            const newChats = [...prev];
+            newChats[newChats.length - 1].content.result = data;
+            return newChats;
+          });
+        });
+      }
 
-    setRecomendedFollowUpQuestions([
-      "What are the typical radiological findings one might expect to see in a patient with early-stage rheumatoid arthritis?",
-      "Can you list the diagnostic criteria for Systemic Lupus Erythematosus?",
-    ]);
+      if (lastChat.role === "function") {
+        const executeFunction = async () => {
+          const res = await fetch(
+            `${process.env.NEXT_PUBLIC_SERVER_URL}/chat`,
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                chat_id: lastChat.message_id,
+              }),
+            }
+          )
+            .then((res) => res.json())
+            .catch((err) => {
+              console.log(err);
+            });
+          return res.data;
+        };
 
-    setHasFetched(true);
-  }, []);
+        executeFunction().then((data) => {
+          setChats((prev) => {
+            const newChats = [...prev];
+            newChats[newChats.length - 1].content.result = data;
+            return newChats;
+          });
+        });
+      }
+    }
+  }, [chats]);
 
   return (
-    <div className="flex-1 w-full flex flex-row items-start justify-evenly gap-12 p-12">
-      <div className="max-w-[56rem] prose lg:prose-lg prose-slate">
-        {nowDisplayedMessages.map((message, index) => (
-          <div className="flex flex-col gap-4 mb-16" key={index}>
-            <div className="self-end flex flex-row w-fit">
-              <div></div>
-            </div>
-            <section className="section-chatbox w-full mb-4">
-              <ChatBox
-                threadId={threadId}
-                key={message.messageId}
-                query={message.query}
-              />
-            </section>
-
-            <section className="section-modules leading-normal">
-              <SectionTitle>Analyzing ...{hasFetched && "Done"}</SectionTitle>
-              <div className="flex flex-col gap-6 mt-8">
-                {modules.length &&
-                  modules
-                    .filter((module) => module.messageId === message.messageId)
-                    .map((module) => (
-                      <ModuleGroupBox key={module.moduleName} {...module} />
-                    ))}
+    status === "authenticated" &&
+    threadId && (
+      <main className="flex flex-row items-center gap-12 h-full w-full">
+        <ChatSideBar userId={session.user.id} />
+        <div className="flex flex-col flex-1 h-full items-center overflow-scroll">
+          <Navigation />
+          <div className="flex-1 w-full flex flex-row items-start justify-evenly gap-12 p-12">
+            <div className="max-w-[56rem] prose lg:prose-lg prose-slate">
+              {chats.map((chat, index) => {
+                if (chat.role === "user")
+                  return (
+                    <section className="section-chatbox w-full mb-4">
+                      <ChatBox
+                        threadId={threadId}
+                        key={chat.message_id}
+                        query={chat.content.user_input}
+                        userId={session.user.id}
+                        mode="edit"
+                        isFirstQuery={index === 0}
+                      />
+                    </section>
+                  );
+                else if (chat.role === "assistant") return chat.content.result;
+                else return null;
+              })}
+              <div>
+                {hasFetched && (
+                  <ChatBox
+                    isFileAttachEnabled={false}
+                    threadId={threadId}
+                    mode="create"
+                    userId={session?.user.id}
+                    rows={4}
+                    isFirstQuery={false}
+                  />
+                )}
               </div>
-            </section>
-
-            <section className="section-result leading-normal">
-              <SectionTitle>Result</SectionTitle>
-              {results
-                .filter((result) => result.messageId === message.messageId)
-                .map((message, index) => (
-                  <div className="flex flex-col gap-6" key={index}>
-                    {results.length &&
-                      results
-                        .filter(
-                          (result) => result.messageId === message.messageId
-                        )
-                        .map((result) => (
-                          <Result key={result.messageId} {...result} />
-                        ))}
-                  </div>
-                ))}
-            </section>
-
-            <section className="section-notes leading-normal">
-              <SectionTitle>Notes</SectionTitle>
-              <ul className="">
-                {notes.map((note, index) => (
-                  <li key={index}>{note}</li>
-                ))}
-              </ul>
-            </section>
-
-            <section className="section-recomend-follow-up-q leading-normal">
-              <SectionTitle>Recommandation for next question</SectionTitle>
-              <ul className="list-disc text-turquiose underline cursor-pointer p-0 not-prose">
-                {recomendedFollowUpQuestions.map((question, index) => (
-                  <li className="flex justify-between my-3 gap-12" key={index}>
-                    {question}
-                    <span className="">
-                      <ArrowRightCircleIcon width="24" />
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            </section>
+            </div>
+            <div className="flex-shrink-0">
+              <RunHistory />
+            </div>
           </div>
-        ))}
-        <div>
-          {hasFetched && (
-            <ChatBox
-              isFileAttachEnabled={false}
-              threadId={threadId}
-              mode="create"
-              rows={4}
-            />
-          )}
         </div>
-      </div>
-      <div className="flex-shrink-0">
-        <RunHistory />
-      </div>
-    </div>
-  );
-}
-
-function SectionTitle({ children }: { children: React.ReactNode }) {
-  return (
-    <div className="flex flex-row items-center gap-4 not-prose mt-5 mb-4">
-      <h3 className="text-xl lg:text-2xl font-bold">{children}</h3>
-    </div>
+      </main>
+    )
   );
 }

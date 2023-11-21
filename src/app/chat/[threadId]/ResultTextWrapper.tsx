@@ -3,10 +3,14 @@ import Image from "next/image";
 
 import MarkdownRenderer from "../../components/MarkdownRenderer";
 
-export default function Result({ image, text }: Result) {
+type Props = {
+  content: string
+}
+
+export default function ResultTextWrapper({ content }: Props) {
   return (
     <div>
-      <MarkdownRenderer markdown={text} />
+      <MarkdownRenderer markdown={content} />
     </div>
   );
 }

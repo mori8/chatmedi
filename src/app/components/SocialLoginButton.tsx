@@ -2,7 +2,7 @@
 
 import React from "react";
 import Image from "next/image";
-import { signIn, useSession } from "next-auth/react";
+import { signIn } from "next-auth/react";
 
 type Props = {
   platform: string;
@@ -10,7 +10,6 @@ type Props = {
 };
 
 export default function SocialLoginButton({ platform, onClick }: Props) {
-  const { data: session } = useSession();
 
   return (
     <button

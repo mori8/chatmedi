@@ -96,7 +96,7 @@ export default function ChatSideBar({ userId }: { userId: string }) {
                 </h1>
                 <div className="mt-2">
                   {chats.map((chat, index) => (
-                    <Link href={`/${chat.id}`} key={index}>
+                    <Link href={`/chat/${chat.id}`} key={index}>
                       <div
                         key={chat.id}
                         className="flex flex-row gap-2 cursor-pointer hover:bg-white hover:text-black transition ease-out rounded-2xl px-3 py-3"

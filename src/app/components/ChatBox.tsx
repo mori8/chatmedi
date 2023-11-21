@@ -4,7 +4,6 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useDropzone } from "react-dropzone";
 import classNames from "classnames";
 import { useRouter } from "next/navigation";
-import { useSession } from "next-auth/react";
 
 import {
   PaperAirplaneIcon,
@@ -18,9 +17,11 @@ import FileInfoModal from "./FileInfoModal";
 type Props = {
   threadId: string | null;
   isFileAttachEnabled?: boolean;
+  isFirstQuery: boolean;
   rows?: number;
   query?: string;
   mode?: "edit" | "create";
+  userId: string;
   // editQuery: (oldMessageId: string, newMessageId: string, newQuery: string, newFile: File | undefined) => void;
 };
 
@@ -29,13 +30,14 @@ export default function ChatBox({
   rows = 6,
   query = "",
   mode,
+  userId,
+  threadId
 }: Props) {
   const [editable, setEditable] = useState(query === "");
   const [files, setFiles] = useState<File[]>([]);
   const [isFileInfoModalOpen, setIsFileInfoModalOpen] = useState(false);
   const [textInput, setTextInput] = useState(query);
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
-  const { data: session } = useSession();
   const { push } = useRouter();
 
   const textAreaAutoResize = (e: any) => {
@@ -58,11 +60,43 @@ export default function ChatBox({
     setTextInput(e.target.value);
   };
 
-  const sendQuery = (query: string, file: File | undefined) => {
+  const fetchChatPlan = async () => {
+    const stringifiedFile = files[0] ? files[0].toString() : undefined;
+    console.log(JSON.stringify({
+      user_id: userId,
+      user_input: textInput,
+      image_input: stringifiedFile,
+      thread_id: undefined,
+    }));
+    
+    const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/chat/plan`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        user_id: userId,
+        user_input: textInput,
+        ...(stringifiedFile && { image_input: stringifiedFile }),
+        ...(threadId && { thread_id: threadId })
+      }),
+    });
+
+    if (!res.ok) {
+      console.log(res);
+      throw new Error("[ChatBox] Failed to send a query");
+    }
+
+    return res.json();
+  }
+
+  const sendQuery = async () => {
     // TODO: fetch query to server
-    const newthreadId = "1";
-    // console.log(newthreadId);
-    push(`/${newthreadId}`);
+    const json: ChatInfo = await fetchChatPlan();
+    const newthreadId = json.thread.id;
+
+    console.log(newthreadId);
+    push(`/chat/${newthreadId}`);
   };
 
   useEffect(() => {
@@ -92,16 +126,6 @@ export default function ChatBox({
         {isFileAttachEnabled && (
           <div className="flex items-center text-sm gap-2">
             <p className="mr-4 font-medium">Files</p>
-            {/* <Button
-              onClick={() => {}}
-              size="sm"
-              color="mint"
-              shadowColor="black"
-            >
-              <ArrowUpOnSquareIcon width="20" />
-              Click to upload
-            </Button>
-            <p>or drag & drop a file here</p> */}
             <FileDropZone
               files={files}
               setFiles={setFiles}
@@ -115,7 +139,7 @@ export default function ChatBox({
         <div className="flex-1"></div>
         <div
           className="rounded-full flex items-center p-3 hover:bg-turquiose hover:text-white transition ease-in-out cursor-pointer"
-          onClick={() => sendQuery(textInput ?? "", files[0])}
+          onClick={() => sendQuery()}
         >
           {editable ? (
             <PaperAirplaneIcon

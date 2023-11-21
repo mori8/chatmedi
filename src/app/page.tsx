@@ -28,7 +28,7 @@ export default function Home() {
         <div className="flex flex-col flex-1 h-full items-center">
           <Navigation />
           <div className="chatbox-wrapper max-w-[64rem] w-full mt-24 p-12">
-            <ChatBox threadId={null} mode="create" isFileAttachEnabled={true} />
+            <ChatBox threadId={null} userId={session.user.id} mode="create" isFileAttachEnabled={true} isFirstQuery />
           </div>
           <div className="text-center flex-1">
             <p className="text-sm font-bold">QUICK START</p>
