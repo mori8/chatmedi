@@ -9,10 +9,14 @@ interface ChatInfo {
   message_id: string;
   role: string;
   content: {
-    image: string;
+    user_input?: string;
+    image?: string;
+    result?: string;
+    answer?: string;
   };
   data: {
-    image: string;
+    image?: string;
+    query?: string;
   };
   created_at: string;
   updated_at: string;
