@@ -9,7 +9,7 @@ type Props = {
 
 export default function MarkdownRenderer({ markdown }: Props) {
   return (
-    <div className="result-text-container">
+    <div className="result-text-container prose">
       <ReactMarkdown>{markdown}</ReactMarkdown>
     </div>
   );

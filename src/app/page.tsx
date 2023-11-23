@@ -23,7 +23,7 @@ export default function Home() {
 
   return (
     status === "authenticated" && (
-      <main className="flex flex-row items-center gap-12 h-full w-full">
+      <main className="flex flex-row items-center gap-12 h-full w-full mb-40">
         <ChatSideBar userId={session.user.id} />
         <div className="flex flex-col flex-1 h-full items-center">
           <Navigation />

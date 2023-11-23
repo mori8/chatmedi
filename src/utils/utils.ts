@@ -15,3 +15,14 @@ export const numberSuffix = (num: number) => {
   if (num === 3) return `${num}rd`
   return `${num}th`
 }
+
+export function extractKeyValuePairs(text: string): { [key: string]: string } {
+  const pattern: RegExp = /\[(.*?)\]\s*(.*?)(?=\n\[|$)/gs;
+  const matches = [...text.matchAll(pattern)];
+  return matches.reduce<{ [key: string]: string }>((acc, match) => {
+      const key = match[1].trim();
+      const value = match[2].trim();
+      acc[key] = value;
+      return acc;
+  }, {});
+}
