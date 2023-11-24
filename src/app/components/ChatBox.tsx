@@ -104,10 +104,10 @@ export default function ChatBox({
   }, [editable]);
 
   return (
-    <div className="flex flex-col border-mint border bg-white rounded-2xl px-8 pt-4 pb-4 w-full shadow-solid shadow-black leading-7 lg:leading-8 prose lg:prose-lg">
+    <div className="flex flex-col border-mint border bg-white rounded-2xl px-8 pt-4 pb-4 w-full shadow-solid shadow-black leading-7 lg:leading-8">
       {editable ? (
         <textarea
-          className={classNames("w-full resize-none outline-none border-none")}
+          className={classNames("w-full resize-none outline-none border-none prose lg:prose-lg")}
           placeholder=""
           rows={rows}
           onChange={(e) => {
@@ -119,7 +119,7 @@ export default function ChatBox({
         />
       ) : (
         <div className="w-full resize-none outline-none border-none">
-          <p className="whitespace-pre-line">{query}</p>
+          <p className="whitespace-pre-line prose lg:prose-lg">{query}</p>
         </div>
       )}
       <div className="w-full flex justify-between">
