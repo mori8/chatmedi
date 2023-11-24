@@ -2,29 +2,45 @@
 
 import { useState, useEffect } from "react";
 
-import { ClipboardIcon, EyeIcon, ArrowPathRoundedSquareIcon } from "@heroicons/react/24/outline";
+import {
+  ClipboardIcon,
+  EyeIcon,
+  ArrowPathRoundedSquareIcon,
+} from "@heroicons/react/24/outline";
 import CreateNewKeyModal from "./CreateNewKeyModal";
-
+import { useSession } from "next-auth/react";
 
 type Props = {};
 
 export default function Home({}: Props) {
-  const [apiKey, setApiKey] = useState<ApiKey>();
+  const { data: session, status } = useSession();
+  const [apiKey, setApiKey] = useState("");
   const [apiKeyVisibility, setApiKeyVisibility] = useState<boolean>(false);
-  const [isCreateNewKeyModalOpened, setIsCreateNewKeyModalOpened] = useState<boolean>(false);
+  const [isCreateNewKeyModalOpened, setIsCreateNewKeyModalOpened] =
+    useState<boolean>(false);
 
   useEffect(() => {
     // TODO: fetch api key from server
-    setApiKey(
-      {
-        id: 1,
-        name: "ChatMedi",
-        key: "1234567890",
-      },
-    );
+    if (session && status === "authenticated") {
+      const fetchApiKey = async () => {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/user/me/`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            email: session.user.email,
+          }),
+        });
+        const data = await res.json();
+        return data
+      };
 
-    setApiKeyVisibility(false);
-  }, []);
+      fetchApiKey().then((data) => {
+        setApiKey(data.secret);
+      });
+    }
+  }, [session]);
 
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
@@ -36,24 +52,21 @@ export default function Home({}: Props) {
 
   const openCreateNewKeyModal = () => {
     setIsCreateNewKeyModalOpened(true);
-  }
+  };
 
   const changeVisibility = () => {
     setApiKeyVisibility((prev) => {
       return !prev;
-    })
-
-  }
+    });
+  };
 
   return (
     <div className="pl-16 pr-16 lg:pr-96 py-8">
-      {
-        isCreateNewKeyModalOpened && (
-          <CreateNewKeyModal
-            onClose={() => setIsCreateNewKeyModalOpened(false)}
-          />
-        )
-      }
+      {isCreateNewKeyModalOpened && (
+        <CreateNewKeyModal
+          onClose={() => setIsCreateNewKeyModalOpened(false)}
+        />
+      )}
       <div>
         <h2 className="font-bold text-lg">API Keys</h2>
         <p className="mt-4 text-slate-800 leading-6">
@@ -73,34 +86,34 @@ export default function Home({}: Props) {
           </div>
         </div>
         <div className="table-body">
-            <div
-              className="flex flex-row items-center px-6 py-3 border-b border-slate-200"
-            >
-              <div className="w-48">
-                <span className="text-slate-800">{apiKey?.name}</span>
-              </div>
-              <div className="flex-1 flex items-center">
-                <span className="text-slate-800">
-                  <input value={apiKey?.key} className="bg-transparent" type={
-                    apiKeyVisibility ? "text" : "password"
-                  } />
-                </span>
-                <button onClick={() => changeVisibility()}>
-                  <EyeIcon width="20" className="ml-2" />
-                </button>
-              </div>
-              <div className="flex flex-row gap-4">
-                <button
-                  className="text-slate-800"
-                  onClick={() => copyToClipboard(apiKey?.key || "")}
-                >
-                  <ClipboardIcon width="20" />
-                </button>
-                <button onClick={() => regenerateApiKey()}>
-                  <ArrowPathRoundedSquareIcon width="20" />
-                </button>
-              </div>
+          <div className="flex flex-row items-center px-6 py-3 border-b border-slate-200">
+            <div className="w-48">
+              <span className="text-slate-800">Your API Key</span>
             </div>
+            <div className="flex-1 flex items-center">
+              <span className="text-slate-800">
+                <input
+                  value={apiKey}
+                  className="bg-transparent"
+                  type={apiKeyVisibility ? "text" : "password"}
+                />
+              </span>
+              <button onClick={() => changeVisibility()}>
+                <EyeIcon width="20" className="ml-2" />
+              </button>
+            </div>
+            <div className="flex flex-row gap-4">
+              <button
+                className="text-slate-800"
+                onClick={() => copyToClipboard(apiKey || "")}
+              >
+                <ClipboardIcon width="20" />
+              </button>
+              <button onClick={() => regenerateApiKey()}>
+                <ArrowPathRoundedSquareIcon width="20" />
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </div>

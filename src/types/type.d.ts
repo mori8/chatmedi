@@ -68,12 +68,6 @@ interface querySummaryHistory {
   parentMessageId: string | null;
 }
 
-interface ApiKey {
-  id: number;
-  name: string;
-  key: string;
-}
-
 interface ChatEditHistory {
   history: {
     messageId: number;
