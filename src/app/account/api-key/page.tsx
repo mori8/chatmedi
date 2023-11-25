@@ -20,7 +20,6 @@ export default function Home({}: Props) {
     useState<boolean>(false);
 
   useEffect(() => {
-    // TODO: fetch api key from server
     if (session && status === "authenticated") {
       const fetchApiKey = async () => {
         const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/user/me/`, {
@@ -61,7 +60,7 @@ export default function Home({}: Props) {
   };
 
   return (
-    <div className="pl-16 pr-16 lg:pr-96 py-8">
+    <div className="pl-16 pr-16 lg:pr-80 py-8">
       {isCreateNewKeyModalOpened && (
         <CreateNewKeyModal
           onClose={() => setIsCreateNewKeyModalOpened(false)}
@@ -91,10 +90,10 @@ export default function Home({}: Props) {
               <span className="text-slate-800">Your API Key</span>
             </div>
             <div className="flex-1 flex items-center">
-              <span className="text-slate-800">
+              <span className="text-slate-800 min-w-[300px]">
                 <input
                   value={apiKey}
-                  className="bg-transparent"
+                  className="bg-transparent w-full"
                   type={apiKeyVisibility ? "text" : "password"}
                 />
               </span>
