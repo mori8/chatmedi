@@ -19,22 +19,12 @@ type Props = {
 
 export default function Home({ params }: Props) {
   const [hasFetched, setHasFetched] = useState(false);
-  const [threadId, setThreadId] = useState<string | null>(null);
   const [chats, setChats] = useState<ChatInfo[]>([]); // user / controller가 항상 짝으로 들어가야 함
   const [nowDisplayedMessages, setNowDisplayedMessages] = useState<
     { messageId: string; query: string; file: File | undefined }[]
   >([]);
   const { data: session, status } = useSession();
-
-  useEffect(() => {
-    setThreadId(params.threadId);
-  }, [params.threadId]);
-
-  const fetchMessage = (query: string, file: File | undefined) => {
-    // fetch query to server
-    const newMessageId = "1";
-    return newMessageId;
-  };
+  const threadId = params.threadId;
 
   const editMessage = (
     oldMessageId: string,
@@ -86,12 +76,12 @@ export default function Home({ params }: Props) {
         setChats(data);
       });
     }
-  }, [session, threadId]);
+  }, [session]);
 
   useEffect(() => {
     if (chats.length > 0) {
       const lastChat = chats[chats.length - 1];
-      const newChatState = continueExecution(
+      continueExecution(
         lastChat.role,
         lastChat.message_id
       ).then((data) => {
@@ -167,6 +157,7 @@ export default function Home({ params }: Props) {
 
 
 const continueExecution = async (lastChatRole: string, chatId: string) => {
+  console.log('continueExecution: ', lastChatRole, chatId)
   if (lastChatRole === "controller") {
     await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/chat/plan-execute`, {
       method: "POST",
@@ -184,7 +175,7 @@ const continueExecution = async (lastChatRole: string, chatId: string) => {
   }
 
   if (lastChatRole === "function") {
-    await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/chat/plan-execute`, {
+    await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/chat`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
