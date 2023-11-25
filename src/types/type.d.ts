@@ -10,7 +10,7 @@ interface ChatInfo {
   role: string;
   content: {
     user_input?: string;
-    image?: string;
+    image_input?: string;
     result?: string;
     answer?: string;
   };

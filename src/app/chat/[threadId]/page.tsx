@@ -19,6 +19,7 @@ type Props = {
 
 export default function Home({ params }: Props) {
   const [hasFetched, setHasFetched] = useState(false);
+  const [imageInputURL, setImageInputURL] = useState<string | undefined>(undefined);
   const [chats, setChats] = useState<ChatInfo[]>([]); // user / controller가 항상 짝으로 들어가야 함
   const [nowDisplayedMessages, setNowDisplayedMessages] = useState<
     { messageId: string; query: string; file: File | undefined }[]
@@ -51,6 +52,10 @@ export default function Home({ params }: Props) {
   };
 
   useEffect(() => {
+
+  }, [])
+
+  useEffect(() => {
     if (session && threadId) {
       const userId = session.user.id;
 
@@ -80,6 +85,13 @@ export default function Home({ params }: Props) {
 
   useEffect(() => {
     if (chats.length > 0) {
+      const imageInputName = chats[0].content.image_input;
+      if (imageInputName) {
+        getImageURL(imageInputName).then((url) => {
+          setImageInputURL(url);
+        });
+      }
+      
       const lastChat = chats[chats.length - 1];
       continueExecution(
         lastChat.role,
@@ -119,6 +131,7 @@ export default function Home({ params }: Props) {
                         userId={session.user.id}
                         mode="edit"
                         isFirstQuery={index === 0}
+                        userImageURL={imageInputURL}
                       />
                     </section>
                   );
@@ -153,6 +166,25 @@ export default function Home({ params }: Props) {
       </main>
     )
   );
+}
+
+
+const getImageURL = async (imageInputName: string) => {
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_SERVER_URL}/files/${imageInputName}`,
+    {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    }
+  ).then((res) => res.blob())
+    .then((blob) => {
+      const imageURL = URL.createObjectURL(blob);
+      return imageURL;
+    }
+  );
+  return res;
 }
 
 

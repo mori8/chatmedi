@@ -22,6 +22,7 @@ type Props = {
   query?: string;
   mode?: "edit" | "create";
   userId: string;
+  userImageURL?: string;
   // editQuery: (oldMessageId: string, newMessageId: string, newQuery: string, newFile: File | undefined) => void;
 };
 
@@ -31,7 +32,8 @@ export default function ChatBox({
   query = "",
   mode,
   userId,
-  threadId
+  threadId,
+  userImageURL,
 }: Props) {
   const [editable, setEditable] = useState(query === "");
   const [files, setFiles] = useState<File[]>([]);
@@ -60,15 +62,26 @@ export default function ChatBox({
     setTextInput(e.target.value);
   };
 
+  const getImageFileName = async (file: File | null) => {
+    if (!file) {
+      return;
+    }
+    const requestBody = new FormData();
+    requestBody.append("file", file);
+    const req = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/upload`, {
+      method: "POST",
+      body: requestBody,
+    });
+    const json = await req.json();
+    console.log(json);
+    return json;
+  };
+
   const fetchChatPlan = async () => {
-    const stringifiedFile = files[0] ? files[0].toString() : undefined;
-    console.log(JSON.stringify({
-      user_id: userId,
-      user_input: textInput,
-      image_input: stringifiedFile,
-      thread_id: undefined,
-    }));
-    
+    const imageFileName = await getImageFileName(
+      files.length > 0 ? files[0] : null
+    );
+
     const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/chat/plan`, {
       method: "POST",
       headers: {
@@ -77,8 +90,8 @@ export default function ChatBox({
       body: JSON.stringify({
         user_id: userId,
         user_input: textInput,
-        ...(stringifiedFile && { image_input: stringifiedFile }),
-        ...(threadId && { thread_id: threadId })
+        ...(files.length > 0 && { image_input: imageFileName }),
+        ...(threadId && { thread_id: threadId }),
       }),
     });
 
@@ -88,7 +101,7 @@ export default function ChatBox({
     }
 
     return res.json();
-  }
+  };
 
   const sendQuery = async () => {
     // TODO: fetch query to server
@@ -105,9 +118,20 @@ export default function ChatBox({
 
   return (
     <div className="flex flex-col border-mint border bg-white rounded-2xl px-8 pt-4 pb-4 w-full shadow-solid shadow-black leading-7 lg:leading-8">
+      {userImageURL && (
+        <div className="overflow-hidden my-4">
+          <img
+            src={userImageURL}
+            alt="user image"
+            className="object-cover"
+          />
+        </div>
+      )}
       {editable ? (
         <textarea
-          className={classNames("w-full resize-none outline-none border-none prose lg:prose-lg")}
+          className={classNames(
+            "w-full resize-none outline-none border-none prose lg:prose-lg"
+          )}
           placeholder=""
           rows={rows}
           onChange={(e) => {
@@ -142,10 +166,7 @@ export default function ChatBox({
           onClick={() => sendQuery()}
         >
           {editable ? (
-            <PaperAirplaneIcon
-              width="24"
-              
-            />
+            <PaperAirplaneIcon width="24" />
           ) : (
             <PencilSquareIcon width="24" />
           )}
