@@ -119,11 +119,11 @@ export default function ChatBox({
   return (
     <div className="flex flex-col border-mint border bg-white rounded-2xl px-8 pt-4 pb-4 w-full shadow-solid shadow-black leading-7 lg:leading-8">
       {userImageURL && (
-        <div className="overflow-hidden my-4">
+        <div className="my-4 w-full">
           <img
             src={userImageURL}
             alt="user image"
-            className="object-cover"
+            className="w-5/6 max-h-96 object-contain mx-auto"
           />
         </div>
       )}
