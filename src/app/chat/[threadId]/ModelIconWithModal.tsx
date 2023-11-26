@@ -46,7 +46,7 @@ export default function ModelDetailsModal({
       >
         {isHovered && <InfoModal name={name} cardURL={cardURL} />}
         <Image
-          src={`/robot-${(hash(name) % 2) + 1}.svg`}
+          src={`/robot-${(hash(name) % 2)}.svg`}
           alt="robot icon"
           width={64}
           height={64}

@@ -6,7 +6,7 @@ export const hash = (str: string) => {
     hash  = ((hash << 5) - hash) + chr; 
     hash |= 0; 
   } 
-  return hash;
+  return Math.abs(hash);
 }
 
 export const numberSuffix = (num: number) => {
