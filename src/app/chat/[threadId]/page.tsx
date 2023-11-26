@@ -163,6 +163,9 @@ export default function Home({ params }: Props) {
                   );
                 else return null;
               })}
+              {!hasFetched && (
+                <LoadingSpinner />
+              )}
               <div className="mt-16">
                 {hasFetched && (
                   <ChatBox
@@ -207,7 +210,7 @@ const getImageURL = async (imageInputName: string) => {
 const continueExecution = async (lastChatRole: string, chatId: string) => {
   console.log("continueExecution: ", lastChatRole, chatId);
   if (lastChatRole === "controller") {
-    await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/chat/plan-execute`, {
+    const fetchPlanExecute = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/chat/plan-execute`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -216,14 +219,23 @@ const continueExecution = async (lastChatRole: string, chatId: string) => {
         chat_id: chatId,
       }),
     })
-      .then((res) => res.json())
-      .then((data) => {
-        return data;
-      });
+    const planExecuteJson = await fetchPlanExecute.json();
+    
+    const fetchChat = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/chat`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        chat_id: planExecuteJson.data.message_id,
+      }),
+    })
+    const chatJson = await fetchChat.json();
+    return chatJson.data;
   }
 
   if (lastChatRole === "function") {
-    await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/chat`, {
+    const fetchChat = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/chat`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -232,10 +244,8 @@ const continueExecution = async (lastChatRole: string, chatId: string) => {
         chat_id: chatId,
       }),
     })
-      .then((res) => res.json())
-      .then((data) => {
-        return data;
-      });
+    const chatJson = await fetchChat.json();
+    return chatJson.data;
   }
 
   return null;
