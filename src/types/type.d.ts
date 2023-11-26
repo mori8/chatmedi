@@ -38,20 +38,24 @@ interface Tool {
   card_url: string;
   created_at: string;
   updated_at: string;
-  parameters: [{}];
+  parameters: {
+    name: string;
+    type: string;
+    description: string;
+  }[];
+  task_name: string;
+  task_description: string;
 }
 
 interface Model {
+  modelId: string;
   name: string;
-  shortDescription: string;
-  task: string;
+  cardURL: string;
 }
 
 interface Module {
-  messageId: string;
   moduleName: string;
-  models: Model[];
-  summary: string;
+  description: string;
 }
 
 interface Result {

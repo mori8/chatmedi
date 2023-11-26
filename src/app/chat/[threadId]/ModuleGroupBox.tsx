@@ -1,27 +1,30 @@
-"use client";
-
-import { useState, useEffect } from "react";
-import Image from "next/image";
-import classNames from "classnames";
-
 import ModelIconWithModal from "./ModelIconWithModal";
-import { hash } from "../../../utils/utils";
+
+type Props = {
+  moduleName: string;
+  moduleDescription: string;
+  models: {
+    name: string;
+    cardURL: string;
+  }[];
+};
 
 export default function ModuleGroupBox({
-  messageId,
   moduleName,
+  moduleDescription,
   models,
-  summary,
-}: Module) {
+}: Props) {
   return (
-    <div className="flex flex-row gap-6">
-      <div className="min-w-[6rem] font-bold">{moduleName}</div>
-      <div className="flex flex-wrap min-w-[8rem] content-start relative">
+    <div className="flex flex-row gap-6 items-center justify-between bg-white px-6 py-4 rounded-2xl">
+      <div>
+        <div className="min-w-[4rem] font-bold text-lg">{moduleName}</div>
+        <div className="text-slate-500">{moduleDescription}</div>
+      </div>
+      <div className="flex flex-wrap content-start relative">
         {models.map((model) => {
           return <ModelIconWithModal {...model} key={model.name} />;
         })}
       </div>
-      <div>{summary}</div>
     </div>
   );
 }

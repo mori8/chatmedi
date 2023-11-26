@@ -1,14 +1,17 @@
 import { useState } from "react";
 import classNames from "classnames";
 import Image from "next/image";
+import Link from "next/link";
 
 import { hash } from "../../../utils/utils";
 
 export default function ModelDetailsModal({
   name,
-  shortDescription,
-  task,
-}: Model) {
+  cardURL,
+}: {
+  name: string;
+  cardURL: string;
+}) {
   const [isHovered, setIsHovered] = useState(false);
 
   const randomBGColor = (name: string) => {
@@ -41,13 +44,7 @@ export default function ModelDetailsModal({
           setIsHovered(false);
         }}
       >
-        {isHovered && (
-          <InfoModal
-            name={name}
-            shortDescription={shortDescription}
-            task={task}
-          />
-        )}
+        {isHovered && <InfoModal name={name} cardURL={cardURL} />}
         <Image
           src={`/robot-${(hash(name) % 2) + 1}.svg`}
           alt="robot icon"
@@ -59,19 +56,19 @@ export default function ModelDetailsModal({
   );
 }
 
-function InfoModal({ name, shortDescription, task }: Model) {
+function InfoModal({ name, cardURL }: { name: string; cardURL: string }) {
   return (
-    <div className="model-info absolute top-5 left-5 z-10 w-72 bg-white shadow-solid shadow-black px-6 py-4 rounded-xl flex flex-col gap-3 not-prose">
+    <div className="model-info absolute top-5 left-5 z-10 lg:max-w-sm max-w-xs bg-white shadow-solid shadow-black px-6 py-4 rounded-xl flex flex-col gap-2 not-prose">
       <div>
         <p className="font-bold text-sm">{name}</p>
-        <p className="text-xs text-slate-600">{task}</p>
       </div>
-      <div className="text-sm text-slate-800">{shortDescription}</div>
       <div className="flex flex-row justify-between text-sm">
-        <p className="underline cursor-pointer">View details</p>
-        <p className="underline text-rose-700 cursor-pointer">
-          Delete this result
-        </p>
+        {/* TODO: add link to model card */}
+        <Link href={"/"}>
+          <p className="underline text-slate-700 cursor-pointer">
+            View details →
+          </p>
+        </Link>
       </div>
     </div>
   );

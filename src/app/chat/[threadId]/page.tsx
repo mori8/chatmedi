@@ -7,6 +7,7 @@ import ChatBox from "../../components/ChatBox";
 import RunHistory from "../../components/RunHistory";
 import ModuleGroupBox from "./ModuleGroupBox";
 import LoadingSpinner from "./LoadingSpinner";
+import SectionTitle from "./SectionTitle";
 import ResultTextWrapper from "./ResultTextWrapper";
 import Navigation from "../../components/Navigation";
 import ChatSideBar from "../../components/ChatSideBar";
@@ -19,7 +20,9 @@ type Props = {
 
 export default function Home({ params }: Props) {
   const [hasFetched, setHasFetched] = useState(false);
-  const [imageInputURL, setImageInputURL] = useState<string | undefined>(undefined);
+  const [imageInputURL, setImageInputURL] = useState<string | undefined>(
+    undefined
+  );
   const [chats, setChats] = useState<ChatInfo[]>([]); // user / controller가 항상 짝으로 들어가야 함
   const [nowDisplayedMessages, setNowDisplayedMessages] = useState<
     { messageId: string; query: string; file: File | undefined }[]
@@ -51,9 +54,7 @@ export default function Home({ params }: Props) {
     });
   };
 
-  useEffect(() => {
-
-  }, [])
+  useEffect(() => {}, []);
 
   useEffect(() => {
     if (session && threadId) {
@@ -91,12 +92,9 @@ export default function Home({ params }: Props) {
           setImageInputURL(url);
         });
       }
-      
+
       const lastChat = chats[chats.length - 1];
-      continueExecution(
-        lastChat.role,
-        lastChat.message_id
-      ).then((data) => {
+      continueExecution(lastChat.role, lastChat.message_id).then((data) => {
         if (data) {
           setChats((prev) => [...prev, data]);
         }
@@ -121,7 +119,7 @@ export default function Home({ params }: Props) {
                 if (chat.role === "user")
                   return (
                     <section
-                      className="section-chatbox w-full mb-4"
+                      className="section-chatbox w-full mb-12"
                       key={chat.message_id}
                     >
                       <ChatBox
@@ -135,7 +133,27 @@ export default function Home({ params }: Props) {
                       />
                     </section>
                   );
-                // else if (chat.role === "controller") return <ModuleGroupBox key={chat.message_id} />;
+                else if (chat.role === "controller")
+                  return (
+                    <div key={chat.message_id}>
+                      <SectionTitle>
+                        Selecting modules to perform a task...
+                      </SectionTitle>
+                      <div className="mt-8">
+                        <ModuleGroupBox
+                          key={chat.message_id}
+                          moduleName={chat.tool?.task_name || ""}
+                          moduleDescription={chat.tool?.task_description || ""}
+                          models={[
+                            {
+                              name: chat.tool?.name || "",
+                              cardURL: chat.tool?.card_url || "",
+                            },
+                          ]}
+                        />
+                      </div>
+                    </div>
+                  );
                 else if (chat.role === "assistant")
                   return (
                     <ResultTextWrapper
@@ -168,7 +186,6 @@ export default function Home({ params }: Props) {
   );
 }
 
-
 const getImageURL = async (imageInputName: string) => {
   const res = await fetch(
     `${process.env.NEXT_PUBLIC_SERVER_URL}/files/${imageInputName}`,
@@ -178,18 +195,17 @@ const getImageURL = async (imageInputName: string) => {
         "Content-Type": "application/json",
       },
     }
-  ).then((res) => res.blob())
+  )
+    .then((res) => res.blob())
     .then((blob) => {
       const imageURL = URL.createObjectURL(blob);
       return imageURL;
-    }
-  );
+    });
   return res;
-}
-
+};
 
 const continueExecution = async (lastChatRole: string, chatId: string) => {
-  console.log('continueExecution: ', lastChatRole, chatId)
+  console.log("continueExecution: ", lastChatRole, chatId);
   if (lastChatRole === "controller") {
     await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/chat/plan-execute`, {
       method: "POST",
