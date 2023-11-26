@@ -115,7 +115,7 @@ export default function Home({ params }: Props) {
         <ChatSideBar userId={session.user.id} />
         <div className="flex flex-col flex-1 h-full items-center overflow-scroll">
           <Navigation />
-          <div className="flex-1 w-full flex flex-row items-start justify-evenly gap-12 p-12 mb-40">
+          <div className="flex-1 w-full flex flex-row items-start justify-evenly gap-12 px-12 py-8 mb-40">
             <div className="max-w-[56rem] whitespace-pre-wrap">
               {chats.map((chat, index) => {
                 if (chat.role === "user")
