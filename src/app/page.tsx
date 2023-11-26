@@ -9,6 +9,7 @@ import { useSession } from "next-auth/react";
 import ChatSideBar from "./components/ChatSideBar";
 import Navigation from "./components/Navigation";
 
+
 export default function Home() {
   const [quickStartQuestions, setQuickStartQuestions] = useState<string[]>([]);
   const { data: session, status } = useSession();

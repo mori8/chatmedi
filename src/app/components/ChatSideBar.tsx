@@ -1,7 +1,9 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { signOut, getSession } from "next-auth/react";
+import { signOut } from "next-auth/react";
 import { useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
+import classNames from "classnames";
 
 import Button from "./Button";
 import PlusChatSVG from "../icons/PlusChatSVG";
@@ -12,25 +14,24 @@ import {
   ChatBubbleLeftIcon,
 } from "@heroicons/react/24/outline";
 
-
 export default function ChatSideBar({ userId }: { userId: string }) {
-  console.log("hi");
   const [chatHistory, setChatHistory] = useState<Chat[]>([]);
+  const currentThread = usePathname().split("/")[2];
 
   useEffect(() => {
     async function fetchChatHistory(userId: string) {
       const res = await fetch(
         `${process.env.NEXT_PUBLIC_SERVER_URL}/threads?` +
-        new URLSearchParams({
-          user_id: userId,
-        }).toString(),
+          new URLSearchParams({
+            user_id: userId,
+          }).toString(),
         {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
-          }
+          },
         }
-      )
+      );
       const json = await res.json();
       return json.data;
     }
@@ -99,9 +100,14 @@ export default function ChatSideBar({ userId }: { userId: string }) {
                     <Link href={`/chat/${chat.id}`} key={index}>
                       <div
                         key={chat.id}
-                        className="flex flex-row gap-2 cursor-pointer hover:bg-white hover:text-black transition ease-out rounded-2xl px-3 py-3"
+                        className={classNames(
+                          "flex flex-row gap-2 cursor-pointer hover:bg-white hover:text-black transition ease-out rounded-2xl px-3 py-2 my-1",
+                          {
+                            "bg-white text-black": currentThread === chat.id,
+                          }
+                        )}
                       >
-                        <ChatBubbleLeftIcon width="20" />
+                        {/* <ChatBubbleLeftIcon width="18" /> */}
                         <div className="flex-1 overflow-hidden whitespace-nowrap">
                           <h1 className="text-sm truncate">{chat.title}</h1>
                         </div>
