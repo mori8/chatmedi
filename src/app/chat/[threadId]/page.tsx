@@ -24,38 +24,12 @@ export default function Home({ params }: Props) {
     undefined
   );
   const [chats, setChats] = useState<ChatInfo[]>([]); // user / controller가 항상 짝으로 들어가야 함
-  const [lastChat, setLastChat] = useState<ChatInfo | null>(null);
-  const [nowDisplayedMessages, setNowDisplayedMessages] = useState<
-    { messageId: string; query: string; file: File | undefined }[]
-  >([]);
+  const [userMessage, setUserMessage] = useState<ChatInfo>();
+  const [controllerMessage, setControllerMessage] = useState<ChatInfo>();
+  const [assistantMessage, setAssistantMessage] = useState<ChatInfo>();
+  const [executeStatus, setExecuteStatus] = useState<"user" | "controller" | "function" | "assistant">("controller");
   const { data: session, status } = useSession();
   const threadId = params.threadId;
-
-  const editMessage = (
-    oldMessageId: string,
-    newMessageId: string,
-    newQuery: string,
-    newFile: File | undefined
-  ) => {
-    // TODO: fetch edited query to server
-
-    // TODO: (then) update message state
-    setNowDisplayedMessages((prev) => {
-      const index = prev.findIndex(
-        (message) => message.messageId === oldMessageId
-      );
-      if (index !== -1) {
-        const newDisplayedMessages = [...prev];
-        newDisplayedMessages[index].messageId = newMessageId;
-        newDisplayedMessages[index].query = newQuery;
-        newDisplayedMessages[index].file = newFile;
-        return newDisplayedMessages;
-      }
-      return prev;
-    });
-  };
-
-  useEffect(() => {}, []);
 
   useEffect(() => {
     if (session && threadId) {
@@ -81,6 +55,18 @@ export default function Home({ params }: Props) {
 
       fetchExecutions().then((data) => {
         setChats(data);
+        const user = data.find((chat: ChatInfo) => chat.role === "user");
+        setUserMessage(user);
+        const controller = data.find(
+          (chat: ChatInfo) => chat.role === "controller"
+        );
+        setControllerMessage(controller);
+        setExecuteStatus("controller");
+        const assistant = data.find(
+          (chat: ChatInfo) => chat.role === "assistant"
+        );
+        setAssistantMessage(assistant);
+        setExecuteStatus("assistant");
       });
     }
   }, [session]);
@@ -95,20 +81,20 @@ export default function Home({ params }: Props) {
       }
 
       const _lastChat = chats[chats.length - 1];
-      setLastChat(lastChat);
 
-      continueExecution(_lastChat.role, _lastChat.message_id).then((data) => {
+      continueExecution(_lastChat.role, _lastChat.message_id, setExecuteStatus).then((data) => {
         if (data) {
-          setChats((prev) => [...prev, data]);
+          setChats((prev) => {
+            return [...prev, data];
+          });
+          setAssistantMessage(data);
         }
       });
 
       if (_lastChat.role === "assistant") {
         setHasFetched(true);
       }
-      console.log("chats: ", chats)
     }
-    
   }, [chats]);
 
   return (
@@ -120,57 +106,53 @@ export default function Home({ params }: Props) {
           <Navigation />
           <div className="flex-1 w-full flex flex-row items-start justify-evenly gap-12 px-12 py-8 mb-40">
             <div className="max-w-[56rem] whitespace-pre-wrap">
-              {chats.map((chat, index) => {
-                if (chat.role === "user")
-                  return (
-                    <section
-                      className="section-chatbox w-full mb-12"
-                      key={chat.message_id}
-                    >
-                      <ChatBox
-                        threadId={threadId}
-                        key={chat.message_id}
-                        query={chat.content.user_input}
-                        userId={session.user.id}
-                        mode="edit"
-                        isFirstQuery={index === 0}
-                        userImageURL={imageInputURL}
-                      />
-                    </section>
-                  );
-                else if (chat.role === "controller")
-                  return (
-                    <div key={chat.message_id}>
-                      <SectionTitle>
-                        Selecting modules to perform a task...
-                      </SectionTitle>
-                      <div className="mt-8">
-                        <ModuleGroupBox
-                          key={chat.message_id}
-                          moduleName={chat.tool?.task_name || ""}
-                          moduleDescription={chat.tool?.task_description || ""}
-                          models={[
-                            {
-                              name: chat.tool?.name || "",
-                              cardURL: chat.tool?.card_url || "",
-                            },
-                          ]}
-                        />
-                      </div>
-                    </div>
-                  );
-                else if (chat.role === "assistant")
-                  return (
-                    <ResultTextWrapper
-                      key={chat.message_id}
-                      content={chat.content.result || ""}
+              {userMessage && (
+                <section
+                  className="section-chatbox w-full mb-12"
+                  key={userMessage.message_id}
+                >
+                  <ChatBox
+                    threadId={threadId}
+                    key={userMessage.message_id}
+                    query={userMessage.content.user_input}
+                    userId={session.user.id}
+                    mode="edit"
+                    isFirstQuery
+                    userImageURL={imageInputURL}
+                  />
+                </section>
+              )}
+              {controllerMessage && (
+                <div key={controllerMessage.message_id}>
+                  <SectionTitle>
+                    Selecting modules to perform a task...
+                  </SectionTitle>
+                  <div className="mt-8">
+                    <ModuleGroupBox
+                      key={controllerMessage.message_id}
+                      moduleName={controllerMessage.tool?.task_name || ""}
+                      moduleDescription={
+                        controllerMessage.tool?.task_description || ""
+                      }
+                      models={[
+                        {
+                          name: controllerMessage.tool?.name || "",
+                          cardURL: controllerMessage.tool?.card_url || "",
+                        },
+                      ]}
                     />
-                  );
-                else return null;
-              })}
+                  </div>
+                </div>
+              )}
+              {assistantMessage && (
+                <ResultTextWrapper
+                  key={assistantMessage.message_id}
+                  content={assistantMessage.content.result || ""}
+                />
+              )}
               {!hasFetched && (
                 <div className="spinner-wrapper w-full flex items-center justify-center my-12">
-                  <LoadingSpinner status={lastChat?.role} />
+                  <LoadingSpinner status={executeStatus} />
                 </div>
               )}
               <div className="mt-16">
@@ -214,46 +196,63 @@ const getImageURL = async (imageInputName: string) => {
   return res;
 };
 
-const continueExecution = async (lastChatRole: string, chatId: string) => {
+const continueExecution = async (
+  lastChatRole: string,
+  chatId: string,
+  setExecuteStatus: (status: "user" | "controller" | "function" | "assistant") => void
+) => {
   console.log("continueExecution: ", lastChatRole, chatId);
   if (lastChatRole === "controller") {
-    const fetchPlanExecute = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/chat/plan-execute`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        chat_id: chatId,
-      }),
-    })
+    setExecuteStatus("controller");
+    const fetchPlanExecute = await fetch(
+      `${process.env.NEXT_PUBLIC_SERVER_URL}/chat/plan-execute`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          chat_id: chatId,
+        }),
+      }
+    );
     const planExecuteJson = await fetchPlanExecute.json();
+    setExecuteStatus("function");
+    console.log("now fetch chat");
 
-    console.log("now fetch chat: ", planExecuteJson.message_id)
-    
-    const fetchChat = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/chat`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        chat_id: planExecuteJson.message_id,
-      }),
-    })
+    const fetchChat = await fetch(
+      `${process.env.NEXT_PUBLIC_SERVER_URL}/chat`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          chat_id: planExecuteJson.message_id,
+        }),
+      }
+    );
     const chatJson = await fetchChat.json();
-    return chatJson.data;
+    setExecuteStatus("assistant"); 
+    console.log("chat fetched:", chatJson);
+    return chatJson;
   }
 
   if (lastChatRole === "function") {
-    const fetchChat = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/chat`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        chat_id: chatId,
-      }),
-    })
+    const fetchChat = await fetch(
+      `${process.env.NEXT_PUBLIC_SERVER_URL}/chat`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          chat_id: chatId,
+        }),
+      }
+    );
     const chatJson = await fetchChat.json();
+    setExecuteStatus("assistant"); 
     return chatJson.data;
   }
 

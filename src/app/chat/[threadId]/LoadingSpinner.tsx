@@ -1,7 +1,7 @@
 import React from "react";
 
 type Props = {
-  status: "user" | "controller" | "function" | "assistant" | undefined;
+  status: "controller" | "function" | "assistant" | "user" | undefined;
 };
 
 export default function LoadingSpinner({ status }: Props) {
@@ -9,7 +9,7 @@ export default function LoadingSpinner({ status }: Props) {
     controller: "Planning to perform a task...",
     function: "Generating results...",
     assistant: "",
-    user: "",
+    user: "Planning to perform a task...",
   };
 
   return (
