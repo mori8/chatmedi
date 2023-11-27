@@ -183,7 +183,7 @@ export default function Home({ params }: Props) {
               </div>
             </div>
             <div className="flex-shrink-0">
-              <RunHistory />
+              <RunHistory chats={chats} />
             </div>
           </div>
         </div>
