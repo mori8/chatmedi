@@ -24,6 +24,7 @@ export default function Home({ params }: Props) {
     undefined
   );
   const [chats, setChats] = useState<ChatInfo[]>([]); // user / controller가 항상 짝으로 들어가야 함
+  const [lastChat, setLastChat] = useState<ChatInfo | null>(null);
   const [nowDisplayedMessages, setNowDisplayedMessages] = useState<
     { messageId: string; query: string; file: File | undefined }[]
   >([]);
@@ -93,18 +94,21 @@ export default function Home({ params }: Props) {
         });
       }
 
-      const lastChat = chats[chats.length - 1];
-      continueExecution(lastChat.role, lastChat.message_id).then((data) => {
+      const _lastChat = chats[chats.length - 1];
+      setLastChat(lastChat);
+
+      continueExecution(_lastChat.role, _lastChat.message_id).then((data) => {
         if (data) {
           setChats((prev) => [...prev, data]);
         }
       });
 
-      if (lastChat.role === "assistant") {
+      if (_lastChat.role === "assistant") {
         setHasFetched(true);
       }
       console.log("chats: ", chats)
     }
+    
   }, [chats]);
 
   return (
@@ -166,7 +170,7 @@ export default function Home({ params }: Props) {
               })}
               {!hasFetched && (
                 <div className="spinner-wrapper w-full flex items-center justify-center my-12">
-                  <LoadingSpinner />
+                  <LoadingSpinner status={lastChat?.role} />
                 </div>
               )}
               <div className="mt-16">
@@ -224,7 +228,7 @@ const continueExecution = async (lastChatRole: string, chatId: string) => {
     })
     const planExecuteJson = await fetchPlanExecute.json();
 
-    console.log("planExecuteJson: ", planExecuteJson, planExecuteJson.data.message_id);
+    console.log("now fetch chat: ", planExecuteJson.message_id)
     
     const fetchChat = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/chat`, {
       method: "POST",
@@ -232,7 +236,7 @@ const continueExecution = async (lastChatRole: string, chatId: string) => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        chat_id: planExecuteJson.data.message_id,
+        chat_id: planExecuteJson.message_id,
       }),
     })
     const chatJson = await fetchChat.json();

@@ -7,7 +7,7 @@ interface Chat {
 
 interface ChatInfo {
   message_id: string;
-  role: string;
+  role: "user" | "controller" | "function" | "assistant";
   content: {
     user_input?: string;
     image_input?: string;

@@ -58,7 +58,7 @@ export default function ModelDetailsModal({
 
 function InfoModal({ name, cardURL }: { name: string; cardURL: string }) {
   return (
-    <div className="model-info absolute top-5 left-5 z-10 lg:max-w-sm max-w-xs bg-white shadow-solid shadow-black px-6 py-4 rounded-xl flex flex-col gap-2 not-prose">
+    <div className="model-info absolute top-5 left-5 z-10 bg-white shadow-solid shadow-black px-6 py-4 rounded-xl flex flex-col gap-2 not-prose">
       <div>
         <p className="font-bold text-sm">{name}</p>
       </div>
