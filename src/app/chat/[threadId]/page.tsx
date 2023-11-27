@@ -103,6 +103,7 @@ export default function Home({ params }: Props) {
       if (lastChat.role === "assistant") {
         setHasFetched(true);
       }
+      console.log("chats: ", chats)
     }
   }, [chats]);
 
@@ -164,7 +165,9 @@ export default function Home({ params }: Props) {
                 else return null;
               })}
               {!hasFetched && (
-                <LoadingSpinner />
+                <div className="spinner-wrapper w-full flex items-center justify-center my-12">
+                  <LoadingSpinner />
+                </div>
               )}
               <div className="mt-16">
                 {hasFetched && (
@@ -220,6 +223,8 @@ const continueExecution = async (lastChatRole: string, chatId: string) => {
       }),
     })
     const planExecuteJson = await fetchPlanExecute.json();
+
+    console.log("planExecuteJson: ", planExecuteJson, planExecuteJson.data.message_id);
     
     const fetchChat = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/chat`, {
       method: "POST",
