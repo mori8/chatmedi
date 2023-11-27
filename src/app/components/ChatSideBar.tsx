@@ -75,14 +75,12 @@ export default function ChatSideBar({ userId }: { userId: string }) {
             </Link>
           </div>
           <div className="mt-6">
-            <Button
-              onClick={() => redirect("/")}
-              color="mint"
-              shadowColor="white"
-            >
-              <PlusChatSVG width="20" />
-              <span>New Chat</span>
-            </Button>
+            <Link href="/">
+              <Button onClick={() => {}} color="mint" shadowColor="white">
+                <PlusChatSVG width="20" />
+                <span>New Chat</span>
+              </Button>
+            </Link>
           </div>
           <div className="flex flex-row gap-2 mt-3 cursor-pointer hover:bg-white hover:text-black transition ease-out rounded-2xl px-3 py-3">
             <LightBulbIcon width="20" />
