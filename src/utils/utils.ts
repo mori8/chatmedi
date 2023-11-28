@@ -44,3 +44,27 @@ export const getImageURL = async (imageInputName: string) => {
     });
   return res;
 };
+
+export const groupByDate = (chatHistory: Chat[]) => {
+  const grouped = chatHistory.reduce((acc, chat) => {
+    const dateKey = new Date(chat.created_at)
+      .toLocaleDateString()
+      .split("T")[0];
+    acc[dateKey] = acc[dateKey] || [];
+    acc[dateKey].push(chat);
+    return acc;
+  }, {} as { [key: string]: Chat[] });
+
+  // 날짜별 정렬 및 채팅 시간별 정렬
+  return Object.entries(grouped)
+    .sort(([dateA], [dateB]) => {
+      return new Date(dateB).getTime() - new Date(dateA).getTime();
+    })
+    .map(([date, chats]) => ({
+      date,
+      chats: chats.sort(
+        (a, b) =>
+          new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+      ),
+    }));
+};

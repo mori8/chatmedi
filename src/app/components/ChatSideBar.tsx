@@ -1,17 +1,16 @@
 import Link from "next/link";
-import { redirect } from "next/navigation";
 import { signOut } from "next-auth/react";
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import classNames from "classnames";
 
 import Button from "./Button";
+import { groupByDate } from "@/utils/utils";
 import PlusChatSVG from "../icons/PlusChatSVG";
 import {
   ArrowTopRightOnSquareIcon,
   LightBulbIcon,
   Bars3Icon,
-  ChatBubbleLeftIcon,
 } from "@heroicons/react/24/outline";
 
 export default function ChatSideBar({ userId }: { userId: string }) {
@@ -41,26 +40,6 @@ export default function ChatSideBar({ userId }: { userId: string }) {
     });
   }, []);
 
-  const groupByDate = (chatHistory: Chat[]) => {
-    const grouped = chatHistory.reduce((acc, chat) => {
-      const date = new Date(chat.created_at).toLocaleDateString();
-      if (!acc[date]) {
-        acc[date] = [];
-      }
-      acc[date].push(chat);
-      return acc;
-    }, {} as { [key: string]: Chat[] });
-
-    // sort by date
-    const sortedKeys = Object.keys(grouped).sort((a, b) => {
-      return new Date(b).getTime() - new Date(a).getTime();
-    });
-
-    return sortedKeys.map((key) => ({
-      date: key,
-      chats: grouped[key],
-    }));
-  };
 
   return (
     <>
