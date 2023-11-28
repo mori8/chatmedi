@@ -27,6 +27,7 @@ export default function Home({ params }: Props) {
   const [chats, setChats] = useState<ChatInfo[]>([]); // user / controller가 항상 짝으로 들어가야 함
   const [userMessage, setUserMessage] = useState<ChatInfo>();
   const [controllerMessage, setControllerMessage] = useState<ChatInfo>();
+  const [resultImageName, setResultImageName] = useState<string | undefined>();
   const [assistantMessage, setAssistantMessage] = useState<ChatInfo>();
   const [executeStatus, setExecuteStatus] = useState<"user" | "controller" | "function" | "assistant">("controller");
   const { data: session, status } = useSession();
@@ -58,11 +59,18 @@ export default function Home({ params }: Props) {
         setChats(data);
         const user = data.find((chat: ChatInfo) => chat.role === "user");
         setUserMessage(user);
+
         const controller = data.find(
           (chat: ChatInfo) => chat.role === "controller"
         );
         setControllerMessage(controller);
         setExecuteStatus("controller");
+
+        const func = data.find(
+          (chat: ChatInfo) => chat.role === "function"
+        );
+        setResultImageName(func?.content.image);
+
         const assistant = data.find(
           (chat: ChatInfo) => chat.role === "assistant"
         );
@@ -83,7 +91,7 @@ export default function Home({ params }: Props) {
 
       const _lastChat = chats[chats.length - 1];
 
-      continueExecution(_lastChat.role, _lastChat.message_id, setExecuteStatus).then((data) => {
+      continueExecution(_lastChat.role, _lastChat.message_id, setResultImageName, setExecuteStatus).then((data) => {
         if (data) {
           setChats((prev) => {
             return [...prev, data];
@@ -146,7 +154,7 @@ export default function Home({ params }: Props) {
                 </div>
               )}
               {assistantMessage && (
-                <ResultSection chat={assistantMessage} />
+                <ResultSection resultImageName={resultImageName} chat={assistantMessage} />
               )}
               {!hasFetched && (
                 <div className="spinner-wrapper w-full flex items-center justify-center my-12">
@@ -179,6 +187,7 @@ export default function Home({ params }: Props) {
 const continueExecution = async (
   lastChatRole: string,
   chatId: string,
+  setResultImageName: (name: string) => void,
   setExecuteStatus: (status: "user" | "controller" | "function" | "assistant") => void
 ) => {
   console.log("continueExecution: ", lastChatRole, chatId);
@@ -197,6 +206,7 @@ const continueExecution = async (
       }
     );
     const planExecuteJson = await fetchPlanExecute.json();
+    setResultImageName(planExecuteJson.content.image);
     setExecuteStatus("function");
     console.log("now fetch chat");
 

@@ -11,10 +11,12 @@ interface ChatInfo {
   content: {
     user_input?: string;
     image_input?: string;
+    image?: string;
     result?: string;
     answer?: string;
   };
   data: {
+    instruction?: string;
     image?: string;
     query?: string;
   };
