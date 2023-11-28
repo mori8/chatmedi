@@ -8,9 +8,10 @@ import RunHistory from "../../components/RunHistory";
 import ModuleGroupBox from "./ModuleGroupBox";
 import LoadingSpinner from "./LoadingSpinner";
 import SectionTitle from "./SectionTitle";
-import ResultTextWrapper from "./ResultTextWrapper";
+import ResultSection from "./ResultSection";
 import Navigation from "../../components/Navigation";
 import ChatSideBar from "../../components/ChatSideBar";
+import { getImageURL } from "@/utils/utils";
 
 type Props = {
   params: {
@@ -145,10 +146,7 @@ export default function Home({ params }: Props) {
                 </div>
               )}
               {assistantMessage && (
-                <ResultTextWrapper
-                  key={assistantMessage.message_id}
-                  content={assistantMessage.content.result || ""}
-                />
+                <ResultSection chat={assistantMessage} />
               )}
               {!hasFetched && (
                 <div className="spinner-wrapper w-full flex items-center justify-center my-12">
@@ -177,24 +175,6 @@ export default function Home({ params }: Props) {
     )
   );
 }
-
-const getImageURL = async (imageInputName: string) => {
-  const res = await fetch(
-    `${process.env.NEXT_PUBLIC_SERVER_URL}/files/${imageInputName}`,
-    {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    }
-  )
-    .then((res) => res.blob())
-    .then((blob) => {
-      const imageURL = URL.createObjectURL(blob);
-      return imageURL;
-    });
-  return res;
-};
 
 const continueExecution = async (
   lastChatRole: string,

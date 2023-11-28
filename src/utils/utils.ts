@@ -26,3 +26,21 @@ export function extractKeyValuePairs(text: string): { [key: string]: string } {
       return acc;
   }, {});
 }
+
+export const getImageURL = async (imageInputName: string) => {
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_SERVER_URL}/files/${imageInputName}`,
+    {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    }
+  )
+    .then((res) => res.blob())
+    .then((blob) => {
+      const imageURL = URL.createObjectURL(blob);
+      return imageURL;
+    });
+  return res;
+};
