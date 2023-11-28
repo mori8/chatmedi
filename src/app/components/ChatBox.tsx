@@ -104,11 +104,8 @@ export default function ChatBox({
   };
 
   const sendQuery = async () => {
-    // TODO: fetch query to server
     const json: ChatInfo = await fetchChatPlan();
     const newthreadId = json.thread.id;
-
-    console.log(newthreadId);
     push(`/chat/${newthreadId}`);
   };
 
@@ -188,7 +185,6 @@ function FileDropZone({
   setFiles: (files: File[]) => void;
   setIsFileInfoModalOpen: (isOpen: boolean) => void;
 }) {
-  // TODO: acceptedFiles -> File[] 맞는지 확인
   const onDrop = useCallback((acceptedFiles: File[]) => {
     console.log(acceptedFiles);
     setFiles(acceptedFiles);
