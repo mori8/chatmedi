@@ -29,7 +29,9 @@ export default function Home({ params }: Props) {
   const [controllerMessage, setControllerMessage] = useState<ChatInfo>();
   const [resultImageName, setResultImageName] = useState<string | undefined>();
   const [assistantMessage, setAssistantMessage] = useState<ChatInfo>();
-  const [executeStatus, setExecuteStatus] = useState<"user" | "controller" | "function" | "assistant">("controller");
+  const [executeStatus, setExecuteStatus] = useState<
+    "user" | "controller" | "function" | "assistant"
+  >("controller");
   const { data: session, status } = useSession();
   const threadId = params.threadId;
 
@@ -66,9 +68,7 @@ export default function Home({ params }: Props) {
         setControllerMessage(controller);
         setExecuteStatus("controller");
 
-        const func = data.find(
-          (chat: ChatInfo) => chat.role === "function"
-        );
+        const func = data.find((chat: ChatInfo) => chat.role === "function");
         setResultImageName(func?.content.image);
 
         const assistant = data.find(
@@ -91,7 +91,12 @@ export default function Home({ params }: Props) {
 
       const _lastChat = chats[chats.length - 1];
 
-      continueExecution(_lastChat.role, _lastChat.message_id, setResultImageName, setExecuteStatus).then((data) => {
+      continueExecution(
+        _lastChat.role,
+        _lastChat.message_id,
+        setResultImageName,
+        setExecuteStatus
+      ).then((data) => {
         if (data) {
           setChats((prev) => {
             return [...prev, data];
@@ -153,9 +158,10 @@ export default function Home({ params }: Props) {
                   </div>
                 </div>
               )}
-              {assistantMessage && (
-                <ResultSection resultImageName={resultImageName} chat={assistantMessage} />
-              )}
+              <ResultSection
+                resultImageName={resultImageName}
+                chat={assistantMessage}
+              />
               {!hasFetched && (
                 <div className="spinner-wrapper w-full flex items-center justify-center my-12">
                   <LoadingSpinner status={executeStatus} />
@@ -188,7 +194,9 @@ const continueExecution = async (
   lastChatRole: string,
   chatId: string,
   setResultImageName: (name: string) => void,
-  setExecuteStatus: (status: "user" | "controller" | "function" | "assistant") => void
+  setExecuteStatus: (
+    status: "user" | "controller" | "function" | "assistant"
+  ) => void
 ) => {
   console.log("continueExecution: ", lastChatRole, chatId);
   if (lastChatRole === "controller") {
@@ -223,7 +231,7 @@ const continueExecution = async (
       }
     );
     const chatJson = await fetchChat.json();
-    setExecuteStatus("assistant"); 
+    setExecuteStatus("assistant");
     console.log("chat fetched:", chatJson);
     return chatJson;
   }
@@ -242,7 +250,7 @@ const continueExecution = async (
       }
     );
     const chatJson = await fetchChat.json();
-    setExecuteStatus("assistant"); 
+    setExecuteStatus("assistant");
     return chatJson.data;
   }
 

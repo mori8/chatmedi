@@ -20,7 +20,7 @@ export default function ResultSection({ resultImageName, chat }: Props) {
         setResultImageURL(url);
       });
     }
-  }, []);
+  }, [resultImageName]);
 
   return (
     <div className="flex flex-col gap-4 mb-16">
