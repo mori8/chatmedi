@@ -27,6 +27,7 @@ export default function Home({ params }: Props) {
   const [chats, setChats] = useState<ChatInfo[]>([]); // user / controller가 항상 짝으로 들어가야 함
   const [userMessage, setUserMessage] = useState<ChatInfo>();
   const [controllerMessage, setControllerMessage] = useState<ChatInfo>();
+  const [functionMessage, setFunctionMessage] = useState<ChatInfo>();
   const [resultImageName, setResultImageName] = useState<string | undefined>();
   const [assistantMessage, setAssistantMessage] = useState<ChatInfo>();
   const [executeStatus, setExecuteStatus] = useState<
@@ -70,6 +71,7 @@ export default function Home({ params }: Props) {
 
         const func = data.find((chat: ChatInfo) => chat.role === "function");
         setResultImageName(func?.content.image);
+        setFunctionMessage(func);
 
         const assistant = data.find(
           (chat: ChatInfo) => chat.role === "assistant"
@@ -136,28 +138,22 @@ export default function Home({ params }: Props) {
                   />
                 </section>
               )}
-              {controllerMessage && (
-                <div key={controllerMessage.message_id}>
-                  <SectionTitle>
-                    Selecting modules to perform a task...
-                  </SectionTitle>
-                  <div className="mt-8">
-                    <ModuleGroupBox
-                      key={controllerMessage.message_id}
-                      moduleName={controllerMessage.tool?.task_name || ""}
-                      moduleDescription={
-                        controllerMessage.tool?.task_description || ""
-                      }
-                      models={[
-                        {
-                          name: controllerMessage.tool?.name || "",
-                          cardURL: controllerMessage.tool?.card_url || "",
-                        },
-                      ]}
-                    />
-                  </div>
+              <div>
+                <SectionTitle>
+                Collecting infomation through AI models...
+                </SectionTitle>
+                <div className="mt-8">
+                  <ModuleGroupBox
+                    name={controllerMessage?.tool?.name || ""}
+                    cardURL={controllerMessage?.tool?.card_url || ""}
+                    query={controllerMessage?.data.query || ""}
+                    answer={functionMessage?.content.answer || ""}
+                    moduleDescription={
+                      controllerMessage?.tool?.task_description || ""
+                    }
+                  />
                 </div>
-              )}
+              </div>
               <ResultSection
                 resultImageName={resultImageName}
                 chat={assistantMessage}

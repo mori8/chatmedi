@@ -68,3 +68,18 @@ export const groupByDate = (chatHistory: Chat[]) => {
       ),
     }));
 };
+
+export const randomBGColor = (name: string) => {
+  const colors = [
+    "bg-[#98C0C6]",
+    "bg-[#F8AEAE]",
+    "bg-[#6780A6]",
+    "bg-[#C4E29D]",
+    "bg-[#E26060]",
+    "bg-[#E8BFE6]",
+    "bg-[#CA4C9F]",
+    "bg-[#7DC892]",
+    "bg-[#9BE8F2]",
+  ];
+  return colors[hash(name) % colors.length];
+};

@@ -11,6 +11,7 @@ const config: Config = {
       fontFamily: {
         'pretendard': 'Pretendard, sans-serif',
         'ibm-3270': 'IBM 3270 Condenced, monospace',
+        'worksans': 'Work Sans, sans-serif',
       },
       colors: {
         'mint': '#B2DFCF',

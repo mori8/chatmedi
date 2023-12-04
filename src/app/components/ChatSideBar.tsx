@@ -13,6 +13,7 @@ import {
   Bars3Icon,
 } from "@heroicons/react/24/outline";
 
+
 export default function ChatSideBar({ userId }: { userId: string }) {
   const [chatHistory, setChatHistory] = useState<Chat[]>([]);
   const currentThread = usePathname().split("/")[2];

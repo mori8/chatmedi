@@ -17,7 +17,7 @@ export default function RootLayout({
     <html lang="en">
       <body>
         <AuthContext>
-          <div className="flex flex-col overflow-hidden w-screen h-screen z-0 relative bg-lightgray">
+          <div className="flex flex-col overflow-hidden w-screen h-screen z-0 relative bg-lightgray font-worksans">
             {children}
           </div>
         </AuthContext>

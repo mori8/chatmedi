@@ -14,6 +14,7 @@ import {
 } from "@heroicons/react/24/outline";
 import FileInfoModal from "./FileInfoModal";
 
+
 type Props = {
   threadId: string | null;
   isFileAttachEnabled?: boolean;
@@ -26,11 +27,11 @@ type Props = {
   // editQuery: (oldMessageId: string, newMessageId: string, newQuery: string, newFile: File | undefined) => void;
 };
 
+
 export default function ChatBox({
   isFileAttachEnabled = false,
   rows = 6,
   query = "",
-  mode,
   userId,
   threadId,
   userImageURL,
@@ -159,9 +160,9 @@ export default function ChatBox({
               setFiles={setFiles}
               setIsFileInfoModalOpen={setIsFileInfoModalOpen}
             />
-            {isFileInfoModalOpen && (
+            {/* {isFileInfoModalOpen && (
               <FileInfoModal onClose={closeFileInfoModal} />
-            )}
+            )} */}
           </div>
         )}
         <div className="flex-1"></div>
