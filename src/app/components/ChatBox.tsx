@@ -78,8 +78,14 @@ export default function ChatBox({
   };
 
   const fetchChatPlan = async () => {
-    const imageFileName = await getImageFileName(
-      files.length > 0 ? files[0] : null
+    // const imageFileName = await getImageFileName(
+    //   files.length > 0 ? files[0] : null
+    // );
+
+    const imageFileNames = await Promise.all(
+      files.map(async (file) => {
+        return await getImageFileName(file);
+      })
     );
 
     const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/chat/plan`, {
@@ -90,7 +96,7 @@ export default function ChatBox({
       body: JSON.stringify({
         user_id: userId,
         user_input: textInput,
-        ...(files.length > 0 && { image_input: imageFileName }),
+        ...(files.length > 0 && { image_input: [...imageFileNames] }),
         ...(threadId && { thread_id: threadId }),
       }),
     });
@@ -115,9 +121,7 @@ export default function ChatBox({
 
   return (
     <div className="flex flex-col border-kaistlightblue border bg-white rounded-2xl px-8 pt-4 pb-4 w-full shadow-solid shadow-black leading-7 lg:leading-8">
-      <div className="text-xs font-bold my-2">
-        YOUR QUESTION
-      </div>
+      <div className="text-xs font-bold my-2">YOUR QUESTION</div>
       {userImageURL && (
         <div className="my-4 w-full">
           <img
@@ -185,19 +189,24 @@ function FileDropZone({
   setFiles: (files: File[]) => void;
   setIsFileInfoModalOpen: (isOpen: boolean) => void;
 }) {
-  const onDrop = useCallback((acceptedFiles: File[]) => {
-    console.log(acceptedFiles);
-    setFiles(acceptedFiles);
+  const onDrop = useCallback((_acceptedFiles: File[]) => {
+    setFiles(_acceptedFiles);
     setIsFileInfoModalOpen(true);
   }, []);
 
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+  const { getRootProps, getInputProps, acceptedFiles } = useDropzone({
     onDrop,
     accept: {
       "image/*": [".jpg", ".png"],
+      "text/*": [".txt"],
+      "application/x-npy": [".npy"],
     },
-    maxFiles: 1,
+    multiple: true,
   });
+
+  const deleteFile = (fileName: string) => {
+    setFiles(files.filter((file) => file.name !== fileName));
+  }
 
   return files.length === 0 ? (
     <div {...getRootProps()}>
@@ -218,18 +227,20 @@ function FileDropZone({
       </div>
     </div>
   ) : (
-    <div>
+    <div className="w-full flex flex-row gap-4">
       {files.map((file, index) => (
         <div
           key={file.name}
           className="flex items-center gap-2 max-w-[280px] shadow-solid rounded-md px-2 py-1 border border-black"
         >
-          <PhotoIcon width="20" color="#D37A47" />
+          <div className="flex-shrink-0">
+            <PhotoIcon width="20" color="#D37A47" />
+          </div>
           <p className="text-sm truncate">{file.name}</p>
           <button
             className="flex items-center justify-center w-6 h-6 rounded-full transition ease-in-out"
             onClick={() => {
-              setFiles([]);
+              deleteFile(file.name);
             }}
           >
             <XMarkIcon width="16" />
