@@ -11,7 +11,7 @@ type Props = {
 export default function Button({
   onClick,
   size = "default",
-  color = "mint",
+  color = "kaistlightblue",
   shadowColor = "black",
   children,
 }: Props) {
@@ -20,12 +20,12 @@ export default function Button({
       className={classNames(
         "cursor-pointer text-sm shadow-solid font-medium flex flex-row items-center gap-2 border border-black",
         {
-          "bg-mint text-black": color === "mint",
+          "bg-kaistlightblue text-black": color === "kaistlightblue",
           "bg-white text-black": color === "white",
           "bg-black text-white": color === "black",
         },
         {
-          "shadow-mint": shadowColor === "mint",
+          "shadow-kaistlightblue": shadowColor === "kaistlightblue",
           "shadow-white": shadowColor === "white",
           "shadow-black": shadowColor === "black",
         }, {

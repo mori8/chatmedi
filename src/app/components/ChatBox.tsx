@@ -114,7 +114,7 @@ export default function ChatBox({
   }, [editable]);
 
   return (
-    <div className="flex flex-col border-mint border bg-white rounded-2xl px-8 pt-4 pb-4 w-full shadow-solid shadow-black leading-7 lg:leading-8">
+    <div className="flex flex-col border-kaistlightblue border bg-white rounded-2xl px-8 pt-4 pb-4 w-full shadow-solid shadow-black leading-7 lg:leading-8">
       <div className="text-xs font-bold my-2">
         YOUR QUESTION
       </div>
@@ -162,7 +162,7 @@ export default function ChatBox({
         )}
         <div className="flex-1"></div>
         <div
-          className="rounded-full flex items-center p-3 hover:bg-turquiose hover:text-white transition ease-in-out cursor-pointer"
+          className="rounded-full flex items-center p-3 hover:bg-kaistblue hover:text-white transition ease-in-out cursor-pointer"
           onClick={() => sendQuery()}
         >
           {editable ? (

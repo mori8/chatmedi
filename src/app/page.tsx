@@ -44,7 +44,7 @@ export default function Home() {
               <ul className="quick-start-question-list flex flex-col items-center">
                 {quickStartQuestions.map((question, index) => (
                   <li
-                    className="quick-start-question-item text-turquiose flex gap-2 mb-2 hover:underline cursor-pointer"
+                    className="quick-start-question-item text-kaistblue flex gap-2 mb-2 hover:underline cursor-pointer"
                     key={index}
                     onClick={() => {
                       executeQuickStart(question, session.user.id).then(

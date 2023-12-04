@@ -55,7 +55,7 @@ export default function ChatSideBar({ userId }: { userId: string }) {
           </div>
           <div className="mt-6">
             <Link href="/">
-              <Button onClick={() => {}} color="mint" shadowColor="white">
+              <Button onClick={() => {}} color="kaistlightblue" shadowColor="white">
                 <PlusChatSVG width="20" />
                 <span>New Chat</span>
               </Button>
