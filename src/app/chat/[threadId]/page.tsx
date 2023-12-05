@@ -27,7 +27,7 @@ export default function Home({ params }: Props) {
   const [chats, setChats] = useState<ChatInfo[]>([]); // user / controller가 항상 짝으로 들어가야 함
   const [userMessage, setUserMessage] = useState<ChatInfo>();
   const [controllerMessage, setControllerMessage] = useState<ChatInfo>();
-  const [functionMessage, setFunctionMessage] = useState<ChatInfo>();
+  const [functionResult, setFunctionResult] = useState<string>("");
   const [resultImageName, setResultImageName] = useState<string | undefined>();
   const [assistantMessage, setAssistantMessage] = useState<ChatInfo>();
   const [executeStatus, setExecuteStatus] = useState<
@@ -71,7 +71,9 @@ export default function Home({ params }: Props) {
 
         const func = data.find((chat: ChatInfo) => chat.role === "function");
         setResultImageName(func?.content.image);
-        setFunctionMessage(func);
+        setFunctionResult(func?.content.answer);
+        console.log("functionResult: ", func.content.answer);
+        setExecuteStatus("function");
 
         const assistant = data.find(
           (chat: ChatInfo) => chat.role === "assistant"
@@ -97,6 +99,7 @@ export default function Home({ params }: Props) {
         _lastChat.role,
         _lastChat.message_id,
         setResultImageName,
+        setFunctionResult,
         setExecuteStatus
       ).then((data) => {
         if (data) {
@@ -145,12 +148,12 @@ export default function Home({ params }: Props) {
                 <div className="mt-8">
                   {controllerMessage && (
                     <ModuleGroupBox
-                      name={controllerMessage.tool?.name || ""}
-                      cardURL={controllerMessage.tool?.card_url || ""}
-                      query={controllerMessage.data.query || ""}
-                      answer={functionMessage?.content.answer || ""}
+                      name={controllerMessage.tool?.name}
+                      cardURL={controllerMessage.tool?.card_url}
+                      query={controllerMessage.data.query}
+                      answer={functionResult}
                       moduleDescription={
-                        controllerMessage.tool?.task_description || ""
+                        controllerMessage.tool?.task_description
                       }
                     />
                   )}
@@ -192,6 +195,7 @@ const continueExecution = async (
   lastChatRole: string,
   chatId: string,
   setResultImageName: (name: string) => void,
+  setFunctionResult: (result: string) => void,
   setExecuteStatus: (
     status: "user" | "controller" | "function" | "assistant"
   ) => void
@@ -213,6 +217,7 @@ const continueExecution = async (
     );
     const planExecuteJson = await fetchPlanExecute.json();
     setResultImageName(planExecuteJson.content.image);
+    setFunctionResult(planExecuteJson.content.answer);
     setExecuteStatus("function");
     console.log("now fetch chat");
 

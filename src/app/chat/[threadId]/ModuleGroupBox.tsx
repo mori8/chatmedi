@@ -1,5 +1,6 @@
 // import ModelIconWithModal from "./ModelIconWithModal";
 import { Tooltip } from "react-tooltip";
+import { useState, useEffect } from "react";
 
 type Props = {
   name?: string;
@@ -20,7 +21,7 @@ export default function ModuleGroupBox({
   const [moduleName, modelName] = name?.split(".") || ["", ""];
 
   return (
-    <div className="flex flex-row gap-4 bg-kaistlightblue bg-opacity-10 px-8 py-5 rounded-2xl text-base">
+    <div className="flex flex-row gap-4 bg-kaistlightblue bg-opacity-10 px-8 py-5 rounded-2xl text-base w-full">
       <div className="flex flex-col items-end text-xs font-semibold py-1">
         <div className="mb-3">
           <span className="bg-slate-100 text-slate-500 rounded py-1 px-2 box-border">Query</span>
@@ -38,15 +39,15 @@ export default function ModuleGroupBox({
             <p className="text-slate-800">{answer}</p>
           ) : (
             <div className="flex space-x-2 justify-center items-center">
-              <div className="h-3 w-3 bg-kaistlightblue bg-opacity-40 rounded-full animate-bounce [animation-delay:-0.3s]" />
-              <div className="h-3 w-3 bg-kaistlightblue bg-opacity-40 rounded-full animate-bounce [animation-delay:-0.15s]" />
-              <div className="h-3 w-3 bg-kaistlightblue bg-opacity-40 rounded-full animate-bounce" />
-              <span className="text-base text-slate-500 ml-4">
+              <div className="h-2 w-2 bg-kaistlightblue bg-opacity-30 rounded-full animate-bounce [animation-delay:-0.3s]" />
+              <div className="h-2 w-2 bg-kaistlightblue bg-opacity-30 rounded-full animate-bounce [animation-delay:-0.15s]" />
+              <div className="h-2 w-2 bg-kaistlightblue bg-opacity-30 rounded-full animate-bounce" />
+              <span className="text-sm text-slate-500 ml-4">
                 Generating ...
               </span>
             </div>
           )}
-          <p className="flex flex-row items-center text-xs mt-4 text-slate-600">
+          <p className="flex flex-row items-center text-xs mt-4 text-slate-500">
             created by &nbsp;
             <div className="">
               <p className="font-medium uppercase">
