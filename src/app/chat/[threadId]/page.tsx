@@ -150,7 +150,7 @@ export default function Home({ params }: Props) {
                     <ModuleGroupBox
                       name={controllerMessage.tool?.name}
                       cardURL={controllerMessage.tool?.card_url}
-                      query={controllerMessage.data.query}
+                      query={controllerMessage.data.query || ""}
                       answer={functionResult}
                       moduleDescription={
                         controllerMessage.tool?.task_description

@@ -12,8 +12,8 @@ import {
   PencilSquareIcon,
   PhotoIcon,
 } from "@heroicons/react/24/outline";
-import FileInfoModal from "./FileInfoModal";
-
+import LoadingSpinner from "../chat/[threadId]/LoadingSpinner";
+// import FileInfoModal from "./FileInfoModal";
 
 type Props = {
   threadId: string | null;
@@ -26,7 +26,6 @@ type Props = {
   userImageURL?: string;
   // editQuery: (oldMessageId: string, newMessageId: string, newQuery: string, newFile: File | undefined) => void;
 };
-
 
 export default function ChatBox({
   isFileAttachEnabled = false,
@@ -41,6 +40,7 @@ export default function ChatBox({
   const [isFileInfoModalOpen, setIsFileInfoModalOpen] = useState(false);
   const [textInput, setTextInput] = useState(query);
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
+  const [isRequesting, setIsRequesting] = useState(false); // TODO: use this to show loading spinner
   const { push } = useRouter();
 
   const textAreaAutoResize = (e: any) => {
@@ -111,7 +111,10 @@ export default function ChatBox({
   };
 
   const sendQuery = async () => {
+    setIsRequesting(true);
     const json: ChatInfo = await fetchChatPlan();
+    setIsRequesting(false);
+
     const newthreadId = json.thread.id;
     push(`/chat/${newthreadId}`);
   };
@@ -166,16 +169,22 @@ export default function ChatBox({
           </div>
         )}
         <div className="flex-1"></div>
-        <div
-          className="rounded-full flex items-center p-3 hover:bg-kaistblue hover:text-white transition ease-in-out cursor-pointer"
-          onClick={() => sendQuery()}
-        >
-          {editable ? (
-            <PaperAirplaneIcon width="24" />
-          ) : (
-            <PencilSquareIcon width="24" />
-          )}
-        </div>
+        {isRequesting ? (
+          <div className="rounded-full flex items-center justify-center p-3">
+            <LoadingSpinner />
+          </div>
+        ) : (
+          <div
+            className="rounded-full flex items-center p-3 hover:bg-kaistblue hover:text-white transition ease-in-out cursor-pointer"
+            onClick={() => sendQuery()}
+          >
+            {editable ? (
+              <PaperAirplaneIcon width="24" />
+            ) : (
+              <PencilSquareIcon width="24" />
+            )}
+          </div>
+        )}
       </div>
     </div>
   );
@@ -207,7 +216,7 @@ function FileDropZone({
 
   const deleteFile = (fileName: string) => {
     setFiles(files.filter((file) => file.name !== fileName));
-  }
+  };
 
   return files.length === 0 ? (
     <div {...getRootProps()}>

@@ -1,7 +1,7 @@
 import React from "react";
 
 type Props = {
-  status: "controller" | "function" | "assistant" | "user" | undefined;
+  status?: "controller" | "function" | "assistant" | "user";
 };
 
 export default function LoadingSpinner({ status }: Props) {
@@ -15,7 +15,7 @@ export default function LoadingSpinner({ status }: Props) {
   return (
     <div className="flex flex-row gap-4 image-center justify-center">
       <div className="border-gray-300 h-8 w-8 animate-spin rounded-full border-4 border-t-teal-500" />
-      <span className="text-slate-500 text-lg">{status ? message[status] : "Loading..."}</span>
+      <span className="text-slate-500 text-lg">{status ? message[status] : ""}</span>
     </div>
   );
 }
