@@ -1,10 +1,5 @@
-import ModelIconWithModal from "./ModelIconWithModal";
-import Image from "next/image";
+// import ModelIconWithModal from "./ModelIconWithModal";
 import { Tooltip } from "react-tooltip";
-
-import { randomBGColor } from "@/utils/utils";
-import { hash } from "@/utils/utils";
-import classNames from "classnames";
 
 type Props = {
   name?: string;
@@ -25,25 +20,30 @@ export default function ModuleGroupBox({
   const [moduleName, modelName] = name?.split(".") || ["", ""];
 
   return (
-    <div className="flex flex-row gap-4 bg-kaistlightblue bg-opacity-10 px-8 py-5 rounded-2xl text-base box-border">
-      <div className="flex flex-col items-end">
-        <div className="mb-3 text-slate-800 font-semibold">Query:</div>
-        <div className="text-slate-700">AI:</div>
+    <div className="flex flex-row gap-4 bg-kaistlightblue bg-opacity-10 px-8 py-5 rounded-2xl text-base">
+      <div className="flex flex-col items-end text-xs font-semibold py-1">
+        <div className="mb-3">
+          <span className="bg-slate-100 text-slate-500 rounded py-1 px-2 box-border">Query</span>
+        </div>
+        <div className="">
+          <span className="bg-slate-100 text-slate-500 rounded py-1 px-2 box-border">AI</span>
+        </div>
       </div>
       <div>
-        <div className="mb-3 text-slate-800 font-semibold">
-          <p className="">{query}</p>
+        <div className="mb-1">
+          <p className="text-slate-800 font-semibold">{query}</p>
         </div>
-        <div className="flex flex-wrap content-start relative"></div>
         <div>
           {answer ? (
             <p className="text-slate-800">{answer}</p>
           ) : (
-            <div className="flex space-x-2 justify-center items-center bg-white h-screen dark:invert">
-              <span className="sr-only">Loading...</span>
-              <div className="h-8 w-8 bg-kaistlightblue rounded-full animate-bounce [animation-delay:-0.3s]"></div>
-              <div className="h-8 w-8 bg-kaistlightblue rounded-full animate-bounce [animation-delay:-0.15s]"></div>
-              <div className="h-8 w-8 bg-kaistlightblue rounded-full animate-bounce"></div>
+            <div className="flex space-x-2 justify-center items-center">
+              <div className="h-3 w-3 bg-kaistlightblue bg-opacity-40 rounded-full animate-bounce [animation-delay:-0.3s]" />
+              <div className="h-3 w-3 bg-kaistlightblue bg-opacity-40 rounded-full animate-bounce [animation-delay:-0.15s]" />
+              <div className="h-3 w-3 bg-kaistlightblue bg-opacity-40 rounded-full animate-bounce" />
+              <span className="text-base text-slate-500 ml-4">
+                Generating ...
+              </span>
             </div>
           )}
           <p className="flex flex-row items-center text-xs mt-4 text-slate-600">

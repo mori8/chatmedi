@@ -140,18 +140,20 @@ export default function Home({ params }: Props) {
               )}
               <div>
                 <SectionTitle>
-                Collecting infomation through AI models...
+                  Collecting infomation through AI models...
                 </SectionTitle>
                 <div className="mt-8">
-                  <ModuleGroupBox
-                    name={controllerMessage?.tool?.name || ""}
-                    cardURL={controllerMessage?.tool?.card_url || ""}
-                    query={controllerMessage?.data.query || ""}
-                    answer={functionMessage?.content.answer || ""}
-                    moduleDescription={
-                      controllerMessage?.tool?.task_description || ""
-                    }
-                  />
+                  {controllerMessage && (
+                    <ModuleGroupBox
+                      name={controllerMessage.tool?.name || ""}
+                      cardURL={controllerMessage.tool?.card_url || ""}
+                      query={controllerMessage.data.query || ""}
+                      answer={functionMessage?.content.answer || ""}
+                      moduleDescription={
+                        controllerMessage.tool?.task_description || ""
+                      }
+                    />
+                  )}
                 </div>
               </div>
               <ResultSection
