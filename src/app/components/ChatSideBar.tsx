@@ -3,6 +3,7 @@ import { signOut } from "next-auth/react";
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import classNames from "classnames";
+import Image from "next/image";
 
 import Button from "./Button";
 import { groupByDate } from "@/utils/utils";
@@ -97,10 +98,13 @@ export default function ChatSideBar({ userId }: { userId: string }) {
             ))}
           </div>
           <div className="flex-1"></div>
-          <div>
+          <div className="flex justify-between items-center">
             <button onClick={() => signOut()}>
               <span>Logout</span>
             </button>
+            <div>
+              <Image src="/kaist-logo-gray.png" alt="kaist logo" width={70} height={40} />
+            </div>
           </div>
         </div>
       </div>
