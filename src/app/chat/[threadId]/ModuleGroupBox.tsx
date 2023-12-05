@@ -21,13 +21,13 @@ export default function ModuleGroupBox({
   const [moduleName, modelName] = name?.split(".") || ["", ""];
 
   return (
-    <div className="flex flex-row gap-4 bg-kaistlightblue bg-opacity-10 px-8 py-5 rounded-2xl text-base w-full">
+    <div className="flex flex-row gap-4 bg-slate-200 bg-opacity-60 px-8 py-6 rounded-2xl text-base w-full shadow-solid shadow-black">
       <div className="flex flex-col items-end text-xs font-semibold py-1">
         <div className="mb-3">
-          <span className="bg-slate-100 text-slate-500 rounded py-1 px-2 box-border">Query</span>
+          <span className="bg-slate-50 text-slate-500 rounded py-1 px-2 box-border">Query</span>
         </div>
         <div className="">
-          <span className="bg-slate-100 text-slate-500 rounded py-1 px-2 box-border">AI</span>
+          <span className="bg-slate-50 text-slate-500 rounded py-1 px-2 box-border">AI</span>
         </div>
       </div>
       <div>

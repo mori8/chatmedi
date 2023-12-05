@@ -63,7 +63,7 @@ export default function ChatBox({
     setTextInput(e.target.value);
   };
 
-  const getImageFileName = async (file: File | null) => {
+  const uploadFile = async (file: File | null) => {
     if (!file) {
       return;
     }
@@ -83,9 +83,9 @@ export default function ChatBox({
     //   files.length > 0 ? files[0] : null
     // );
 
-    const imageFileNames = await Promise.all(
+    const fileNames = await Promise.all(
       files.map(async (file) => {
-        return await getImageFileName(file);
+        return await uploadFile(file);
       })
     );
 
@@ -97,7 +97,7 @@ export default function ChatBox({
       body: JSON.stringify({
         user_id: userId,
         user_input: textInput,
-        ...(files.length > 0 && { image_input: [...imageFileNames] }),
+        ...(files.length > 0 && { file_inputs: [...fileNames] }),
         ...(threadId && { thread_id: threadId }),
       }),
     });
