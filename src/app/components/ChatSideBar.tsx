@@ -45,8 +45,8 @@ export default function ChatSideBar({ userId }: { userId: string }) {
 
   return (
     <>
-      <div className="bg-black w-[260px] text-white flex-shrink-0 overflow-x-hidden rounded-se-3xl h-screen">
-        <div className="flex flex-col p-5 pt-8 h-full">
+      <div className="bg-black w-[260px] box-border text-white flex-shrink-0 overflow-x-hidden rounded-se-3xl h-screen">
+        <div className="flex flex-col p-5 pt-8 h-full relative">
           <div className="flex flex-row gap-4">
             <Bars3Icon width="24" className="cursor-pointer" />
             <Link href="/">
@@ -68,7 +68,7 @@ export default function ChatSideBar({ userId }: { userId: string }) {
             <p className="text-sm font-medium flex-1">Templates</p>
             <ArrowTopRightOnSquareIcon width="20" />
           </div>
-          <div className="chat-history">
+          <div className="chat-history flex-1 overflow-scroll h-full">
             {groupByDate(chatHistory).map(({ date, chats }) => (
               <div key={date} className="mt-6">
                 <h1 className="text-xs font-medium">
@@ -97,10 +97,9 @@ export default function ChatSideBar({ userId }: { userId: string }) {
               </div>
             ))}
           </div>
-          <div className="flex-1"></div>
-          <div className="flex justify-between items-center">
+          <div className="flex justify-between items-center bg-black px-2 mt-4">
             <button onClick={() => signOut()}>
-              <span>Logout</span>
+              <span className="text-sm">Logout</span>
             </button>
             <div>
               <Image src="/kaist-logo-gray.png" alt="kaist logo" width={70} height={40} />
