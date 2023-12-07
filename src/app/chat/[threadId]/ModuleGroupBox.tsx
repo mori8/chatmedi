@@ -3,6 +3,7 @@ import { Tooltip } from "react-tooltip";
 import { useState, useEffect } from "react";
 
 import MiniFileBox from "@/app/components/MiniFileBox";
+import { isImageGenerationModel } from "@/utils/utils";
 
 type Props = {
   name?: string;
@@ -69,7 +70,13 @@ export default function ModuleGroupBox({
             <p className="text-slate-800">{answer}</p>
           ) : (
             <div className="w-full flex items-center justify-center my-2">
-              <SimpleLoading />
+                {
+                  isImageGenerationModel(modelName) ?
+                    <span className="text-slate-400">
+                      The image will be created below.
+                    </span>
+                  : <SimpleLoading />
+              }
             </div>
           )}
         </div>

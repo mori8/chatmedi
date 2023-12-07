@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useSession } from "next-auth/react";
 
 import ChatBox from "../../components/ChatBox";
@@ -13,13 +13,11 @@ import Navigation from "../../components/Navigation";
 import ChatSideBar from "../../components/ChatSideBar";
 import { getImageURL } from "@/utils/utils";
 
-
 type Props = {
   params: {
     threadId: string;
   };
 };
-
 
 export default function Home({ params }: Props) {
   const [hasFetched, setHasFetched] = useState(false);
@@ -35,6 +33,7 @@ export default function Home({ params }: Props) {
   const [executeStatus, setExecuteStatus] = useState<
     "user" | "controller" | "function" | "assistant"
   >("controller");
+  const [isErrorOccured, setIsErrorOccured] = useState(false);
   const { data: session, status } = useSession();
   const threadId = params.threadId;
 
@@ -60,35 +59,42 @@ export default function Home({ params }: Props) {
         return json.data;
       };
 
-      fetchExecutions().then((data) => {
-        setChats(data);
-        const user = data.find((chat: ChatInfo) => chat.role === "user");
-        setUserMessage(user);
+      fetchExecutions()
+        .then((data) => {
+          setChats(data);
+          const user = data.find((chat: ChatInfo) => chat.role === "user");
+          setUserMessage(user);
 
-        const controller = data.find(
-          (chat: ChatInfo) => chat.role === "controller"
-        );
-        setControllerMessage(controller);
-        setExecuteStatus("controller");
+          const controller = data.find(
+            (chat: ChatInfo) => chat.role === "controller"
+          );
+          setControllerMessage(controller);
+          setExecuteStatus("controller");
 
-        const func = data.find((chat: ChatInfo) => chat.role === "function");
-        setResultImageName(func?.content.image);
-        setFunctionResult(func?.content.answer ? func?.content.answer : func?.content.result);
+          const func = data.find((chat: ChatInfo) => chat.role === "function");
+          setResultImageName(func?.content.image);
+          setFunctionResult(
+            func?.content.answer ? func?.content.answer : func?.content.result
+          );
 
-        setExecuteStatus("function");
+          setExecuteStatus("function");
 
-        const assistant = data.find(
-          (chat: ChatInfo) => chat.role === "assistant"
-        );
-        setAssistantMessage(assistant);
-        setExecuteStatus("assistant");
-      });
+          const assistant = data.find(
+            (chat: ChatInfo) => chat.role === "assistant"
+          );
+          setAssistantMessage(assistant);
+          setExecuteStatus("assistant");
+        })
+        .catch((err) => {
+          console.log(err);
+          setIsErrorOccured(true);
+        });
     }
   }, [session]);
 
   useEffect(() => {
     if (chats.length > 0) {
-      const imageInputName = chats[1].data.image_file;
+      const imageInputName = chats[1].data?.image_file;
 
       if (imageInputName) {
         getImageURL(imageInputName).then((url) => {
@@ -104,20 +110,75 @@ export default function Home({ params }: Props) {
         setResultImageName,
         setFunctionResult,
         setExecuteStatus
-      ).then((data) => {
-        if (data) {
-          setChats((prev) => {
-            return [...prev, data];
-          });
-          setAssistantMessage(data);
-        }
-      });
+      )
+        .then((data) => {
+          if (data) {
+            setChats((prev) => {
+              return [...prev, data];
+            });
+            setAssistantMessage(data);
+          }
+        })
+        .catch((err) => {
+          console.log(err);
+          setIsErrorOccured(true);
+        });
 
       if (_lastChat.role === "assistant") {
         setHasFetched(true);
       }
     }
   }, [chats]);
+
+  const ResultContainer = () => {
+    return (
+      session && (
+        <section className="result-wrapper">
+          <div>
+            <SectionTitle>
+              Collecting infomation through AI models...
+            </SectionTitle>
+            <div className="mt-8">
+              {controllerMessage && (
+                <ModuleGroupBox
+                  name={controllerMessage.tool?.name}
+                  cardURL={controllerMessage.tool?.card_url}
+                  input={controllerMessage.data?.query || ""}
+                  files={[
+                    controllerMessage.data?.text_file,
+                    controllerMessage.data?.numpy_file,
+                  ]}
+                  answer={functionResult}
+                  moduleDescription={controllerMessage.tool?.task_description}
+                />
+              )}
+            </div>
+          </div>
+          <ResultSection
+            resultImageName={resultImageName}
+            chat={assistantMessage}
+          />
+          {!hasFetched && (
+            <div className="spinner-wrapper w-full flex items-center justify-center my-12">
+              <LoadingSpinner status={executeStatus} />
+            </div>
+          )}
+          <div className="mt-16">
+            {hasFetched && (
+              <ChatBox
+                isFileAttachEnabled={false}
+                threadId={threadId}
+                mode="create"
+                userId={session?.user.id}
+                rows={4}
+                isFirstQuery={false}
+              />
+            )}
+          </div>
+        </section>
+      )
+    );
+  };
 
   return (
     status === "authenticated" &&
@@ -144,46 +205,15 @@ export default function Home({ params }: Props) {
                   />
                 </section>
               )}
-              <div>
-                <SectionTitle>
-                  Collecting infomation through AI models...
-                </SectionTitle>
-                <div className="mt-8">
-                  {controllerMessage && (
-                    <ModuleGroupBox
-                      name={controllerMessage.tool?.name}
-                      cardURL={controllerMessage.tool?.card_url}
-                      input={controllerMessage.data.query || ""}
-                      files={[controllerMessage.data.text_file, controllerMessage.data.numpy_file]}
-                      answer={functionResult}
-                      moduleDescription={
-                        controllerMessage.tool?.task_description
-                      }
-                    />
-                  )}
+              {isErrorOccured ? (
+                <div className="flex flex-col items-center justify-center mt-8 bg-rose-50 rounded-xl p-6 w-full">
+                  <p className=" text-rose-800 text-base">
+                    Sorry, an error occured. Please try again later.
+                  </p>
                 </div>
-              </div>
-              <ResultSection
-                resultImageName={resultImageName}
-                chat={assistantMessage}
-              />
-              {!hasFetched && (
-                <div className="spinner-wrapper w-full flex items-center justify-center my-12">
-                  <LoadingSpinner status={executeStatus} />
-                </div>
+              ) : (
+                <ResultContainer />
               )}
-              <div className="mt-16">
-                {hasFetched && (
-                  <ChatBox
-                    isFileAttachEnabled={false}
-                    threadId={threadId}
-                    mode="create"
-                    userId={session?.user.id}
-                    rows={4}
-                    isFirstQuery={false}
-                  />
-                )}
-              </div>
             </div>
             <div className="flex-shrink-0">
               <RunHistory chats={chats} />
@@ -194,7 +224,6 @@ export default function Home({ params }: Props) {
     )
   );
 }
-
 
 const continueExecution = async (
   lastChatRole: string,
@@ -220,9 +249,14 @@ const continueExecution = async (
         }),
       }
     );
+
     const planExecuteJson = await fetchPlanExecute.json();
     setResultImageName(planExecuteJson.content.image);
-    setFunctionResult(planExecuteJson.content.answer ? planExecuteJson.content.answer : planExecuteJson.content.result);
+    setFunctionResult(
+      planExecuteJson.content.answer
+        ? planExecuteJson.content.answer
+        : planExecuteJson.content.result
+    );
     setExecuteStatus("function");
     console.log("now fetch chat");
 

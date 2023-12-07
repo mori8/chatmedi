@@ -15,7 +15,7 @@ interface ChatInfo {
     result?: string;
     answer?: string;
   };
-  data: {
+  data?: {
     instruction?: string;
     image_file?: string;
     query?: string;

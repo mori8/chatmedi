@@ -83,3 +83,11 @@ export const randomBGColor = (name: string) => {
   ];
   return colors[hash(name) % colors.length];
 };
+
+export const isImageGenerationModel = (modelName: string) => {
+  const imageGenerationModels = [
+    "generate_ct_x_ray_image_from_text"
+  ]
+
+  return imageGenerationModels.includes(modelName)
+}

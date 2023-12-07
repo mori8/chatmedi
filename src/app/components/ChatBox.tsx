@@ -8,9 +8,7 @@ import { useRouter } from "next/navigation";
 import {
   PaperAirplaneIcon,
   ArrowUpOnSquareIcon,
-  XMarkIcon,
   PencilSquareIcon,
-  PhotoIcon,
 } from "@heroicons/react/24/outline";
 import LoadingSpinner from "../chat/[threadId]/LoadingSpinner";
 import MiniFileBox from "./MiniFileBox";
@@ -80,10 +78,6 @@ export default function ChatBox({
   };
 
   const fetchChatPlan = async () => {
-    // const imageFileName = await getImageFileName(
-    //   files.length > 0 ? files[0] : null
-    // );
-
     const fileNames = await Promise.all(
       files.map(async (file) => {
         return await uploadFile(file);
