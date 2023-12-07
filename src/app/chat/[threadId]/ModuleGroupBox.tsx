@@ -23,7 +23,13 @@ export default function ModuleGroupBox({
   moduleDescription,
 }: Props) {
   const [moduleName, modelName] = name?.split(".") || ["", ""];
-  console.log("moduleGroupBox: ", files);
+  // 나중에 고쳐야 함
+  const linkToArxiv =
+    moduleName === "LLMCXR"
+      ? "https://arxiv.org/pdf/2305.11490.pdf"
+      : "SCHYENA"
+      ? "https://arxiv.org/pdf/2310.02713.pdf"
+      : "";
 
   return (
     <div className="flex flex-col bg-slate-200 bg-opacity-60 px-8 py-6 rounded-2xl text-base w-full shadow-solid shadow-black">
@@ -47,10 +53,9 @@ export default function ModuleGroupBox({
                     deleteEnabled={false}
                   />
                 ))}
-              <p className="text-slate-800">{input}</p>
+              <p className="text-slate-800 font-semibold">{input}</p>
             </div>
           )}
-          {!files && input && <p className="text-slate-800">{input}</p>}
         </div>
       </div>
       <div className="flex flex-row gap-4 items-center mb-2">
@@ -72,17 +77,21 @@ export default function ModuleGroupBox({
       <p className="flex flex-row items-center text-xs mt-4 text-slate-500">
         created by &nbsp;
         <div className="">
-          <p className="font-medium uppercase">
-            {moduleName && (
-              <span
-                className="bg-kaistlightblue bg-opacity-20 rounded-md px-2 py-1 text-kaistdarkblue mr-2 text-xs"
-                data-tooltip-id="module-desc"
-                data-tooltip-content={moduleDescription}
-              >
-                {moduleName}
-              </span>
-            )}
+          <p className="font-medium">
+            <a href={linkToArxiv} className="no-underline" target="_blank">
+              {moduleName && (
+                <span
+                  className="bg-kaistlightblue bg-opacity-20 rounded-md px-2 py-1 text-kaistdarkblue mr-2 text-xs"
+                  data-tooltip-id="module-desc"
+                  data-tooltip-content={moduleDescription}
+                >
+                  {moduleName}
+                </span>
+              )}
+            </a>
+            <span className="uppercase">
             {modelName}
+            </span>
           </p>
           <Tooltip id="module-desc" />
         </div>
