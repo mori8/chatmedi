@@ -19,6 +19,8 @@ interface ChatInfo {
     instruction?: string;
     image?: string;
     query?: string;
+    text_file?: string;
+    numpy_file?: string;
   };
   created_at: string;
   updated_at: string;

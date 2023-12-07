@@ -13,11 +13,13 @@ import Navigation from "../../components/Navigation";
 import ChatSideBar from "../../components/ChatSideBar";
 import { getImageURL } from "@/utils/utils";
 
+
 type Props = {
   params: {
     threadId: string;
   };
 };
+
 
 export default function Home({ params }: Props) {
   const [hasFetched, setHasFetched] = useState(false);
@@ -71,7 +73,7 @@ export default function Home({ params }: Props) {
 
         const func = data.find((chat: ChatInfo) => chat.role === "function");
         setResultImageName(func?.content.image);
-        setFunctionResult(func?.content.answer);
+        setFunctionResult(func?.content.answer ? func?.content.answer : func?.content.result);
         console.log("functionResult: ", func.content.answer);
         setExecuteStatus("function");
 
@@ -150,7 +152,8 @@ export default function Home({ params }: Props) {
                     <ModuleGroupBox
                       name={controllerMessage.tool?.name}
                       cardURL={controllerMessage.tool?.card_url}
-                      query={controllerMessage.data.query || ""}
+                      input={controllerMessage.data.query || ""}
+                      files={[controllerMessage.data.text_file, controllerMessage.data.numpy_file]}
                       answer={functionResult}
                       moduleDescription={
                         controllerMessage.tool?.task_description
@@ -191,6 +194,7 @@ export default function Home({ params }: Props) {
   );
 }
 
+
 const continueExecution = async (
   lastChatRole: string,
   chatId: string,
@@ -217,7 +221,7 @@ const continueExecution = async (
     );
     const planExecuteJson = await fetchPlanExecute.json();
     setResultImageName(planExecuteJson.content.image);
-    setFunctionResult(planExecuteJson.content.answer);
+    setFunctionResult(planExecuteJson.content.answer ? planExecuteJson.content.answer : planExecuteJson.content.result);
     setExecuteStatus("function");
     console.log("now fetch chat");
 
