@@ -13,6 +13,7 @@ import {
   PhotoIcon,
 } from "@heroicons/react/24/outline";
 import LoadingSpinner from "../chat/[threadId]/LoadingSpinner";
+import MiniFileBox from "./MiniFileBox";
 // import FileInfoModal from "./FileInfoModal";
 
 type Props = {
@@ -239,23 +240,11 @@ function FileDropZone({
   ) : (
     <div className="w-full flex flex-row gap-4">
       {files.map((file, index) => (
-        <div
-          key={file.name}
-          className="flex items-center gap-2 max-w-[280px] shadow-solid rounded-md px-2 py-1 border border-black"
-        >
-          <div className="flex-shrink-0">
-            <PhotoIcon width="20" color="#D37A47" />
-          </div>
-          <p className="text-sm truncate">{file.name}</p>
-          <button
-            className="flex items-center justify-center w-6 h-6 rounded-full transition ease-in-out"
-            onClick={() => {
-              deleteFile(file.name);
-            }}
-          >
-            <XMarkIcon width="16" />
-          </button>
-        </div>
+        <MiniFileBox
+          key={index}
+          file={file}
+          onClick={() => deleteFile(file.name)}
+        />
       ))}
     </div>
   );
