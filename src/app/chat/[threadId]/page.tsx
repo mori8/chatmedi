@@ -74,7 +74,7 @@ export default function Home({ params }: Props) {
         const func = data.find((chat: ChatInfo) => chat.role === "function");
         setResultImageName(func?.content.image);
         setFunctionResult(func?.content.answer ? func?.content.answer : func?.content.result);
-        console.log("functionResult: ", func.content.answer);
+
         setExecuteStatus("function");
 
         const assistant = data.find(
@@ -88,7 +88,8 @@ export default function Home({ params }: Props) {
 
   useEffect(() => {
     if (chats.length > 0) {
-      const imageInputName = chats[0].content.image_input;
+      const imageInputName = chats[1].data.image_file;
+
       if (imageInputName) {
         getImageURL(imageInputName).then((url) => {
           setImageInputURL(url);

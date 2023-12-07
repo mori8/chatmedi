@@ -19,8 +19,6 @@ export default function ResultTextWrapper({ isImageIncluded = false, content }: 
     setParsedContent(parsed);
   }, []);
 
-  console.log(parsedContent);
-
   return (
     <div>
       {parsedContent &&

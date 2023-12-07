@@ -10,14 +10,14 @@ interface ChatInfo {
   role: "user" | "controller" | "function" | "assistant";
   content: {
     user_input?: string;
-    image_input?: string;
+    file_inputs?: string[];
     image?: string;
     result?: string;
     answer?: string;
   };
   data: {
     instruction?: string;
-    image?: string;
+    image_file?: string;
     query?: string;
     text_file?: string;
     numpy_file?: string;
