@@ -17,17 +17,17 @@ export default function Home() {
 
   useEffect(() => {
     setQuickStartQuestions([
-      "Does MRI pose a risk of radiation exposure?",
-      "What radiological findings are typical for early rheumatoid arthritis?",
-      "What are common causes for persistent abdominal pain and nausea?",
+      "Explain what pneumonia is in detail.",
+      "What is the difference between pneumonia and pleural effusion?",
+      "Generate a chest X-ray image about severe left-sided pleural effusion.",
     ]);
   }, []);
 
   return (
     status === "authenticated" && (
-      <main className="flex flex-row items-center gap-12 h-full w-full mb-40">
+      <main className="flex flex-row items-center gap-12 h-full w-full">
         <ChatSideBar userId={session.user.id} />
-        <div className="flex flex-col flex-1 h-full items-center">
+        <div className="flex flex-col flex-1 h-full items-center overflow-scroll pb-40">
           <Navigation />
           <div className="chatbox-wrapper max-w-[64rem] w-full mt-24 p-12">
             <ChatBox
@@ -41,10 +41,10 @@ export default function Home() {
           <div className="text-center flex-1">
             <p className="text-sm font-bold">QUICK START</p>
             <div className="mt-4">
-              <ul className="quick-start-question-list flex flex-col items-center">
+              <ul className="quick-start-question-list flex flex-col items-center w-[40rem]">
                 {quickStartQuestions.map((question, index) => (
                   <li
-                    className="quick-start-question-item text-kaistblue flex gap-2 mb-2 hover:underline cursor-pointer"
+                    className="quick-start-question-item text-kaistblue flex gap-2 mb-2 hover:underline cursor-pointer items-center line-clamp-2"
                     key={index}
                     onClick={() => {
                       executeQuickStart(question, session.user.id).then(
@@ -54,11 +54,13 @@ export default function Home() {
                       );
                     }}
                   >
-                    <p>
+                    <p className="text-center">
                       {/* 새 채팅 생성 */}
                       {question}
                     </p>
-                    <ArrowRightCircleIcon width="24" />
+                    <div className="flex-shrink-0">
+                      <ArrowRightCircleIcon width="24" />
+                    </div>
                   </li>
                 ))}
               </ul>

@@ -28,7 +28,7 @@ type Props = {
 
 export default function ChatBox({
   isFileAttachEnabled = false,
-  rows = 6,
+  rows = 5,
   query = "",
   userId,
   threadId,

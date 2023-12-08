@@ -33,7 +33,7 @@ export default function Home({ params }: Props) {
   const [executeStatus, setExecuteStatus] = useState<
     "user" | "controller" | "function" | "assistant"
   >("controller");
-  const [isErrorOccured, setIsErrorOccured] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | undefined>();
   const { data: session, status } = useSession();
   const threadId = params.threadId;
 
@@ -87,7 +87,7 @@ export default function Home({ params }: Props) {
         })
         .catch((err) => {
           console.log(err);
-          setIsErrorOccured(true);
+          setErrorMessage(err.message);
         });
     }
   }, [session]);
@@ -121,7 +121,7 @@ export default function Home({ params }: Props) {
         })
         .catch((err) => {
           console.log(err);
-          setIsErrorOccured(true);
+          setErrorMessage(err.message);
         });
 
       if (_lastChat.role === "assistant") {
@@ -205,11 +205,17 @@ export default function Home({ params }: Props) {
                   />
                 </section>
               )}
-              {isErrorOccured ? (
-                <div className="flex flex-col items-center justify-center mt-8 bg-rose-50 rounded-xl p-6 w-full">
-                  <p className=" text-rose-800 text-base">
+              {errorMessage ? (
+                <div className="flex flex-col items-center justify-center mt-8 bg-rose-50 rounded-xl p-6 w-full text-rose-800">
+                  <p className=" text-base">
                     Sorry, an error occured. Please try again later.
                   </p>
+                  <div>
+                    <p className="text-xs mt-2">Error message:</p>
+                    <p className="text-xs">
+                      {errorMessage}
+                    </p>
+                  </div>
                 </div>
               ) : (
                 <ResultContainer />
