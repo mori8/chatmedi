@@ -4,8 +4,10 @@ import React, { useState, useEffect, useCallback } from "react";
 import { useParams } from "next/navigation";
 import { useRecoilValue, useSetRecoilState } from "recoil";
 import { chatState } from "@/recoil/atoms";
-import ChatTextArea from "@/components/ChatTextArea";
 import classNames from "classnames";
+
+import ChatTextArea from "@/components/ChatTextArea";
+import MarkdownWrapper from "@/components/MarkdownWrapper";
 
 
 function ChatPage() {
@@ -42,7 +44,7 @@ function ChatPage() {
   }, [content, messages, chat.userId, chatId]);
 
   return (
-    <div className="flex flex-col h-screen">
+    <div className="flex flex-col h-full gap-4">
       <div className="flex-1 overflow-scroll mt-4 rounded-lg flex flex-col gap-8">
         {messages.map((message, index) => (
           <div
@@ -67,7 +69,7 @@ function ChatPage() {
                 "bg-slate-100 rounded-xl px-4 py-2": message.sender === "user",
               })}
             >
-              {message.text}
+              <MarkdownWrapper markdown={message.text} />
             </span>
           </div>
         ))}

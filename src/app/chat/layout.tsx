@@ -11,7 +11,7 @@ export default function layout({ children }: Props) {
       <div className="flex-shrink-0">
         <ChatSideBar />
       </div>
-      <div className="flex-1 p-4 text-slate-900 leading-snug flex flex-col gap-8">
+      <div className="flex-1 p-4 text-slate-900 leading-snug flex flex-col gap-8 max-w-[940px]">
         {children}
       </div>
     </div>
