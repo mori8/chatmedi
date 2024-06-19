@@ -17,10 +17,13 @@
     "openai": "^4.51.0",
     "react": "^18",
     "react-dom": "^18",
+    "react-markdown": "^9.0.1",
     "recoil": "^0.7.7",
+    "remark-gfm": "^4.0.0",
     "uuid": "^10.0.0"
   },
   "devDependencies": {
+    "@tailwindcss/typography": "^0.5.13",
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",
