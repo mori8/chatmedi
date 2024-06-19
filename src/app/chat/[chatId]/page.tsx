@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import { useParams } from "next/navigation";
 import { useRecoilValue, useSetRecoilState } from "recoil";
 import { chatState } from "@/recoil/atoms";
@@ -8,7 +8,6 @@ import classNames from "classnames";
 
 import ChatTextArea from "@/components/ChatTextArea";
 import MarkdownWrapper from "@/components/MarkdownWrapper";
-
 
 function ChatPage() {
   const { chatId } = useParams<{ chatId: string }>();
@@ -19,6 +18,16 @@ function ChatPage() {
   const [messages, setMessages] = useState<{ sender: string; text: string }[]>([
     { sender: "user", text: chat.prompt },
   ]);
+  
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
 
   const handleSubmit = useCallback(async () => {
     if (content.trim() === "") return;
@@ -73,6 +82,7 @@ function ChatPage() {
             </span>
           </div>
         ))}
+        <div ref={messagesEndRef} />
       </div>
       <div className="flex-shrink-0">
         <ChatTextArea
