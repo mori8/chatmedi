@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useRef } from 'react';
+import React, { useRef, useState, useCallback, useEffect } from 'react';
 import { ArrowUpOnSquareIcon, PaperAirplaneIcon } from '@heroicons/react/24/outline';
 
 type Props = {
@@ -27,13 +27,21 @@ function ChatTextArea({ content, setContent, handleSubmit }: Props) {
     }
   };
 
-  const submitAndResetHeight = () => {
+  const submitAndResetHeight = useCallback(() => {
+    if (content.trim() === '') return;
     handleSubmit();
+    setContent('');
     if (textareaRef.current) {
-      setContent('');
       textareaRef.current.style.height = 'auto';
     }
-  };
+  }, [content, handleSubmit, setContent]);
+
+  useEffect(() => {
+    if (textareaRef.current) {
+      textareaRef.current.style.height = 'auto';
+      textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
+    }
+  }, [content]);
 
   return (
     <div className='flex flex-col w-full gap-4'>
