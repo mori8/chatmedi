@@ -20,6 +20,21 @@ function ChatTextArea({ content, setContent, handleSubmit }: Props) {
     }
   };
 
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      submitAndResetHeight();
+    }
+  };
+
+  const submitAndResetHeight = () => {
+    handleSubmit();
+    if (textareaRef.current) {
+      setContent('');
+      textareaRef.current.style.height = 'auto';
+    }
+  };
+
   return (
     <div className='flex flex-col w-full gap-4'>
       <div className='flex items-start border-2 border-palatinate rounded-2xl p-3 w-full gap-4'>
@@ -30,6 +45,7 @@ function ChatTextArea({ content, setContent, handleSubmit }: Props) {
           placeholder="Ask me a question!"
           value={content}
           onChange={handleChange}
+          onKeyDown={handleKeyDown}
           rows={1}
           style={{ minHeight: '16px', maxHeight: '200px' }}
         />
@@ -37,7 +53,7 @@ function ChatTextArea({ content, setContent, handleSubmit }: Props) {
           width={24}
           height={24}
           className='text-slate-900 cursor-pointer'
-          onClick={handleSubmit}
+          onClick={submitAndResetHeight}
         />
       </div>
     </div>
