@@ -13,12 +13,11 @@ function ChatPage() {
   const { chatId } = useParams<{ chatId: string }>();
   const userId = "kaithape";
   const chat = useRecoilValue(chatState);
-  const setChat = useSetRecoilState(chatState);
   const [content, setContent] = useState("");
   const [messages, setMessages] = useState<{ sender: string; text: string }[]>([
     { sender: "user", text: chat.prompt },
   ]);
-  
+
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -29,12 +28,7 @@ function ChatPage() {
     scrollToBottom();
   }, [messages]);
 
-  const handleSubmit = useCallback(async () => {
-    if (content.trim() === "") return;
-
-    setMessages((prev) => [...prev, { sender: "user", text: content }]);
-    setContent("");
-
+  const fetchAIResponse = async (prompt: string) => {
     const response = await fetch(`/api/chat`, {
       method: "POST",
       headers: {
@@ -42,15 +36,29 @@ function ChatPage() {
       },
       body: JSON.stringify({
         userId: userId,
-        prompt: content,
+        prompt: prompt,
         chatId: chatId,
       }),
     });
-    console.log("response:", response);
     const data = await response.json();
-    console.log(data);
     setMessages((prev) => [...prev, { sender: "ai", text: data.response }]);
-  }, [content, messages, chat.userId, chatId]);
+  };
+
+  const lastMessageRef = useRef<{ sender: string; text: string } | null>(null);
+
+  useEffect(() => {
+    const lastMessage = messages[messages.length - 1];
+    if (lastMessage.sender === "user" && lastMessage !== lastMessageRef.current) {
+      lastMessageRef.current = lastMessage;
+      fetchAIResponse(lastMessage.text);
+    }
+  }, [messages]);
+
+  const handleSubmit = useCallback(() => {
+    if (content.trim() === "") return;
+    setMessages((prev) => [...prev, { sender: "user", text: content }]);
+    setContent("");
+  }, [content]);
 
   return (
     <div className="flex flex-col h-full gap-4">
