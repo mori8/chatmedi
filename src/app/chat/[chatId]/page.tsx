@@ -43,7 +43,7 @@ function ChatPage() {
       body: JSON.stringify({
         userId: userId,
         prompt: content,
-        history: messages.map((m) => m.text),
+        chatId: chatId,
       }),
     });
     console.log("response:", response);
