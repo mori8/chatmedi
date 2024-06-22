@@ -64,6 +64,5 @@ export async function POST(req: NextRequest) {
   }
 
   const aiResponse = await getAIResponse(prompt, chatId);
-  console.log("aiResponse:", aiResponse);
   return NextResponse.json({ response: aiResponse });
 }

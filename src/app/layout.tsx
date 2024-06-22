@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Nunito } from "next/font/google";
 import RecoilRootWrapper from "@/context/RecoilRootWrapper";
+import NextAuthContext from "@/context/NextAuthContext";
 import "./globals.css";
 
 const nunito = Nunito({ subsets: ["latin"] });
@@ -18,7 +19,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={nunito.className}>
-        <RecoilRootWrapper>{children}</RecoilRootWrapper>
+        <NextAuthContext>
+          <RecoilRootWrapper>{children}</RecoilRootWrapper>
+        </NextAuthContext>
       </body>
     </html>
   );
