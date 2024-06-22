@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useRecoilState } from 'recoil';
 import { chatState } from '@/recoil/atoms';
@@ -9,6 +10,7 @@ import ChatTextArea from '@/components/ChatTextArea';
 type Props = {}
 
 export default function Page({ }: Props) {
+  const { data: session, status } = useSession();
   const bestCaseExamples = [
     "Generate a chest X-ray image with specific characteristics",
     "Finding abnormal points in attached chest X-ray file",
