@@ -20,7 +20,8 @@ function ChatTextArea({ content, setContent, handleSubmit }: Props) {
     }
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+  const handleKeyUp = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.nativeEvent.isComposing) return;
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       submitAndResetHeight();
@@ -53,7 +54,7 @@ function ChatTextArea({ content, setContent, handleSubmit }: Props) {
           placeholder="Ask me a question!"
           value={content}
           onChange={handleChange}
-          onKeyDown={handleKeyDown}
+          onKeyUp={handleKeyUp}
           rows={1}
           style={{ minHeight: '16px', maxHeight: '200px' }}
         />
