@@ -6,8 +6,10 @@ import {
 } from "@langchain/core/prompts";
 import { RunnableWithMessageHistory } from "@langchain/core/runnables";
 import { UpstashRedisChatMessageHistory } from "@langchain/community/stores/message/upstash_redis";
+import { saveChatMessage } from "@/lib/redis";
 
-const getAIResponse = async (prompt: string, chatId: string) => {
+
+const getAIResponse = async (userId: string, prompt: string, chatId: string) => {
   const prompts = ChatPromptTemplate.fromMessages([
     ["system", "You're an assistant who's good at medical QA."],
     new MessagesPlaceholder("history"),
@@ -30,7 +32,6 @@ const getAIResponse = async (prompt: string, chatId: string) => {
     historyMessagesKey: "history",
   });
 
-  // TODO
   const result = await chainWithHistory.invoke(
     {
       question: prompt,
@@ -42,10 +43,13 @@ const getAIResponse = async (prompt: string, chatId: string) => {
     }
   );
 
-  console.log("result:", result);
+  // console.log("result:", result);
+  console.log("chainWithHistory called")
+  await saveChatMessage(userId, chatId, { sender: "ai", text: result.content.toString() });
 
   return result.content;
 };
+
 
 export async function POST(req: NextRequest) {
   const { userId, prompt, chatId } = await req.json();
@@ -63,6 +67,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Invalid input" }, { status: 400 });
   }
 
-  const aiResponse = await getAIResponse(prompt, chatId);
+  const aiResponse = await getAIResponse(userId, prompt, chatId);
   return NextResponse.json({ response: aiResponse });
 }

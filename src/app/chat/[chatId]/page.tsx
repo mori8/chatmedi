@@ -1,17 +1,21 @@
-"use client";
+'use client';
 
 import React, { useState, useEffect, useCallback, useRef } from "react";
+import { useSession } from "next-auth/react";
 import { useParams } from "next/navigation";
-import { useRecoilValue, useSetRecoilState } from "recoil";
+import { useRecoilValue } from "recoil";
 import { chatState } from "@/recoil/atoms";
 import classNames from "classnames";
 
 import ChatTextArea from "@/components/ChatTextArea";
 import MarkdownWrapper from "@/components/MarkdownWrapper";
+import { fetchChatHistory, saveChatMessage } from "@/lib/redis";
 
 function ChatPage() {
+  const { data: session, status } = useSession();
   const { chatId } = useParams<{ chatId: string }>();
-  const userId = "kaithape";
+  const user = session?.user;
+  const userId = user?.email!;
   const chat = useRecoilValue(chatState);
   const [content, setContent] = useState("");
   const [messages, setMessages] = useState<{ sender: string; text: string }[]>([
@@ -19,6 +23,7 @@ function ChatPage() {
   ]);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const isFetchingRef = useRef(false);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -28,37 +33,57 @@ function ChatPage() {
     scrollToBottom();
   }, [messages]);
 
+  useEffect(() => {
+    async function loadChatHistory() {
+      const history = await fetchChatHistory(userId, chatId);
+      console.log("history:", history);
+      setMessages(history);
+    }
+
+    loadChatHistory();
+  }, [chatId, userId]);
+
   const fetchAIResponse = async (prompt: string) => {
-    const response = await fetch(`/api/chat`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        userId: userId,
-        prompt: prompt,
-        chatId: chatId,
-      }),
-    });
-    const data = await response.json();
-    setMessages((prev) => [...prev, { sender: "ai", text: data.response }]);
+    if (isFetchingRef.current) return;
+
+    isFetchingRef.current = true;
+    try {
+      const response = await fetch(`/api/chat`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          userId: userId,
+          prompt: prompt,
+          chatId: chatId,
+        }),
+      });
+      const data = await response.json();
+      const aiMessage = { sender: "ai", text: data.response };
+      setMessages((prev) => [...prev, aiMessage]);
+    } finally {
+      isFetchingRef.current = false;
+    }
   };
 
   const lastMessageRef = useRef<{ sender: string; text: string } | null>(null);
 
   useEffect(() => {
     const lastMessage = messages[messages.length - 1];
-    if (lastMessage.sender === "user" && lastMessage !== lastMessageRef.current) {
+    if (lastMessage?.sender === "user" && lastMessage !== lastMessageRef.current) {
       lastMessageRef.current = lastMessage;
       fetchAIResponse(lastMessage.text);
     }
   }, [messages]);
 
-  const handleSubmit = useCallback(() => {
+  const handleSubmit = useCallback(async () => {
     if (content.trim() === "") return;
-    setMessages((prev) => [...prev, { sender: "user", text: content }]);
+    const userMessage = { sender: "user", text: content };
+    setMessages((prev) => [...prev, userMessage]);
     setContent("");
-  }, [content]);
+    await saveChatMessage(userId, chatId, userMessage);
+  }, [content, userId, chatId]);
 
   return (
     <div className="flex flex-col h-full gap-4">

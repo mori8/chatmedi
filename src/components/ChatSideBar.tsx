@@ -25,10 +25,10 @@ export default function ChatSideBar({ }: Props) {
         setChatIds(data);
       });
     }
-  }, [user]);
+  }, [user, chatId]);
 
   return (
-    <div className="bg-palatinate text-alabaster px-4 pt-5 pb-4 rounded-3xl h-full flex flex-col gap-2 w-64 box-border text-sm">
+    <div className="bg-palatinate text-alabaster px-4 pt-5 pb-4 rounded-3xl h-full flex flex-col gap-3 w-64 box-border text-sm">
       <div className="flex-shrink-0 flex justify-between items-center">
         <div>
           <h1 className="text-base font-bold">ChatMedi</h1>

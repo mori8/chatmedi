@@ -11,6 +11,8 @@ type Props = {};
 
 export default function Page({}: Props) {
   const { data: session, status } = useSession();
+  const user = session?.user;
+  const userId = user?.email!;
   const bestCaseExamples = [
     "Generate a chest X-ray image with specific characteristics",
     "Finding abnormal points in attached chest X-ray file",
@@ -24,9 +26,6 @@ export default function Page({}: Props) {
   const handleSubmit = async () => {
     if (content.trim() === "") return;
 
-    const userId = "kaithape";
-    console.log("userId:", userId);
-    console.log("content:", content);
     const response = await fetch("/api/chat/start", {
       method: "POST",
       headers: {
