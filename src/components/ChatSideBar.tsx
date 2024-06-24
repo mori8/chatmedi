@@ -4,10 +4,7 @@ import React, { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { PlusIcon } from "@heroicons/react/20/solid";
-import {
-  Cog6ToothIcon,
-  ArrowRightStartOnRectangleIcon,
-} from "@heroicons/react/24/outline";
+import { ArrowRightStartOnRectangleIcon } from "@heroicons/react/24/outline";
 import { useSession } from "next-auth/react";
 import classNames from "classnames";
 import { Tooltip } from "react-tooltip";
@@ -54,7 +51,7 @@ export default function ChatSideBar({}: Props) {
               <li
                 key={_chatId}
                 className={classNames(
-                  "py-2 px-3 truncate hover:bg-white hover:bg-opacity-20 rounded-xl",
+                  "py-2 px-1 truncate hover:bg-white hover:bg-opacity-20 rounded-xl",
                   {
                     "bg-white bg-opacity-20": _chatId === chatId,
                   }
@@ -98,7 +95,11 @@ export default function ChatSideBar({}: Props) {
             </div>
             <div>
               <Tooltip id="logout" />
-              <a href="/api/auth/signout" data-tooltip-id="logout" data-tooltip-content="Logout">
+              <a
+                href="/api/auth/signout"
+                data-tooltip-id="logout"
+                data-tooltip-content="Logout"
+              >
                 <ArrowRightStartOnRectangleIcon width={24} height={24} />
               </a>
             </div>

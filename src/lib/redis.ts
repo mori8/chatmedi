@@ -6,31 +6,46 @@ const redis = new Redis({
   token: process.env.NEXT_PUBLIC_UPSTASH_REDIS_REST_TOKEN!,
 });
 
+interface Message {
+  sender: string;
+  text: string;
+}
+
 export async function fetchChatHistory(userId: string, chatId: string) {
   // 특정 사용자와 채팅 ID에 대한 모든 채팅 기록을 가져옴
   if (!userId || !chatId) {
     return [];
   }
   const keys = await redis.keys(`chat:${userId}:${chatId}:*`);
-  const chats = [];
+  const chats: Message[] = [];
   
   for (const key of keys) {
-    const chat = await redis.hgetall(key);
-    chats.push(chat);
+    const chat = await redis.hgetall(key) as unknown as Message;
+    if (chat) {
+      chats.push(chat);
+    }
   }
+
   console.log("fetchChatHistory called");
   // console.log("chats:", chats);
   return chats;
 }
 
-export async function saveChatMessage(userId: string, chatId: string, message: { sender: string; text: string }) {
+export async function saveChatMessage(userId: string, chatId: string, message: Message) {
   // 특정 사용자와 채팅 ID에 대한 개별 메시지를 저장
   if (!userId || !chatId) {
     return;
   }
+  
   const timestamp = new Date().toISOString();
+  
   console.log("saveChatMessage called", message, timestamp)
-  await redis.hset(`chat:${userId}:${chatId}:${timestamp}`, message);
+
+  const redisMessage: Record<string, string> = {
+    sender: message.sender,
+    text: message.text,
+  };
+  await redis.hset(`chat:${userId}:${chatId}:${timestamp}`, redisMessage);
 }
 
 export async function saveNewChat(userId: string, chatId: string, prompt: string) {
