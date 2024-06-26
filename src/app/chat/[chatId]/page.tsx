@@ -11,6 +11,7 @@ import ChatTextArea from "@/components/ChatTextArea";
 import MarkdownWrapper from "@/components/MarkdownWrapper";
 import { fetchChatHistory, saveChatMessage } from "@/lib/redis";
 
+
 function ChatPage() {
   const { data: session, status } = useSession();
   const { chatId } = useParams<{ chatId: string }>();
@@ -61,6 +62,19 @@ function ChatPage() {
       });
       const data = await response.json();
       const aiMessage = { sender: "ai", text: data.response };
+
+      const res = await fetch('/api/plan-task', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ prompt, sessionId: chatId})
+      });
+
+      const dataFromPlanTask = await res.json();
+
+      console.log("Planned Tasks:", dataFromPlanTask);
+      
       setMessages((prev) => [...prev, aiMessage]);
     } finally {
       isFetchingRef.current = false;
