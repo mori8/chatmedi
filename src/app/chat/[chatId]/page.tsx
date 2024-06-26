@@ -100,7 +100,7 @@ function ChatPage() {
                 className="rounded-full w-8 h-8"
                 src={
                   message.sender === "user"
-                    ? user?.image
+                    ? user?.image!
                     : "/images/robot-1.svg"
                 }
                 alt={message.sender}
