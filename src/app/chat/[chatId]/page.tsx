@@ -19,12 +19,45 @@ function ChatPage() {
   const userId = user?.email!;
   const chat = useRecoilValue(chatState);
   const [content, setContent] = useState("");
+  const [currentStep, setCurrentStep] = useState(0);
   const [messages, setMessages] = useState<{ sender: string; text: string }[]>([
     { sender: "user", text: chat.prompt },
   ]);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const isFetchingRef = useRef(false);
+
+  const CurrentStepInfo = () => {
+    if (currentStep === 0) {
+      return (
+        <div className="flex items-center mt-5">
+          <span role="img" aria-label="waving hand" className="text-xl mr-2">
+            👋
+          </span>
+          <p>I'm an AI that can perform general-purpose medical tasks!</p>
+        </div>
+      );
+    } else if (currentStep === 1) {
+      return (
+        <div className="flex items-center mt-5">
+          <span role="img" aria-label="paper clip" className="text-xl mr-2">
+            📎
+          </span>
+          <p>Planning your task...</p>
+        </div>
+      );
+    } else if (currentStep === 2) {
+      return (
+        <div className="flex items-center mt-5">
+          <span role="img" aria-label="paper clip" className="text-xl mr-2">
+            📎
+          </span>
+          <p>Task planned successfully!</p>
+        </div>
+      );
+    }
+    return null;
+  }
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -47,7 +80,23 @@ function ChatPage() {
   const fetchAIResponse = async (prompt: string) => {
     if (isFetchingRef.current) return;
 
+    setCurrentStep(1);
     isFetchingRef.current = true;
+
+    const res = await fetch('/api/plan-task', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ prompt, sessionId: chatId})
+    });
+
+    const dataFromPlanTask = await res.json();
+
+    console.log("Planned Tasks:", dataFromPlanTask);
+
+    setCurrentStep(2);
+
     try {
       const response = await fetch(`/api/chat`, {
         method: "POST",
@@ -62,18 +111,6 @@ function ChatPage() {
       });
       const data = await response.json();
       const aiMessage = { sender: "ai", text: data.response };
-
-      const res = await fetch('/api/plan-task', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ prompt, sessionId: chatId})
-      });
-
-      const dataFromPlanTask = await res.json();
-
-      console.log("Planned Tasks:", dataFromPlanTask);
       
       setMessages((prev) => [...prev, aiMessage]);
     } finally {
