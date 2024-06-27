@@ -45,9 +45,9 @@ const getAIResponse = async (userId: string, prompt: string, chatId: string) => 
 
   // console.log("result:", result);
   console.log("chainWithHistory called")
-  await saveChatMessage(userId, chatId, { sender: "ai", text: result.content.toString() });
+  const savedMessage = await saveChatMessage(userId, chatId, { sender: "ai", text: result.content.toString() });
 
-  return result.content;
+  return savedMessage;
 };
 
 
@@ -68,5 +68,7 @@ export async function POST(req: NextRequest) {
   }
 
   const aiResponse = await getAIResponse(userId, prompt, chatId);
+  console.log("aiResponse:", aiResponse);
+  
   return NextResponse.json({ response: aiResponse });
 }

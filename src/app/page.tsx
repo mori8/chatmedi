@@ -1,61 +1,51 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
-export default function Home() {
-  const [prompt, setPrompt] = useState('');
-  const [response, setResponse] = useState(null);
-  const [loading, setLoading] = useState(false);
+const StreamingResponsePage = () => {
+  const [data, setData] = useState<any[]>([]);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleSubmit = async (event: React.FormEvent) => {
-    event.preventDefault();
-    setLoading(true);
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await fetch('/api/stream');
+        const reader = response.body?.getReader();
+        const decoder = new TextDecoder();
 
-    const history = {
-      messages: [
-        {sender: 'system', text: 'You are a very good assistant which is good at biomedical tasks. You have a great understanding of the human body and can help me with my medical questions and also good at parsing medical requests. You are an AI that only returns data in JSON format. Please answer the following question in JSON format.'},
-      ]
+        let receivedData: any[] = [];
+        while (true) {
+          const { done, value } = await reader!.read();
+          if (done) break;
+          const chunk = decoder.decode(value, { stream: true });
+          const lines = chunk.split('\n').filter(line => line.trim() !== '');
+
+          for (const line of lines) {
+            try {
+              const parsedLine = JSON.parse(line);
+              receivedData = [...receivedData, parsedLine];
+              setData([...receivedData]); // Update state with new data
+            } catch (err) {
+              console.error('Error parsing line:', err);
+            }
+          }
+        }
+      } catch (err) {
+        console.error('Error fetching data:', err);
+        setError('Error fetching data');
+      }
     };
 
-    try {
-      const res = await fetch('/api/plan-task', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ prompt, history })
-      });
-
-      const data = await res.json();
-      setResponse(data);
-    } catch (error) {
-      console.error('Failed to fetch tasks:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+    fetchData();
+  }, []);
 
   return (
     <div>
-      <h1>Task Planning with GPT-4</h1>
-      <form onSubmit={handleSubmit}>
-        <textarea
-          value={prompt}
-          onChange={(e) => setPrompt(e.target.value)}
-          placeholder="Enter your prompt"
-          rows={4}
-          cols={50}
-        />
-        <button type="submit" disabled={loading}>
-          {loading ? 'Planning...' : 'Plan Tasks'}
-        </button>
-      </form>
-      {response && (
-        <div>
-          <h2>Response</h2>
-          <pre>{JSON.stringify(response, null, 2)}</pre>
-        </div>
-      )}
+      <h1>Streaming Response</h1>
+      {error && <p>Error: {error}</p>}
+      <pre>{JSON.stringify(data, null, 2)}</pre>
     </div>
   );
-}
+};
+
+export default StreamingResponsePage;

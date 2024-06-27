@@ -12,7 +12,12 @@ export async function POST(req: NextRequest) {
   const chatId = uuidv4();
   console.log("/api/chat called", userId, chatId, prompt);
   
-  await saveNewChat(userId, chatId, prompt);
+  const savedFirstMessage = await saveNewChat(userId, chatId, prompt);
 
-  return NextResponse.json({ chatId });
+  return NextResponse.json({
+    chatId,
+    prompt,
+    userId,
+    messageId: savedFirstMessage?.messageId,
+  });
 }

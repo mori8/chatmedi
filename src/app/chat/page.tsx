@@ -33,10 +33,17 @@ export default function Page({}: Props) {
       },
       body: JSON.stringify({ userId: userId, prompt: content }),
     });
+    // TODO:
+    // 여기서 /api/chat/start가 저장된 첫 프롬프트의 messageId도 함께 반환한 다음
+    // messageId도 recoil에 저장해서
+    // /chat/[chatId]로 이동할 때 해당 messageId를 가지고 채팅을 불러오도록 하면 될 듯
+    // 그러면 /chat/[chatId]에서 첫 메세지 messageId 얻으려고 똥꼬쇼한거 없애도 됨
+    const data: {
+      chatId?: string;
+    } & Message = await response.json();
 
-    const data = await response.json();
     if (data.chatId) {
-      setChat({ userId, prompt: content, chatId: data.chatId });
+      setChat({ userId, prompt: content, chatId: data.chatId, messageId: data.messageId });
       router.push(`/chat/${data.chatId}`);
     }
   };

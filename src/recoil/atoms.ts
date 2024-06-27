@@ -5,6 +5,7 @@ export const chatState = atom({
   default: {
     userId: '',
     prompt: '',
-    chatId: ''
+    chatId: '',
+    messageId: '',
   }
 });

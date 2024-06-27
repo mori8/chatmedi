@@ -11,7 +11,6 @@ import ChatTextArea from "@/components/ChatTextArea";
 import MarkdownWrapper from "@/components/MarkdownWrapper";
 import { fetchChatHistory, saveChatMessage } from "@/lib/redis";
 
-
 function ChatPage() {
   const { data: session, status } = useSession();
   const { chatId } = useParams<{ chatId: string }>();
@@ -19,45 +18,10 @@ function ChatPage() {
   const userId = user?.email!;
   const chat = useRecoilValue(chatState);
   const [content, setContent] = useState("");
-  const [currentStep, setCurrentStep] = useState(0);
-  const [messages, setMessages] = useState<{ sender: string; text: string }[]>([
-    { sender: "user", text: chat.prompt },
-  ]);
+  const [messages, setMessages] = useState<Message[]>([]);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const isFetchingRef = useRef(false);
-
-  const CurrentStepInfo = () => {
-    if (currentStep === 0) {
-      return (
-        <div className="flex items-center mt-5">
-          <span role="img" aria-label="waving hand" className="text-xl mr-2">
-            👋
-          </span>
-          <p>I'm an AI that can perform general-purpose medical tasks!</p>
-        </div>
-      );
-    } else if (currentStep === 1) {
-      return (
-        <div className="flex items-center mt-5">
-          <span role="img" aria-label="paper clip" className="text-xl mr-2">
-            📎
-          </span>
-          <p>Planning your task...</p>
-        </div>
-      );
-    } else if (currentStep === 2) {
-      return (
-        <div className="flex items-center mt-5">
-          <span role="img" aria-label="paper clip" className="text-xl mr-2">
-            📎
-          </span>
-          <p>Task planned successfully!</p>
-        </div>
-      );
-    }
-    return null;
-  }
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -68,35 +32,19 @@ function ChatPage() {
   }, [messages]);
 
   useEffect(() => {
-    async function loadChatHistory() {
-      const history = await fetchChatHistory(userId, chatId);
+    async function initializeChat() {
+      const history: Message[] = await fetchChatHistory(userId, chatId);
       console.log("history:", history);
       setMessages(history);
     }
 
-    loadChatHistory();
-  }, [chatId, userId]);
+    initializeChat();
+  }, [chatId]);
 
   const fetchAIResponse = async (prompt: string) => {
     if (isFetchingRef.current) return;
 
-    setCurrentStep(1);
     isFetchingRef.current = true;
-
-    const res = await fetch('/api/plan-task', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ prompt, sessionId: chatId})
-    });
-
-    const dataFromPlanTask = await res.json();
-
-    console.log("Planned Tasks:", dataFromPlanTask);
-
-    setCurrentStep(2);
-
     try {
       const response = await fetch(`/api/chat`, {
         method: "POST",
@@ -110,15 +58,15 @@ function ChatPage() {
         }),
       });
       const data = await response.json();
-      const aiMessage = { sender: "ai", text: data.response };
+      const savedMessage = data.response;
       
-      setMessages((prev) => [...prev, aiMessage]);
+      setMessages((prev) => [...prev, savedMessage]);
     } finally {
       isFetchingRef.current = false;
     }
   };
 
-  const lastMessageRef = useRef<{ sender: string; text: string } | null>(null);
+  const lastMessageRef = useRef<Message | null>(null);
 
   useEffect(() => {
     const lastMessage = messages[messages.length - 1];
@@ -131,9 +79,13 @@ function ChatPage() {
   const handleSubmit = useCallback(async () => {
     if (content.trim() === "") return;
     const userMessage = { sender: "user", text: content };
-    setMessages((prev) => [...prev, userMessage]);
     setContent("");
-    await saveChatMessage(userId, chatId, userMessage);
+    const savedUserMessage = await saveChatMessage(userId, chatId, userMessage);
+    if (!savedUserMessage) {
+      console.error("Failed to save user message");
+      return;
+    }
+    setMessages((prev) => [...prev, savedUserMessage]);
   }, [content, userId, chatId]);
 
   return (
@@ -151,7 +103,7 @@ function ChatPage() {
                 className="rounded-full w-8 h-8"
                 src={
                   message.sender === "user"
-                    ? user?.image!
+                    ? "https://github.com/mori8.png"
                     : "/images/robot-1.svg"
                 }
                 alt={message.sender}
@@ -163,6 +115,7 @@ function ChatPage() {
               })}
             >
               <MarkdownWrapper markdown={message.text} />
+              {message.messageId}
             </span>
           </div>
         ))}
