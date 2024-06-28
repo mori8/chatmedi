@@ -1,5 +1,4 @@
-
-import { Redis } from '@upstash/redis';
+import { Redis } from "@upstash/redis";
 import { v4 as uuidv4 } from "uuid";
 
 const redis = new Redis({
@@ -14,20 +13,22 @@ export async function fetchChatHistory(userId: string, chatId: string) {
   }
   const keys = await redis.keys(`chat:${userId}:${chatId}:*`);
   const chats: Message[] = [];
-  
+
   for (const key of keys) {
-    const chat = await redis.hgetall(key) as unknown as Message;
+    const chat = (await redis.hgetall(key)) as unknown as Message;
     if (chat) {
       chats.push(chat);
     }
   }
-
-  console.log("fetchChatHistory called");
-  // console.log("chats:", chats);
+  
   return chats;
 }
 
-export async function saveChatMessage(userId: string, chatId: string, message: Omit<Message, 'messageId'>): Promise<Message|void> {
+export async function saveChatMessage(
+  userId: string,
+  chatId: string,
+  message: Omit<Message, "messageId">
+): Promise<Message | void> {
   // 특정 사용자와 채팅 ID에 대한 개별 메시지를 저장
   if (!userId || !chatId) {
     return;
@@ -47,17 +48,24 @@ export async function saveChatMessage(userId: string, chatId: string, message: O
   return redisMessage;
 }
 
-export async function saveNewChat(userId: string, chatId: string, prompt: string): Promise<Message|void> {
+export async function saveNewChat(
+  userId: string,
+  chatId: string,
+  prompt: string
+): Promise<Message | void> {
   if (!userId || !chatId || !prompt) {
     return;
   }
   // 이 함수는 /chat/page.tsx에서만 호출되어야 함
   // chatId(uuid)는 /api/chat/route.ts에서 생성됨
   console.log("saveNewChat called", userId, chatId, prompt);
-  
+
   const createdAt = new Date().toISOString().split("T")[0];
 
-  const savedMessage = await saveChatMessage(userId, chatId, { sender: "user", text: prompt });
+  const savedMessage = await saveChatMessage(userId, chatId, {
+    sender: "user",
+    text: prompt,
+  });
   await redis.hset(`chat:${userId}:${createdAt}`, { chatId, prompt });
   await redis.sadd(`user:${userId}:chats`, chatId);
   // sender, text, messageId 반환해야함
