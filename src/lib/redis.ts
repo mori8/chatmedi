@@ -59,25 +59,38 @@ export async function saveNewChat(
   // chatId(uuid)는 /api/chat/route.ts에서 생성됨
   console.log("saveNewChat called", userId, chatId, prompt);
 
-  const createdAt = new Date().toISOString().split("T")[0];
+  const locale = new Date().toLocaleString('en-US', { timeZone: 'Asia/Seoul' });
+  const createdAt = new Date(locale).toISOString().split("T")[0];
 
   const savedMessage = await saveChatMessage(userId, chatId, {
     sender: "user",
     text: prompt,
   });
 
-  await redis.hset(`chat:${userId}:history:${createdAt}`, { chatId, prompt });
+  await redis.hset(`chat:${userId}:history:${createdAt}:${chatId}`, { chatId, prompt });
   await redis.sadd(`user:${userId}:chats`, chatId);
 
   return savedMessage;
 }
 
-export async function fetchUserChats(userId: string) {
-  // 사용자가 생성한 모든 채팅 ID를 가져옴
+export async function fetchUserChats(userId: string): Promise<{ [date: string]: { chatId: string; prompt: string; }[] }> {
   if (!userId) {
-    return [];
+    return {};
   }
   console.log("fetchUserChats called", userId);
-  const chatIds = await redis.smembers(`user:${userId}:chats`);
-  return chatIds;
+  const keys = await redis.keys(`chat:${userId}:history:*`);
+  const chatsByDate: { [date: string]: { chatId: string; prompt: string; }[] } = {};
+
+  for (const key of keys) {
+    const [_, __, ___, date, chatId] = key.split(':');
+    const chat = await redis.hgetall(key) as { chatId: string; prompt: string; };
+    if (chat) {
+      if (!chatsByDate[date]) {
+        chatsByDate[date] = [];
+      }
+      chatsByDate[date].push(chat);
+    }
+  }
+
+  return chatsByDate;
 }
