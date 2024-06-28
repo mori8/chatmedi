@@ -6,36 +6,36 @@ const redis = new Redis({
   token: process.env.NEXT_PUBLIC_UPSTASH_REDIS_REST_TOKEN!,
 });
 
-export async function fetchChatHistory(userId: string, chatId: string) {
-  // 특정 사용자와 채팅 ID에 대한 모든 채팅 기록을 가져옴
+export async function fetchChatHistory(userId: string, chatId: string): Promise<Message[]> {
   if (!userId || !chatId) {
     return [];
   }
-  const keys = await redis.keys(`chat:${userId}:${chatId}:*`);
+  const keys = await redis.keys(`chat:${userId}:${chatId}:message:*`);
   const chats: Message[] = [];
-
+  
   for (const key of keys) {
-    const chat = (await redis.hgetall(key)) as unknown as Message;
-    if (chat) {
-      chats.push(chat);
+    const chat = await redis.hgetall(key);
+    if (chat && chat.sender && chat.text && chat.messageId) {
+      chats.push(chat as unknown as Message);
     }
   }
 
+  console.log("fetchChatHistory called");
+  console.log("keys:", keys);
+  console.log("chats:", chats);
   return chats;
 }
 
-export async function saveChatMessage(
-  userId: string,
-  chatId: string,
-  message: Omit<Message, "messageId">
-): Promise<Message | void> {
-  // 특정 사용자와 채팅 ID에 대한 개별 메시지를 저장
+
+
+export async function saveChatMessage(userId: string, chatId: string, message: Omit<Message, 'messageId'>): Promise<Message | void> {
   if (!userId || !chatId) {
     return;
   }
 
   const messageId = uuidv4();
-  console.log("saveChatMessage called", message);
+  const timestamp = new Date().toISOString();
+  console.log("saveChatMessage called", message, timestamp);
 
   const redisMessage = {
     messageId: messageId,
@@ -43,33 +43,21 @@ export async function saveChatMessage(
     text: message.text,
   };
 
-  await redis.hset(`chat:${userId}:${chatId}:messages`, redisMessage);
-  return redisMessage;
+  await redis.hset(`chat:${userId}:${chatId}:message:${timestamp}`, redisMessage);
+  return { ...redisMessage };
 }
 
-export async function saveNewChat(
-  userId: string,
-  chatId: string,
-  prompt: string
-): Promise<Message | void> {
+export async function saveNewChat(userId: string, chatId: string, prompt: string): Promise<Message | void> {
   if (!userId || !chatId || !prompt) {
     return;
   }
-  // 이 함수는 /chat/page.tsx에서만 호출되어야 함
-  // chatId(uuid)는 /api/chat/route.ts에서 생성됨
+
   console.log("saveNewChat called", userId, chatId, prompt);
-
-  const locale = new Date().toLocaleString('en-US', { timeZone: 'Asia/Seoul' });
-  const createdAt = new Date(locale).toISOString().split("T")[0];
-
-  const savedMessage = await saveChatMessage(userId, chatId, {
-    sender: "user",
-    text: prompt,
-  });
-
+  
+  const createdAt = new Date().toISOString().split("T")[0];
+  const savedMessage = await saveChatMessage(userId, chatId, { sender: "user", text: prompt });
   await redis.hset(`chat:${userId}:history:${createdAt}:${chatId}`, { chatId, prompt });
   await redis.sadd(`user:${userId}:chats`, chatId);
-
   return savedMessage;
 }
 
@@ -93,4 +81,46 @@ export async function fetchUserChats(userId: string): Promise<{ [date: string]: 
   }
 
   return chatsByDate;
+}
+
+export async function saveChatMediResponse(userId: string, chatId: string, messageId: string, response: ChatMediResponse): Promise<void> {
+  if (!userId || !chatId || !messageId || !response) {
+    throw new Error("Invalid input: Missing required parameters.");
+  }
+
+  console.log("saveChatMediResponse called", userId, chatId, messageId, response);
+
+  await redis.hset(`chat:${userId}:${chatId}:${messageId}:response`, response as unknown as Record<string, string>);
+}
+
+export async function getChatMediResponse(userId: string, chatId: string, messageId: string): Promise<ChatMediResponse | null> {
+  if (!userId || !chatId || !messageId) {
+    return null;
+  }
+
+  const response = await redis.hgetall(`chat:${userId}:${chatId}:${messageId}:response`);
+  if (!response || Object.keys(response).length === 0) {
+    return null;
+  }
+
+  return response as unknown as ChatMediResponse;
+}
+
+export async function getMessageInfo(userId: string, chatId: string, messageId: string): Promise<{ sender: string; text: string } | null> {
+  if (!userId || !chatId || !messageId) {
+    throw new Error("Invalid input: Missing required parameters.");
+  }
+
+  const key = `chat:${userId}:${chatId}:${messageId}`;
+  const messageData = await redis.hgetall(key);
+
+  if (!messageData || !messageData.sender || !messageData.text) {
+    console.error(`Message data not found for key: ${key}`);
+    return null;
+  }
+
+  return {
+    sender: messageData.sender as string,
+    text: messageData.text as string
+  };
 }

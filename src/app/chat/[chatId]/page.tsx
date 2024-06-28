@@ -9,7 +9,8 @@ import classNames from "classnames";
 
 import ChatTextArea from "@/components/ChatTextArea";
 import MarkdownWrapper from "@/components/MarkdownWrapper";
-import { fetchChatHistory, saveChatMessage } from "@/lib/redis";
+import { fetchChatHistory, saveChatMessage, saveChatMediResponse, getChatMediResponse } from "@/lib/redis";
+
 
 function ChatPage() {
   const { data: session, status } = useSession();
@@ -19,6 +20,7 @@ function ChatPage() {
   const chat = useRecoilValue(chatState);
   const [content, setContent] = useState("");
   const [messages, setMessages] = useState<Message[]>([]);
+  const [responses, setResponses] = useState<{ [key: string]: ChatMediResponse }>({});
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const isFetchingRef = useRef(false);
@@ -36,10 +38,52 @@ function ChatPage() {
       const history: Message[] = await fetchChatHistory(userId, chatId);
       console.log("history:", history);
       setMessages(history);
+
+      // Load ChatMediResponses for each message
+      const newResponses: { [key: string]: ChatMediResponse } = {};
+      for (const msg of history) {
+        const response = await getChatMediResponse(userId, chatId, msg.messageId);
+        if (response) {
+          newResponses[msg.messageId] = response;
+        }
+      }
+      setResponses(newResponses);
     }
 
     initializeChat();
   }, [userId, chatId]);
+
+  const fetchStreamResponse = async (userId: string, chatId: string, messageId: string) => {
+    const response = await fetch(`/api/stream`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        userId: userId,
+        chatId: chatId,
+        messageId: messageId,
+      }),
+    });
+
+    const reader = response.body?.getReader();
+    if (!reader) return;
+
+    const decoder = new TextDecoder();
+    let chatMediResponse: ChatMediResponse = {};
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      const chunk = decoder.decode(value, { stream: true });
+      const data = JSON.parse(chunk);
+      chatMediResponse = { ...chatMediResponse, ...data };
+      setResponses(prev => ({ ...prev, [messageId]: chatMediResponse }));
+    }
+
+    // Save the final response to Redis
+    await saveChatMediResponse(userId, chatId, messageId, chatMediResponse);
+  };
 
   const fetchAIResponse = async (prompt: string) => {
     if (isFetchingRef.current) return;
@@ -59,8 +103,10 @@ function ChatPage() {
       });
       const data = await response.json();
       const savedMessage = data.response;
-      
       setMessages((prev) => [...prev, savedMessage]);
+
+      // Fetch and display the stream response
+      await fetchStreamResponse(userId, chatId, savedMessage.messageId);
     } finally {
       isFetchingRef.current = false;
     }
@@ -115,7 +161,11 @@ function ChatPage() {
               })}
             >
               <MarkdownWrapper markdown={message.text} />
-              {message.messageId}
+              {responses[message.messageId] && (
+                <div className="mt-2 p-2 border-t border-gray-300">
+                  {JSON.stringify(responses[message.messageId], null, 2)}
+                </div>
+              )}
             </span>
           </div>
         ))}

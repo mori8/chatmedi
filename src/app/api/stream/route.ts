@@ -1,11 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
+import { saveChatMediResponse, getMessageInfo } from "@/lib/redis";
 
 export const config = {
   runtime: "edge",
 };
 
-export async function GET(req: NextRequest) {
-  // Create a ReadableStream
+export async function POST(req: NextRequest) {
+  const { userId, chatId, messageId } = await req.json();
+  const message = await getMessageInfo(userId, chatId, messageId);
+
+  // Initialize ChatMediResponse object
+  const chatMediResponse: ChatMediResponse = {};
+
   const stream = new ReadableStream({
     start(controller) {
       // Helper function to send data in chunks
@@ -13,6 +19,8 @@ export async function GET(req: NextRequest) {
         controller.enqueue(
           new TextEncoder().encode(JSON.stringify(data) + "\n")
         );
+        // Append data to chatMediResponse object
+        Object.assign(chatMediResponse, data);
       };
 
       // Function to simulate delay
@@ -59,8 +67,11 @@ export async function GET(req: NextRequest) {
           },
         });
 
-        // Close the stream
+        // Close the stream and save the response to Redis
         controller.close();
+
+        // Save the completed ChatMediResponse to Redis
+        await saveChatMediResponse(userId, chatId, messageId, chatMediResponse);
       })();
     },
   });
