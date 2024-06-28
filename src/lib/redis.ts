@@ -20,7 +20,7 @@ export async function fetchChatHistory(userId: string, chatId: string) {
       chats.push(chat);
     }
   }
-  
+
   return chats;
 }
 
@@ -35,8 +35,7 @@ export async function saveChatMessage(
   }
 
   const messageId = uuidv4();
-  const timestamp = new Date().toISOString();
-  console.log("saveChatMessage called", message, timestamp);
+  console.log("saveChatMessage called", message);
 
   const redisMessage = {
     messageId: messageId,
@@ -44,7 +43,7 @@ export async function saveChatMessage(
     text: message.text,
   };
 
-  await redis.hset(`chat:${userId}:${chatId}:${timestamp}`, redisMessage);
+  await redis.hset(`chat:${userId}:${chatId}:messages`, redisMessage);
   return redisMessage;
 }
 
@@ -66,9 +65,10 @@ export async function saveNewChat(
     sender: "user",
     text: prompt,
   });
-  await redis.hset(`chat:${userId}:${createdAt}`, { chatId, prompt });
+
+  await redis.hset(`chat:${userId}:history:${createdAt}`, { chatId, prompt });
   await redis.sadd(`user:${userId}:chats`, chatId);
-  // sender, text, messageId 반환해야함
+
   return savedMessage;
 }
 
