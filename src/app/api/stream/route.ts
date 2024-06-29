@@ -1,17 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
-import { saveChatMediResponse, getMessageInfo } from "@/lib/redis";
+import { saveAIMessage } from "@/lib/redis";
 
 export const config = {
   runtime: "edge",
 };
 
 export async function POST(req: NextRequest) {
-  const { userId, chatId, messageId } = await req.json();
-  const message = await getMessageInfo(userId, chatId, messageId);
-
+  const { userId, chatId, prompt } = await req.json();
   // Initialize ChatMediResponse object
   const chatMediResponse: ChatMediResponse = {};
-
+  console.log("[stream/route.ts]: ", userId, chatId, prompt);
   const stream = new ReadableStream({
     start(controller) {
       // Helper function to send data in chunks
@@ -61,17 +59,31 @@ export async function POST(req: NextRequest) {
         await delay(1000);
 
         // Send the final_response part and close the stream
+        const url = `${process.env.NEXT_PUBLIC_BASE_URL}/api/chat`;
+        const response = await fetch(url, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            userId: userId,
+            prompt: prompt,
+            chatId: chatId,
+          }),
+        });
+        const data = await response.json();
+        const aiFinalResponse = data.response;
+        // 여기서 aiFinalResponse는 단순 문자열
         await sendData({
           final_response: {
-            text: "Pneumonia and pleural effusion are both serious conditions affecting the respiratory system, but they differ significantly in terms of their underlying pathology, causes, symptoms, diagnosis, and treatment.",
+            text: aiFinalResponse,
           },
-        });
+        }); 
 
         // Close the stream and save the response to Redis
         controller.close();
-
-        // Save the completed ChatMediResponse to Redis
-        await saveChatMediResponse(userId, chatId, messageId, chatMediResponse);
+        // 여기서 saveAIMessage 해야댐
+        await saveAIMessage(userId, chatId, chatMediResponse);
       })();
     },
   });

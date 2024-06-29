@@ -9,8 +9,7 @@ import classNames from "classnames";
 
 import ChatTextArea from "@/components/ChatTextArea";
 import MarkdownWrapper from "@/components/MarkdownWrapper";
-import { fetchChatHistory, saveChatMessage, saveChatMediResponse, getChatMediResponse } from "@/lib/redis";
-
+import { fetchChatHistory, saveUserMessage, saveAIMessage } from "@/lib/redis";
 
 function ChatPage() {
   const { data: session, status } = useSession();
@@ -19,11 +18,11 @@ function ChatPage() {
   const userId = user?.email!;
   const chat = useRecoilValue(chatState);
   const [content, setContent] = useState("");
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [responses, setResponses] = useState<{ [key: string]: ChatMediResponse }>({});
+  const [messages, setMessages] = useState<(UserMessage | AIMessage)[]>([]);
+  const [tempChatMediResponse, setTempChatMediResponse] = useState<ChatMediResponse | null>(null);
+  const [isFetching, setIsFetching] = useState(false);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const isFetchingRef = useRef(false);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -35,103 +34,68 @@ function ChatPage() {
 
   useEffect(() => {
     async function initializeChat() {
-      const history: Message[] = await fetchChatHistory(userId, chatId);
+      const history: (UserMessage | AIMessage)[] = await fetchChatHistory(userId, chatId);
       console.log("history:", history);
       setMessages(history);
-
-      // Load ChatMediResponses for each message
-      const newResponses: { [key: string]: ChatMediResponse } = {};
-      for (const msg of history) {
-        const response = await getChatMediResponse(userId, chatId, msg.messageId);
-        if (response) {
-          newResponses[msg.messageId] = response;
-        }
-      }
-      setResponses(newResponses);
     }
 
     initializeChat();
   }, [userId, chatId]);
 
-  const fetchStreamResponse = async (userId: string, chatId: string, messageId: string) => {
-    const response = await fetch(`/api/stream`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        userId: userId,
-        chatId: chatId,
-        messageId: messageId,
-      }),
-    });
-
-    const reader = response.body?.getReader();
-    if (!reader) return;
-
-    const decoder = new TextDecoder();
-    let chatMediResponse: ChatMediResponse = {};
-
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      const chunk = decoder.decode(value, { stream: true });
-      const data = JSON.parse(chunk);
-      chatMediResponse = { ...chatMediResponse, ...data };
-      setResponses(prev => ({ ...prev, [messageId]: chatMediResponse }));
+  useEffect(() => {
+    const lastMessage = messages[messages.length - 1];
+    if (lastMessage && 'prompt' in lastMessage && !isFetching) {
+      setIsFetching(true);
+      fetchStreamResponse(lastMessage.prompt.text, lastMessage.messageId);
     }
+  }, [messages]);
 
-    // Save the final response to Redis
-    await saveChatMediResponse(userId, chatId, messageId, chatMediResponse);
-  };
-
-  const fetchAIResponse = async (prompt: string) => {
-    if (isFetchingRef.current) return;
-
-    isFetchingRef.current = true;
+  const fetchStreamResponse = async (prompt: string, userMessageId: string) => {
     try {
-      const response = await fetch(`/api/chat`, {
+      const response = await fetch(`/api/stream`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
           userId: userId,
-          prompt: prompt,
           chatId: chatId,
+          prompt: prompt,
         }),
       });
-      const data = await response.json();
-      const savedMessage = data.response;
-      setMessages((prev) => [...prev, savedMessage]);
 
-      // Fetch and display the stream response
-      await fetchStreamResponse(userId, chatId, savedMessage.messageId);
+      const reader = response.body?.getReader();
+      if (!reader) return;
+
+      const decoder = new TextDecoder();
+      let tempResponse: ChatMediResponse = {};
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        const chunk = decoder.decode(value, { stream: true });
+        const data = JSON.parse(chunk);
+        tempResponse = { ...tempResponse, ...data };
+        setTempChatMediResponse(tempResponse);
+      }
+
+      // Save the final response to Redis
+      const savedAIMessage = await saveAIMessage(userId, chatId, tempResponse);
+      setMessages(prevMessages => [...prevMessages, savedAIMessage]);
     } finally {
-      isFetchingRef.current = false;
+      setIsFetching(false);
     }
   };
 
-  const lastMessageRef = useRef<Message | null>(null);
-
-  useEffect(() => {
-    const lastMessage = messages[messages.length - 1];
-    if (lastMessage?.sender === "user" && lastMessage !== lastMessageRef.current) {
-      lastMessageRef.current = lastMessage;
-      fetchAIResponse(lastMessage.text);
-    }
-  }, [messages]);
-
   const handleSubmit = useCallback(async () => {
     if (content.trim() === "") return;
-    const userMessage = { sender: "user", text: content };
-    setContent("");
-    const savedUserMessage = await saveChatMessage(userId, chatId, userMessage);
+    const savedUserMessage = await saveUserMessage(userId, chatId, content, []);
     if (!savedUserMessage) {
       console.error("Failed to save user message");
       return;
     }
     setMessages((prev) => [...prev, savedUserMessage]);
+    setContent("");
   }, [content, userId, chatId]);
 
   return (
@@ -160,11 +124,10 @@ function ChatPage() {
                 "bg-slate-100 rounded-xl px-4 py-2": message.sender === "user",
               })}
             >
-              <MarkdownWrapper markdown={message.text} />
-              {responses[message.messageId] && (
-                <div className="mt-2 p-2 border-t border-gray-300">
-                  {JSON.stringify(responses[message.messageId], null, 2)}
-                </div>
+              {'prompt' in message ? (
+                <MarkdownWrapper markdown={message.prompt.text} />
+              ) : (
+                <MarkdownWrapper markdown={message.response?.final_response?.text || ""} />
               )}
             </span>
           </div>
