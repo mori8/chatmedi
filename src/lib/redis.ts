@@ -11,7 +11,7 @@ export async function fetchChatHistory(userId: string, chatId: string) {
     return [];
   }
   const keys = await redis.keys(`chat:${userId}:${chatId}:*`);
-  const chats: (UserMessage | AIMessage)[] = [];
+  const chats: (UserMessage & { timestamp: string } | AIMessage & { timestamp: string })[] = [];
   
   for (const key of keys) {
     const chat = await redis.hgetall(key) as unknown as Record<string, string>;
@@ -20,40 +20,37 @@ export async function fetchChatHistory(userId: string, chatId: string) {
       continue;
     }
     if (chat.sender === 'user') {
-      const userMessage: UserMessage = {
+      const userMessage: UserMessage & { timestamp: string } = {
         messageId: chat.messageId,
         sender: 'user',
         prompt: {
           text: chat.promptText,
           files: chat.promptFiles ? chat.promptFiles.split(',') : [],
         },
+        timestamp: chat.timestamp,
       };
       chats.push(userMessage);
     } else if (chat.sender === 'ai') {
       let response: ChatMediResponse;
       try {
-        // Check if chat.response is a JSON string or already an object
-        if (typeof chat.response === 'string') {
-          response = JSON.parse(chat.response) as ChatMediResponse;
-        } else {
-          response = chat.response as unknown as ChatMediResponse;
-        }
+        response = typeof chat.response === 'string' ? JSON.parse(chat.response) : chat.response;
       } catch (error) {
         console.error("Failed to parse response:", chat.response);
         continue;
       }
 
-      const aiMessage: AIMessage = {
+      const aiMessage: AIMessage & { timestamp: string } = {
         messageId: chat.messageId,
         sender: 'ai',
         response: response,
+        timestamp: chat.timestamp,
       };
       chats.push(aiMessage);
     }
   }
   console.log('chats:', chats);
   console.log("fetchChatHistory called");
-  return chats.sort((a, b) => a.messageId.localeCompare(b.messageId)); // Assuming messageId is timestamp based
+  return chats.sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
 }
 
 export async function saveUserMessage(userId: string, chatId: string, text: string, files?: string[]): Promise<UserMessage> {
@@ -77,7 +74,8 @@ export async function saveUserMessage(userId: string, chatId: string, text: stri
     messageId: userMessage.messageId,
     sender: userMessage.sender,
     promptText: userMessage.prompt.text,
-    promptFiles: userMessage.prompt.files?.join(',') || "",
+    promptFiles: userMessage.prompt.files?.join(',') || '',
+    timestamp,
   });
 
   return userMessage;
@@ -101,12 +99,13 @@ export async function saveAIMessage(userId: string, chatId: string, response: Ch
     messageId: aiMessage.messageId,
     sender: aiMessage.sender,
     response: JSON.stringify(aiMessage.response),
+    timestamp,
   });
 
   return aiMessage;
 }
 
-export async function saveNewChat(userId: string, chatId: string, prompt: string, files: string[] = []) {
+export async function saveNewChat(userId: string, chatId: string, prompt: string, files?: string[]) {
   if (!userId || !chatId || !prompt) {
     throw new Error('[redis.ts/saveNewChat] Invalid input');
   }

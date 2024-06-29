@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-import { saveAIMessage } from "@/lib/redis";
 
 export const config = {
   runtime: "edge",
@@ -82,8 +81,6 @@ export async function POST(req: NextRequest) {
 
         // Close the stream and save the response to Redis
         controller.close();
-        // 여기서 saveAIMessage 해야댐
-        await saveAIMessage(userId, chatId, chatMediResponse);
       })();
     },
   });
