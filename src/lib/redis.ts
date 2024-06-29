@@ -135,12 +135,13 @@ export async function saveNewChat(
 
   console.log("saveNewChat called", userId, chatId, prompt);
 
-  await saveUserMessage(userId, chatId, prompt, files);
+  const savedMessage = await saveUserMessage(userId, chatId, prompt, files);
 
   const timestamp = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Seoul" })).toISOString().split("T")[0];
   await redis.hset(`chat:${userId}:history:${timestamp}:${chatId}`, { chatId, prompt });
   await redis.sadd(`user:${userId}:chats`, chatId);
 
+  return savedMessage;
 }
 
 export async function fetchUserChats(

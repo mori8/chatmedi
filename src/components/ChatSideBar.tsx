@@ -35,7 +35,7 @@ export default function ChatSideBar({}: Props) {
   }, [user, chatId]);
 
   return (
-    <div className="bg-palatinate text-alabaster px-4 pt-5 pb-4 rounded-3xl h-full flex flex-col min-w-64 box-border text-sm">
+    <div className="bg-palatinate text-alabaster px-4 pt-5 pb-4 rounded-3xl h-full flex flex-col w-64 box-border text-sm">
       <div className="flex-shrink-0 flex justify-between items-center">
         <div>
           <h1 className="text-base font-bold">ChatMedi</h1>
@@ -50,7 +50,7 @@ export default function ChatSideBar({}: Props) {
       </div>
       <div className="flex-1 overflow-auto">
         {status === "loading" ? (
-          <div className="animate-pulse">Loading chat history...</div>
+          <div className="animate-pulse mt-2">Loading chat history...</div>
         ) : Object.keys(chatHistory).length > 0 ? (
           <div>
             {Object.entries(chatHistory).map(([date, chats]) => (
@@ -63,7 +63,7 @@ export default function ChatSideBar({}: Props) {
                     <li
                       key={chat.chatId}
                       className={classNames(
-                        "px-3 py-2 rounded-xl hover:bg-alabaster hover:bg-opacity-30",
+                        "px-3 py-2 rounded-xl hover:bg-alabaster hover:bg-opacity-30 truncate",
                         {
                           "bg-alabaster bg-opacity-30": chat.chatId === chatId,
                         }
