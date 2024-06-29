@@ -6,7 +6,7 @@ import {
 } from "@langchain/core/prompts";
 import { RunnableWithMessageHistory } from "@langchain/core/runnables";
 import { UpstashRedisChatMessageHistory } from "@langchain/community/stores/message/upstash_redis";
-import { saveAIMessage } from "@/lib/redis";
+
 
 
 const getAIResponse = async (userId: string, prompt: string, chatId: string) => {
@@ -45,8 +45,7 @@ const getAIResponse = async (userId: string, prompt: string, chatId: string) => 
 
   // console.log("result:", result);
   console.log("getAIResponse called")
-  // const savedMessage = await saveAIMessage(userId, chatId, { sender: "ai", text: result.content.toString() });
-  // return savedMessage;
+
   return result.content.toString();
 };
 

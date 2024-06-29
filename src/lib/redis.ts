@@ -15,6 +15,7 @@ export async function fetchChatHistory(userId: string, chatId: string) {
   
   for (const key of keys) {
     const chat = await redis.hgetall(key) as unknown as Record<string, string>;
+
     if (!chat) {
       continue;
     }
@@ -31,7 +32,12 @@ export async function fetchChatHistory(userId: string, chatId: string) {
     } else if (chat.sender === 'ai') {
       let response: ChatMediResponse;
       try {
-        response = JSON.parse(chat.response) as ChatMediResponse;
+        // Check if chat.response is a JSON string or already an object
+        if (typeof chat.response === 'string') {
+          response = JSON.parse(chat.response) as ChatMediResponse;
+        } else {
+          response = chat.response as unknown as ChatMediResponse;
+        }
       } catch (error) {
         console.error("Failed to parse response:", chat.response);
         continue;
@@ -45,7 +51,7 @@ export async function fetchChatHistory(userId: string, chatId: string) {
       chats.push(aiMessage);
     }
   }
-
+  console.log('chats:', chats);
   console.log("fetchChatHistory called");
   return chats.sort((a, b) => a.messageId.localeCompare(b.messageId)); // Assuming messageId is timestamp based
 }
