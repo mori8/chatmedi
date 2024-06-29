@@ -8,7 +8,6 @@ import { RunnableWithMessageHistory } from "@langchain/core/runnables";
 import { UpstashRedisChatMessageHistory } from "@langchain/community/stores/message/upstash_redis";
 
 
-
 const getAIResponse = async (userId: string, prompt: string, chatId: string) => {
   const prompts = ChatPromptTemplate.fromMessages([
     ["system", "You're an assistant who's good at medical QA."],
@@ -52,9 +51,6 @@ const getAIResponse = async (userId: string, prompt: string, chatId: string) => 
 
 export async function POST(req: NextRequest) {
   const { userId, prompt, chatId } = await req.json();
-  console.log("userId:", userId);
-  console.log("prompt:", prompt);
-  console.log("chatId:", chatId);
 
   if (
     !userId ||

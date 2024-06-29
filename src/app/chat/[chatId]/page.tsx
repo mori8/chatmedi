@@ -46,11 +46,11 @@ function ChatPage() {
     const lastMessage = messages[messages.length - 1];
     if (lastMessage && 'prompt' in lastMessage && !isFetching) {
       setIsFetching(true);
-      fetchStreamResponse(lastMessage.prompt.text, lastMessage.messageId);
+      fetchStreamResponse(lastMessage.prompt.text);
     }
   }, [messages]);
 
-  const fetchStreamResponse = async (prompt: string, userMessageId: string) => {
+  const fetchStreamResponse = async (prompt: string) => {
     try {
       const response = await fetch(`/api/stream`, {
         method: "POST",
@@ -89,7 +89,8 @@ function ChatPage() {
 
   const handleSubmit = useCallback(async () => {
     if (content.trim() === "") return;
-    const savedUserMessage = await saveUserMessage(userId, chatId, content, []);
+    const savedUserMessage = await saveUserMessage(userId, chatId, content);
+    console.log("savedUserMessage:", savedUserMessage)
     if (!savedUserMessage) {
       console.error("Failed to save user message");
       return;

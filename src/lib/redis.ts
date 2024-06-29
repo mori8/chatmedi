@@ -1,4 +1,4 @@
-import { Redis } from '@upstash/redis';
+import { Redis } from "@upstash/redis";
 import { v4 as uuidv4 } from "uuid";
 
 const redis = new Redis({
@@ -11,29 +11,38 @@ export async function fetchChatHistory(userId: string, chatId: string) {
     return [];
   }
   const keys = await redis.keys(`chat:${userId}:${chatId}:*`);
-  const chats: (UserMessage & { timestamp: string } | AIMessage & { timestamp: string })[] = [];
-  
+  const chats: (
+    | (UserMessage & { timestamp: string })
+    | (AIMessage & { timestamp: string })
+  )[] = [];
+
   for (const key of keys) {
-    const chat = await redis.hgetall(key) as unknown as Record<string, string>;
+    const chat = (await redis.hgetall(key)) as unknown as Record<
+      string,
+      string
+    >;
 
     if (!chat) {
       continue;
     }
-    if (chat.sender === 'user') {
+    if (chat.sender === "user") {
       const userMessage: UserMessage & { timestamp: string } = {
         messageId: chat.messageId,
-        sender: 'user',
+        sender: "user",
         prompt: {
           text: chat.promptText,
-          files: chat.promptFiles ? chat.promptFiles.split(',') : [],
+          files: chat.promptFiles ? chat.promptFiles.split(",") : [],
         },
         timestamp: chat.timestamp,
       };
       chats.push(userMessage);
-    } else if (chat.sender === 'ai') {
+    } else if (chat.sender === "ai") {
       let response: ChatMediResponse;
       try {
-        response = typeof chat.response === 'string' ? JSON.parse(chat.response) : chat.response;
+        response =
+          typeof chat.response === "string"
+            ? JSON.parse(chat.response)
+            : chat.response;
       } catch (error) {
         console.error("Failed to parse response:", chat.response);
         continue;
@@ -41,61 +50,70 @@ export async function fetchChatHistory(userId: string, chatId: string) {
 
       const aiMessage: AIMessage & { timestamp: string } = {
         messageId: chat.messageId,
-        sender: 'ai',
+        sender: "ai",
         response: response,
         timestamp: chat.timestamp,
       };
       chats.push(aiMessage);
     }
   }
-  console.log('chats:', chats);
+  console.log("chats:", chats);
   console.log("fetchChatHistory called");
-  return chats.sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
+  return chats;
 }
 
-export async function saveUserMessage(userId: string, chatId: string, text: string, files?: string[]): Promise<UserMessage> {
+export async function saveUserMessage(
+  userId: string,
+  chatId: string,
+  text: string,
+  files?: string[]
+): Promise<UserMessage> {
   if (!userId || !chatId || !text) {
-    throw new Error('Invalid input');
+    throw new Error("Invalid input");
   }
-
+  console.log("saveUserMessage called", userId, chatId, text);
   const messageId = uuidv4();
-  const timestamp = new Date().toISOString();
-  
+  const timestamp = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Seoul" })).toISOString();
+
   const userMessage: UserMessage = {
     messageId,
-    sender: 'user',
+    sender: "user",
     prompt: {
       text,
       files,
     },
   };
 
-  await redis.hset(`chat:${userId}:${chatId}:${timestamp}`, {
+  await redis.hset(`chat:${userId}:${chatId}:${timestamp}:user`, {
     messageId: userMessage.messageId,
     sender: userMessage.sender,
     promptText: userMessage.prompt.text,
-    promptFiles: userMessage.prompt.files?.join(',') || '',
+    promptFiles: userMessage.prompt.files?.join(",") || "",
     timestamp,
   });
 
   return userMessage;
 }
 
-export async function saveAIMessage(userId: string, chatId: string, response: ChatMediResponse): Promise<AIMessage> {
+export async function saveAIMessage(
+  userId: string,
+  chatId: string,
+  response: ChatMediResponse
+): Promise<AIMessage> {
   if (!userId || !chatId || !response) {
-    throw new Error('Invalid input');
+    throw new Error("Invalid input");
   }
   console.log("saveAIMessage called", userId, chatId, response);
   const messageId = uuidv4();
-  const timestamp = new Date().toISOString();
+  const timestamp = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Seoul" })).toISOString();
 
   const aiMessage: AIMessage = {
     messageId,
-    sender: 'ai',
+    sender: "ai",
     response,
   };
 
-  await redis.hset(`chat:${userId}:${chatId}:${timestamp}`, {
+  await redis.hset(`chat:${userId}:${chatId}:${timestamp}:ai`, {
     messageId: aiMessage.messageId,
     sender: aiMessage.sender,
     response: JSON.stringify(aiMessage.response),
@@ -105,34 +123,62 @@ export async function saveAIMessage(userId: string, chatId: string, response: Ch
   return aiMessage;
 }
 
-export async function saveNewChat(userId: string, chatId: string, prompt: string, files?: string[]) {
+export async function saveNewChat(
+  userId: string,
+  chatId: string,
+  prompt: string,
+  files?: string[]
+) {
   if (!userId || !chatId || !prompt) {
-    throw new Error('[redis.ts/saveNewChat] Invalid input');
+    throw new Error("[redis.ts/saveNewChat] Invalid input");
   }
 
   console.log("saveNewChat called", userId, chatId, prompt);
-  
+
   await saveUserMessage(userId, chatId, prompt, files);
+
+  const timestamp = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Seoul" })).toISOString().split("T")[0];
+  await redis.hset(`chat:${userId}:history:${timestamp}:${chatId}`, { chatId, prompt });
   await redis.sadd(`user:${userId}:chats`, chatId);
+
 }
 
-export async function fetchUserChats(userId: string): Promise<{ [date: string]: { chatId: string; prompt: string; }[] }> {
+export async function fetchUserChats(
+  userId: string
+): Promise<{ [date: string]: { chatId: string; prompt: string }[] }> {
   if (!userId) {
     return {};
   }
   console.log("fetchUserChats called", userId);
+
+  // Get all keys related to user's chat history
   const keys = await redis.keys(`chat:${userId}:history:*`);
-  const chatsByDate: { [date: string]: { chatId: string; prompt: string; }[] } = {};
+  const chatsByDate: { [date: string]: { chatId: string; prompt: string }[] } =
+    {};
 
   for (const key of keys) {
-    const [_, __, ___, date, chatId] = key.split(':');
-    const chat = await redis.hgetall(key) as { chatId: string; prompt: string; };
-    if (chat) {
-      if (!chatsByDate[date]) {
-        chatsByDate[date] = [];
-      }
-      chatsByDate[date].push(chat);
+    const chat = (await redis.hgetall(key)) as unknown as Record<
+      string,
+      string
+    >;
+    if (!chat) {
+      continue;
     }
+
+    const timestamp = key.split(":")[3];
+    const date = timestamp.split("T")[0];
+    const chatId = chat.chatId;
+
+    const chatData = {
+      chatId,
+      prompt: chat.prompt,
+    };
+
+    if (!chatsByDate[date]) {
+      chatsByDate[date] = [];
+    }
+
+    chatsByDate[date].push(chatData);
   }
 
   return chatsByDate;
