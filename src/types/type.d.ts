@@ -33,7 +33,9 @@ interface SelectedModel {
 }
 
 interface OutputFromModel {
+  input: string;
   text: string;
+  file?: string;
 }
 
 interface FinalResponse {
@@ -43,7 +45,7 @@ interface FinalResponse {
 interface ChatMediResponse {
   planned_task?: Task[];
   selected_model?: SelectedModel;
-  output_from_model?: OutputFromModel;
+  output_from_model?: OutputFromModel[];
   final_response?: FinalResponse;
 }
 

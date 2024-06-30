@@ -51,9 +51,11 @@ export async function POST(req: NextRequest) {
 
         // Send the output_from_model part
         await sendData({
-          output_from_model: {
-            text: "기깔나네요",
-          },
+          output_from_model: [{
+            input: "Tell me the difference between pneumonia and pleural effusion",
+            text: "넹",
+            file: ""
+          },]
         });
         await delay(1000);
 
