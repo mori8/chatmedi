@@ -32,7 +32,7 @@ function ChatPage() {
 
   useEffect(() => {
     scrollToBottom();
-  }, [messages]);
+  }, [messages, tempChatMediResponse]);
 
   useEffect(() => {
     async function initializeChat() {
@@ -148,9 +148,11 @@ function ChatPage() {
             </div>
           </div>
         ) : (
-          <div className="mt-4 text-sm text-slate-400">
-            Finding the right model to perform <LoadingDots />
-          </div>
+          response.planned_task && (
+            <div className="mt-4 text-sm text-slate-400">
+              Finding the right model to perform <LoadingDots />
+            </div>
+          )
         )}
         {response.output_from_model ? (
           <div className="mt-4 text-sm">
@@ -182,18 +184,22 @@ function ChatPage() {
             ))}
           </div>
         ) : (
-          <div className="mt-4 text-sm text-slate-400">
+          response.selected_model && (
+            <div className="mt-4 text-sm text-slate-400">
               Executing model <LoadingDots />
-          </div>
+            </div>
+          )
         )}
         {response.final_response ? (
           <div className="mt-2">
             <MarkdownWrapper markdown={response.final_response.text} />
           </div>
         ) : (
+          response.output_from_model && (
             <div className="mt-4 text-sm text-slate-400">
               Generating a result based on the model’s output <LoadingDots />
             </div>
+          )
         )}
       </div>
     );

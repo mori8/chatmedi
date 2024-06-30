@@ -12,7 +12,7 @@ const LoadingDots = () => {
           return '';
         }
       });
-    }, 1000);
+    }, 500);
 
     return () => clearInterval(interval);
   }, []);
