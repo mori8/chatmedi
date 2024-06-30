@@ -33,6 +33,7 @@ interface SelectedModel {
 }
 
 interface OutputFromModel {
+  model_name: string;
   input: string;
   text: string;
   file?: string;

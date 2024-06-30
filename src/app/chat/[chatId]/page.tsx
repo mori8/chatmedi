@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import { useSession } from "next-auth/react";
@@ -7,6 +7,7 @@ import { useRecoilValue } from "recoil";
 import { chatState } from "@/recoil/atoms";
 import classNames from "classnames";
 
+import LoadingDots from "@/components/LoadingDots";
 import ChatTextArea from "@/components/ChatTextArea";
 import MarkdownWrapper from "@/components/MarkdownWrapper";
 import { fetchChatHistory, saveUserMessage, saveAIMessage } from "@/lib/redis";
@@ -19,7 +20,8 @@ function ChatPage() {
   const chat = useRecoilValue(chatState);
   const [content, setContent] = useState("");
   const [messages, setMessages] = useState<(UserMessage | AIMessage)[]>([]);
-  const [tempChatMediResponse, setTempChatMediResponse] = useState<ChatMediResponse | null>(null);
+  const [tempChatMediResponse, setTempChatMediResponse] =
+    useState<ChatMediResponse | null>(null);
   const [isFetching, setIsFetching] = useState(false);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -34,7 +36,10 @@ function ChatPage() {
 
   useEffect(() => {
     async function initializeChat() {
-      const history: (UserMessage | AIMessage)[] = await fetchChatHistory(userId, chatId);
+      const history: (UserMessage | AIMessage)[] = await fetchChatHistory(
+        userId,
+        chatId
+      );
       console.log("history:", history);
       setMessages(history);
     }
@@ -44,7 +49,7 @@ function ChatPage() {
 
   useEffect(() => {
     const lastMessage = messages[messages.length - 1];
-    if (lastMessage && 'prompt' in lastMessage && !isFetching) {
+    if (lastMessage && "prompt" in lastMessage && !isFetching) {
       setIsFetching(true);
       fetchStreamResponse(lastMessage.prompt.text);
     }
@@ -81,7 +86,7 @@ function ChatPage() {
 
       // Save the final response to Redis
       const savedAIMessage = await saveAIMessage(userId, chatId, tempResponse);
-      setMessages(prevMessages => [...prevMessages, savedAIMessage]);
+      setMessages((prevMessages) => [...prevMessages, savedAIMessage]);
     } finally {
       setIsFetching(false);
     }
@@ -90,7 +95,7 @@ function ChatPage() {
   const handleSubmit = useCallback(async () => {
     if (content.trim() === "") return;
     const savedUserMessage = await saveUserMessage(userId, chatId, content);
-    console.log("savedUserMessage:", savedUserMessage)
+    console.log("savedUserMessage:", savedUserMessage);
     if (!savedUserMessage) {
       console.error("Failed to save user message");
       return;
@@ -102,36 +107,93 @@ function ChatPage() {
   const renderChatMediResponse = (response: ChatMediResponse) => {
     return (
       <div className="mt-2 p-2">
-        {response.planned_task && (
-          <div>
-            <strong>Planned Task:</strong>
-            {response.planned_task.map((task, index) => (
-              <div key={index}>
-                <p>Task: {task.task}</p>
-                <p>ID: {task.id}</p>
-                <p>Dep: {task.dep.join(', ')}</p>
-                <p>Args: {JSON.stringify(task.args)}</p>
+        {response.planned_task ? (
+          <div className="text-sm">
+            <p className="m-0 text-slate-400">
+              To handle your request, we need to tackle these tasks:
+            </p>
+            <div className="flex flex-row my-2 flex-wrap gap-2">
+              {response.planned_task.map((task, index) => (
+                <span className="m-0 py-1 px-2 rounded-xl bg-blue-50 border border-blue-200 text-slate-600 font-semibold flex-shrink-0">
+                  {task.task}
+                </span>
+              ))}
+            </div>
+
+            <p className="m-0 text-slate-400">
+              I'll find the right model for the job!
+            </p>
+          </div>
+        ) : (
+          <div className="mt-2 text-sm text-slate-400">
+            Analyzing <LoadingDots />
+          </div>
+        )}
+        {response.selected_model ? (
+          <div className="mt-4 text-sm">
+            <p className="m-0 text-slate-400">I found an appropriate model!</p>
+            <div className="bg-slate-100 my-2 px-4 py-3 rounded-xl">
+              <p className="m-0 mb-1">
+                <span className="text-xs font-semibold bg-white px-1 py-[2px] rounded border border-slate-200 text-slate-500">
+                  Model
+                </span>{" "}
+                {response.selected_model.model}
+              </p>
+              <p className="m-0">
+                <span className="text-xs font-semibold bg-white px-1 py-[2px] rounded border border-slate-200 text-slate-500">
+                  Reason
+                </span>{" "}
+                {response.selected_model.reason}
+              </p>
+            </div>
+          </div>
+        ) : (
+          <div className="mt-4 text-sm text-slate-400">
+            Finding the right model to perform <LoadingDots />
+          </div>
+        )}
+        {response.output_from_model ? (
+          <div className="mt-4 text-sm">
+            <p className="m-0 text-slate-400">Model run complete.</p>
+            {response.output_from_model.map((output, index) => (
+              <div
+                key={index}
+                className="my-2 px-4 py-3 rounded-xl bg-slate-100"
+              >
+                <p className="m-0 mb-2 text-slate-400 text-xs">
+                  response from{" "}
+                  <span className="ml-1 bg-slate-200 border border-slate-300 px-1 py-[2px] rounded text-slate-500">
+                    asdfasdf
+                  </span>
+                </p>
+                <p className="m-0 mb-1">
+                  <span className="text-xs font-semibold bg-white px-1 py-[2px] rounded border border-slate-200 text-slate-500">
+                    Input
+                  </span>{" "}
+                  {output.input}
+                </p>
+                <p className="m-0">
+                  <span className="text-xs font-semibold bg-white px-1 py-[2px] rounded border border-slate-200 text-slate-500">
+                    Output
+                  </span>{" "}
+                  {output.text}
+                </p>
               </div>
             ))}
           </div>
-        )}
-        {response.selected_model && (
-          <div>
-            <strong>Selected Model:</strong>
-            <p>Model: {response.selected_model.model}</p>
-            <p>Reason: {response.selected_model.reason}</p>
+        ) : (
+          <div className="mt-4 text-sm text-slate-400">
+              Executing model <LoadingDots />
           </div>
         )}
-        {response.output_from_model && (
-          <div>
-            <strong>Output from Model:</strong>
-            <p>Text: {response.output_from_model.text}</p>
-          </div>
-        )}
-        {response.final_response && (
-          <div>
+        {response.final_response ? (
+          <div className="mt-2">
             <MarkdownWrapper markdown={response.final_response.text} />
           </div>
+        ) : (
+            <div className="mt-4 text-sm text-slate-400">
+              Generating a result based on the model’s output <LoadingDots />
+            </div>
         )}
       </div>
     );
@@ -159,11 +221,11 @@ function ChatPage() {
               />
             </div>
             <span
-              className={classNames('prose', {
+              className={classNames("prose", {
                 "bg-slate-100 rounded-xl px-4 py-2": message.sender === "user",
               })}
             >
-              {'prompt' in message ? (
+              {"prompt" in message ? (
                 <MarkdownWrapper markdown={message.prompt.text} />
               ) : (
                 <>
@@ -176,9 +238,13 @@ function ChatPage() {
         {isFetching && tempChatMediResponse && (
           <div className="flex gap-4 justify-start">
             <div className="profile-image flex-shrink-0">
-              <img className="rounded-full w-8 h-8" src="/images/robot-1.svg" alt="AI" />
+              <img
+                className="rounded-full w-8 h-8"
+                src="/images/robot-1.svg"
+                alt="AI"
+              />
             </div>
-            <span className="prose bg-slate-100 rounded-xl px-4 py-2">
+            <span className="prose">
               {renderChatMediResponse(tempChatMediResponse)}
             </span>
           </div>
