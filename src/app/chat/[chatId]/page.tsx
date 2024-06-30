@@ -51,6 +51,7 @@ function ChatPage() {
   }, [messages]);
 
   const fetchStreamResponse = async (prompt: string) => {
+    let tempResponse: ChatMediResponse = {};
     try {
       const response = await fetch(`/api/stream`, {
         method: "POST",
@@ -68,7 +69,6 @@ function ChatPage() {
       if (!reader) return;
 
       const decoder = new TextDecoder();
-      let tempResponse: ChatMediResponse = {};
 
       while (true) {
         const { done, value } = await reader.read();
@@ -77,6 +77,13 @@ function ChatPage() {
         const data = JSON.parse(chunk);
         tempResponse = { ...tempResponse, ...data };
         setTempChatMediResponse(tempResponse);
+        setMessages(prevMessages => 
+          prevMessages.map(msg => 
+            'prompt' in msg && msg.prompt.text === prompt ? 
+              { ...msg, response: tempResponse } as AIMessage : 
+              msg
+          )
+        );
       }
 
       // Save the final response to Redis
@@ -84,6 +91,7 @@ function ChatPage() {
       setMessages(prevMessages => [...prevMessages, savedAIMessage]);
     } finally {
       setIsFetching(false);
+      setTempChatMediResponse(null); // Reset temp response after saving
     }
   };
 
@@ -128,11 +136,35 @@ function ChatPage() {
               {'prompt' in message ? (
                 <MarkdownWrapper markdown={message.prompt.text} />
               ) : (
-                <MarkdownWrapper markdown={message.response?.final_response?.text || ""} />
+                <>
+                  {Object.entries(message.response || {}).map(([key, value], i) => (
+                    <div key={i} className="mt-2 p-2 border-t border-gray-300">
+                      <MarkdownWrapper markdown={JSON.stringify(value, null, 2)} />
+                    </div>
+                  ))}
+                </>
               )}
             </span>
           </div>
         ))}
+        {isFetching && tempChatMediResponse && (
+          <div className="flex gap-4 justify-start">
+            <div className="profile-image flex-shrink-0">
+              <img
+                className="rounded-full w-8 h-8"
+                src="/images/robot-1.svg"
+                alt="ai"
+              />
+            </div>
+            <span className="prose">
+              {Object.entries(tempChatMediResponse).map(([key, value], i) => (
+                <div key={i} className="mt-2 p-2 border-t border-gray-300">
+                  <MarkdownWrapper markdown={JSON.stringify(value, null, 2)} />
+                </div>
+              ))}
+            </span>
+          </div>
+        )}
         <div ref={messagesEndRef} />
       </div>
       <div className="flex-shrink-0">
