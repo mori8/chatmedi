@@ -79,9 +79,15 @@ function ChatPage() {
         const { done, value } = await reader.read();
         if (done) break;
         const chunk = decoder.decode(value, { stream: true });
-        const data = JSON.parse(chunk);
-        tempResponse = { ...tempResponse, ...data };
-        setTempChatMediResponse(tempResponse);
+        const dataChunks = chunk.trim().split("\n");
+  
+        for (const dataChunk of dataChunks) {
+          if (dataChunk) {
+            const data = JSON.parse(dataChunk);
+            tempResponse = { ...tempResponse, ...data };
+            setTempChatMediResponse(tempResponse);
+          }
+        }
       }
 
       // Save the final response to Redis
@@ -106,8 +112,8 @@ function ChatPage() {
 
   const renderChatMediResponse = (response: ChatMediResponse) => {
     return (
-      <div className="mt-2 p-2">
-        {response.planned_task ? (
+      <div className="p-2">
+        {response.planned_task && (
           <div className="text-sm">
             <p className="m-0 text-slate-400">
               To handle your request, we need to tackle these tasks:
@@ -123,10 +129,6 @@ function ChatPage() {
             <p className="m-0 text-slate-400">
               I'll find the right model for the job!
             </p>
-          </div>
-        ) : (
-          <div className="mt-2 text-sm text-slate-400">
-            Analyzing <LoadingDots />
           </div>
         )}
         {response.selected_model ? (
@@ -235,7 +237,11 @@ function ChatPage() {
                 <MarkdownWrapper markdown={message.prompt.text} />
               ) : (
                 <>
-                  {message.response && renderChatMediResponse(message.response)}
+                    {message.response ? renderChatMediResponse(message.response) : (
+                      <div className="text-sm text-slate-400">
+                        Analyzing <LoadingDots />
+                      </div>
+                  )}
                 </>
               )}
             </span>
