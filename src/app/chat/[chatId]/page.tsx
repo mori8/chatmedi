@@ -51,7 +51,6 @@ function ChatPage() {
   }, [messages]);
 
   const fetchStreamResponse = async (prompt: string) => {
-    let tempResponse: ChatMediResponse = {};
     try {
       const response = await fetch(`/api/stream`, {
         method: "POST",
@@ -69,6 +68,7 @@ function ChatPage() {
       if (!reader) return;
 
       const decoder = new TextDecoder();
+      let tempResponse: ChatMediResponse = {};
 
       while (true) {
         const { done, value } = await reader.read();
@@ -77,13 +77,6 @@ function ChatPage() {
         const data = JSON.parse(chunk);
         tempResponse = { ...tempResponse, ...data };
         setTempChatMediResponse(tempResponse);
-        setMessages(prevMessages => 
-          prevMessages.map(msg => 
-            'prompt' in msg && msg.prompt.text === prompt ? 
-              { ...msg, response: tempResponse } as AIMessage : 
-              msg
-          )
-        );
       }
 
       // Save the final response to Redis
@@ -91,7 +84,6 @@ function ChatPage() {
       setMessages(prevMessages => [...prevMessages, savedAIMessage]);
     } finally {
       setIsFetching(false);
-      setTempChatMediResponse(null); // Reset temp response after saving
     }
   };
 
@@ -106,6 +98,44 @@ function ChatPage() {
     setMessages((prev) => [...prev, savedUserMessage]);
     setContent("");
   }, [content, userId, chatId]);
+
+  const renderChatMediResponse = (response: ChatMediResponse) => {
+    return (
+      <div className="mt-2 p-2">
+        {response.planned_task && (
+          <div>
+            <strong>Planned Task:</strong>
+            {response.planned_task.map((task, index) => (
+              <div key={index}>
+                <p>Task: {task.task}</p>
+                <p>ID: {task.id}</p>
+                <p>Dep: {task.dep.join(', ')}</p>
+                <p>Args: {JSON.stringify(task.args)}</p>
+              </div>
+            ))}
+          </div>
+        )}
+        {response.selected_model && (
+          <div>
+            <strong>Selected Model:</strong>
+            <p>Model: {response.selected_model.model}</p>
+            <p>Reason: {response.selected_model.reason}</p>
+          </div>
+        )}
+        {response.output_from_model && (
+          <div>
+            <strong>Output from Model:</strong>
+            <p>Text: {response.output_from_model.text}</p>
+          </div>
+        )}
+        {response.final_response && (
+          <div>
+            <MarkdownWrapper markdown={response.final_response.text} />
+          </div>
+        )}
+      </div>
+    );
+  };
 
   return (
     <div className="flex flex-col h-full gap-4">
@@ -137,11 +167,7 @@ function ChatPage() {
                 <MarkdownWrapper markdown={message.prompt.text} />
               ) : (
                 <>
-                  {Object.entries(message.response || {}).map(([key, value], i) => (
-                    <div key={i} className="mt-2 p-2 border-t border-gray-300">
-                      <MarkdownWrapper markdown={JSON.stringify(value, null, 2)} />
-                    </div>
-                  ))}
+                  {message.response && renderChatMediResponse(message.response)}
                 </>
               )}
             </span>
@@ -150,18 +176,10 @@ function ChatPage() {
         {isFetching && tempChatMediResponse && (
           <div className="flex gap-4 justify-start">
             <div className="profile-image flex-shrink-0">
-              <img
-                className="rounded-full w-8 h-8"
-                src="/images/robot-1.svg"
-                alt="ai"
-              />
+              <img className="rounded-full w-8 h-8" src="/images/robot-1.svg" alt="AI" />
             </div>
-            <span className="prose">
-              {Object.entries(tempChatMediResponse).map(([key, value], i) => (
-                <div key={i} className="mt-2 p-2 border-t border-gray-300">
-                  <MarkdownWrapper markdown={JSON.stringify(value, null, 2)} />
-                </div>
-              ))}
+            <span className="prose bg-slate-100 rounded-xl px-4 py-2">
+              {renderChatMediResponse(tempChatMediResponse)}
             </span>
           </div>
         )}
