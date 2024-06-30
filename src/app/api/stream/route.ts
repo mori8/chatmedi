@@ -26,30 +26,33 @@ export async function POST(req: NextRequest) {
 
       (async () => {
         // Send the planned_task part
-        await sendData({
-          planned_task: [
-            {
-              task: "question-answering-about-medical-domain",
-              id: 1,
-              dep: [-1],
-              args: {
-                text: "Tell me the difference between pneumonia and pleural effusion",
-              },
-            },
-          ],
+        const plannedTaskData = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/plan-task`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            prompt: prompt,
+            sessionId: chatId,
+          }),
         });
-        await delay(1000);
+        const { tasks } = await plannedTaskData.json();
+
+        await sendData({
+          planned_task: tasks,
+        });
 
         // Send the selected_model part
+        await delay(1000);
         await sendData({
           selected_model: {
             model: "your_model_name",
             reason: "your_reason",
           },
         });
-        await delay(1000);
 
         // Send the output_from_model part
+        await delay(1000);
         await sendData({
           output_from_model: [{
             model_name: "your_model_name",
@@ -58,11 +61,9 @@ export async function POST(req: NextRequest) {
             file: ""
           },]
         });
-        await delay(1000);
 
         // Send the final_response part and close the stream
-        const url = `${process.env.NEXT_PUBLIC_BASE_URL}/api/chat`;
-        const response = await fetch(url, {
+        const finalResponse = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/chat`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -73,14 +74,14 @@ export async function POST(req: NextRequest) {
             chatId: chatId,
           }),
         });
-        const data = await response.json();
+        const data = await finalResponse.json();
         const aiFinalResponse = data.response;
         // 여기서 aiFinalResponse는 단순 문자열
         await sendData({
           final_response: {
             text: aiFinalResponse,
           },
-        }); 
+        });
 
         // Close the stream and save the response to Redis
         controller.close();
