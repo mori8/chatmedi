@@ -66,13 +66,13 @@ export async function planTasks(
       .array(
         z.object({
           task: z.enum([
-            "visual-question-answering-about-medical-domain",
             "question-answering-about-medical-domain",
+            "visual-question-answering-about-medical-domain",
             "text-to-image",
             "medical-image-segmentation",
           ]),
-          id: z.string(),
-          dep: z.array(z.string()).optional(),
+          id: z.number(),
+          dep: z.array(z.number()).optional(),
           args: z.object({
             text: z.string().optional(),
             image: z.string().optional(),
