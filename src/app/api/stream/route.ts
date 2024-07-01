@@ -42,15 +42,6 @@ export async function POST(req: NextRequest) {
           planned_task: tasks,
         });
 
-        // Send the selected_model part
-        await delay(1000);
-        await sendData({
-          selected_model: {
-            model: "your_model_name",
-            reason: "your_reason",
-          },
-        });
-
         // Send the output_from_model part
         const modelSelectionRequest: ModelSelectionRequest = {
           user_input: prompt,
@@ -71,10 +62,12 @@ export async function POST(req: NextRequest) {
 
         const { selected_models } = await modelSelectionResponse.json();
 
-        await delay(1000);
         await sendData({
           selected_model: selected_models,
         });
+
+        // send the output_from_model part
+
 
         // Send the final_response part and close the stream
         const finalResponse = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/chat`, {
