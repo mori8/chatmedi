@@ -26,10 +26,18 @@ interface ConversationHistory {
   messages: Message[];
 }
 
+interface ModelSelectionRequest {
+  user_input: string;
+  tasks: TaskModel[];
+}
 
 interface SelectedModel {
-  model: string;
+  id: string;
   reason: string;
+}
+
+interface ModelSelectionResponse {
+  selected_models: { [key: number]: SelectedModel };
 }
 
 interface OutputFromModel {
@@ -45,7 +53,7 @@ interface FinalResponse {
 
 interface ChatMediResponse {
   planned_task?: Task[];
-  selected_model?: SelectedModel;
+  selected_model?: { [key: number]: SelectedModel };
   output_from_model?: OutputFromModel[];
   final_response?: FinalResponse;
 }

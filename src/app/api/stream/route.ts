@@ -52,14 +52,28 @@ export async function POST(req: NextRequest) {
         });
 
         // Send the output_from_model part
+        const modelSelectionRequest: ModelSelectionRequest = {
+          user_input: prompt,
+          tasks: tasks,
+        };
+
+        const modelSelectionResponse = await fetch('http://localhost:8000/select-model', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(modelSelectionRequest),
+        });
+
+        if (!modelSelectionResponse.ok) {
+          throw new Error(`HTTP error! ${JSON.stringify(modelSelectionResponse)}`);
+        }
+
+        const { selected_models } = await modelSelectionResponse.json();
+
         await delay(1000);
         await sendData({
-          output_from_model: [{
-            model_name: "your_model_name",
-            input: "Tell me the difference between pneumonia and pleural effusion",
-            text: "넹",
-            file: ""
-          },]
+          selected_model: selected_models,
         });
 
         // Send the final_response part and close the stream

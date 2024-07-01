@@ -80,7 +80,7 @@ function ChatPage() {
         if (done) break;
         const chunk = decoder.decode(value, { stream: true });
         const dataChunks = chunk.trim().split("\n");
-  
+
         for (const dataChunk of dataChunks) {
           if (dataChunk) {
             const data = JSON.parse(dataChunk);
@@ -95,6 +95,7 @@ function ChatPage() {
       setMessages((prevMessages) => [...prevMessages, savedAIMessage]);
     } finally {
       setIsFetching(false);
+      setTempChatMediResponse(null);
     }
   };
 
@@ -134,20 +135,26 @@ function ChatPage() {
         {response.selected_model ? (
           <div className="mt-4 text-sm">
             <p className="m-0 text-slate-400">I found an appropriate model!</p>
-            <div className="bg-slate-100 my-2 px-4 py-3 rounded-xl">
-              <p className="m-0 mb-1">
-                <span className="text-xs font-semibold bg-white px-1 py-[2px] rounded border border-slate-200 text-slate-500">
-                  Model
-                </span>{" "}
-                {response.selected_model.model}
-              </p>
-              <p className="m-0">
-                <span className="text-xs font-semibold bg-white px-1 py-[2px] rounded border border-slate-200 text-slate-500">
-                  Reason
-                </span>{" "}
-                {response.selected_model.reason}
-              </p>
-            </div>
+            {Object.entries(response.selected_model).map(([key, model]) => (
+              <div key={key} className="bg-slate-100 my-2 px-4 py-3 rounded-xl leading-snug">
+                <p className="m-0 mb-1 flex items-start gap-1">
+                  <span className="w-14 flex-shrink-0">
+                    <span className="text-xs font-semibold bg-white px-1 py-[2px] rounded border border-slate-200 text-slate-500 inline-block">
+                      Model
+                    </span>
+                  </span>
+                  <span className="font-semibold">{model.id}</span>
+                </p>
+                <p className="m-0 flex items-start gap-1">
+                  <span className="w-14 flex-shrink-0">
+                    <span className="text-xs font-semibold bg-white px-1 py-[2px] rounded border border-slate-200 text-slate-500 inline-block">
+                      Reason
+                    </span>
+                  </span>
+                  <span className="text-slate-500">{model.reason}</span>
+                </p>
+              </div>
+            ))}
           </div>
         ) : (
           response.planned_task && (
@@ -237,10 +244,12 @@ function ChatPage() {
                 <MarkdownWrapper markdown={message.prompt.text} />
               ) : (
                 <>
-                    {message.response ? renderChatMediResponse(message.response) : (
-                      <div className="text-sm text-slate-400">
-                        Analyzing <LoadingDots />
-                      </div>
+                  {message.response ? (
+                    renderChatMediResponse(message.response)
+                  ) : (
+                    <div className="text-sm text-slate-400">
+                      Analyzing <LoadingDots />
+                    </div>
                   )}
                 </>
               )}
