@@ -73,7 +73,7 @@ export async function saveUserMessage(
   }
   console.log("saveUserMessage called", userId, chatId, text);
   const messageId = uuidv4();
-  const timestamp = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Seoul" })).toISOString();
+  const timestamp = new Date().toLocaleString("en-US", { timeZone: "Asia/Seoul" });
 
   const userMessage: UserMessage = {
     messageId,
@@ -105,7 +105,7 @@ export async function saveAIMessage(
   }
   console.log("saveAIMessage called", userId, chatId, response);
   const messageId = uuidv4();
-  const timestamp = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Seoul" })).toISOString();
+  const timestamp = new Date().toLocaleString("en-US", { timeZone: "Asia/Seoul" });
 
   const aiMessage: AIMessage = {
     messageId,
@@ -137,7 +137,7 @@ export async function saveNewChat(
 
   const savedMessage = await saveUserMessage(userId, chatId, prompt, files);
 
-  const timestamp = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Seoul" })).toISOString().split("T")[0];
+  const timestamp = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Seoul" })).toLocaleDateString()
   await redis.hset(`chat:${userId}:history:${timestamp}:${chatId}`, { chatId, prompt });
   await redis.sadd(`user:${userId}:chats`, chatId);
 
@@ -166,8 +166,7 @@ export async function fetchUserChats(
       continue;
     }
 
-    const timestamp = key.split(":")[3];
-    const date = timestamp.split("T")[0];
+    const date = key.split(":")[3];
     const chatId = chat.chatId;
 
     const chatData = {

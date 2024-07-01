@@ -16,7 +16,7 @@ export default function ChatSideBar({}: Props) {
   const { chatId } = useParams<{ chatId: string }>();
   const { data: session, status } = useSession();
   const user = session?.user;
-  const today = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Seoul" })).toISOString().split("T")[0];
+  const today = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Seoul" })).toLocaleDateString()
   const [chatHistory, setChatHistory] = useState<{
     [date: string]: { chatId: string; prompt: string }[];
   }>({});
