@@ -121,18 +121,14 @@ function ChatPage() {
             </p>
             <div className="flex flex-row my-2 flex-wrap gap-2">
               {response.planned_task.map((task, index) => (
-                <span className="m-0 py-1 px-2 rounded-xl bg-blue-50 border border-blue-200 text-slate-600 font-semibold flex-shrink-0">
+                <span className="m-0 py-1 px-2 rounded-xl bg-blue-50 border border-blue-200 text-slate-600 font-semibold flex-shrink-0" key={index}>
                   {task.task}
                 </span>
               ))}
             </div>
-
-            <p className="m-0 text-slate-400">
-              I'll find the right model for the job!
-            </p>
           </div>
         )}
-        {response.selected_model ? (
+        {response.selected_model && response.selected_model[0].id !== "none" ? (
           <div className="mt-4 text-sm">
             <p className="m-0 text-slate-400">I found an appropriate model!</p>
             {Object.entries(response.selected_model).map(([key, model]) => (
@@ -157,46 +153,47 @@ function ChatPage() {
             ))}
           </div>
         ) : (
-          response.planned_task && (
-            <div className="mt-4 text-sm text-slate-400">
-              Finding the right model to perform <LoadingDots />
-            </div>
-          )
-        )}
-        {response.output_from_model ? (
-          <div className="mt-4 text-sm">
-            <p className="m-0 text-slate-400">Model run complete.</p>
-            {response.output_from_model.map((output, index) => (
-              <div
-                key={index}
-                className="my-2 px-4 py-3 rounded-xl bg-slate-100"
-              >
-                <p className="m-0 mb-2 text-slate-400 text-xs">
-                  response from{" "}
-                  <span className="ml-1 bg-slate-200 border border-slate-300 px-1 py-[2px] rounded text-slate-500">
-                    asdfasdf
-                  </span>
-                </p>
-                <p className="m-0 mb-1">
-                  <span className="text-xs font-semibold bg-white px-1 py-[2px] rounded border border-slate-200 text-slate-500">
-                    Input
-                  </span>{" "}
-                  {output.input}
-                </p>
-                <p className="m-0">
-                  <span className="text-xs font-semibold bg-white px-1 py-[2px] rounded border border-slate-200 text-slate-500">
-                    Output
-                  </span>{" "}
-                  {output.text}
-                </p>
-              </div>
-            ))}
+          !response.selected_model && <div className="mt-4 text-sm text-slate-400">
+            I'm looking for the right model to help you <LoadingDots />
           </div>
-        ) : (
-          response.selected_model && (
-            <div className="mt-4 text-sm text-slate-400">
-              Executing model <LoadingDots />
+        
+        )}
+        {response.selected_model && response.selected_model[0].id !== "none" && (
+          response.output_from_model ? (
+            <div className="mt-4 text-sm">
+              <p className="m-0 text-slate-400">Model run complete.</p>
+              {response.output_from_model.map((output, index) => (
+                <div
+                  key={index}
+                  className="my-2 px-4 py-3 rounded-xl bg-slate-100"
+                >
+                  <p className="m-0 mb-2 text-slate-400 text-xs">
+                    response from{" "}
+                    <span className="ml-1 bg-slate-200 border border-slate-300 px-1 py-[2px] rounded text-slate-500">
+                      asdfasdf
+                    </span>
+                  </p>
+                  <p className="m-0 mb-1">
+                    <span className="text-xs font-semibold bg-white px-1 py-[2px] rounded border border-slate-200 text-slate-500">
+                      Input
+                    </span>{" "}
+                    {output.input}
+                  </p>
+                  <p className="m-0">
+                    <span className="text-xs font-semibold bg-white px-1 py-[2px] rounded border border-slate-200 text-slate-500">
+                      Output
+                    </span>{" "}
+                    {output.text}
+                  </p>
+                </div>
+              ))}
             </div>
+          ) : (
+            response.selected_model && (
+              <div className="mt-4 text-sm text-slate-400">
+                Executing model <LoadingDots />
+              </div>
+            )
           )
         )}
         {response.final_response ? (
@@ -204,7 +201,7 @@ function ChatPage() {
             <MarkdownWrapper markdown={response.final_response.text} />
           </div>
         ) : (
-          response.output_from_model && (
+          response.selected_model && response.selected_model[0].id !== "none" && response.output_from_model && (
             <div className="mt-4 text-sm text-slate-400">
               Generating a result based on the model’s output <LoadingDots />
             </div>
