@@ -201,7 +201,7 @@ function ChatPage() {
           response.output_from_model && response.output_from_model.filter((output) => output.inference_result.image).map((output, index) => (
               <div className="mt-4">
               <img
-                src={`http://localhost:8000/files/${output.inference_result.image}`}
+                src={`${process.env.NEXT_PUBLIC_SERVER_URL}/files/${output.inference_result.image}`}
                 alt="Model output image"
                 className="rounded w-full h-auto"
               />

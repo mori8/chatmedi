@@ -65,7 +65,7 @@ export async function POST(req: NextRequest) {
               tasks: tasks,
             };
 
-            const modelSelectionResponse = await fetch('http://localhost:8000/select-model', {
+            const modelSelectionResponse = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/select-model`, {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',
@@ -87,7 +87,7 @@ export async function POST(req: NextRequest) {
 
           if (selected_models["1"].id !== "none") {
             // Send the output_from_model part
-            const modelExecutionResponse = await fetch('http://localhost:8000/execute-tasks', {
+            const modelExecutionResponse = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/execute-tasks`, {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',
