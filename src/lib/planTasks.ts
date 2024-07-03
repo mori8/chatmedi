@@ -68,7 +68,6 @@ export async function planTasks(
           task: z.enum([
             "question-answering-about-medical-domain",
             "summarization",
-            "conversational",
             "report-to-cxr-generation",
             "cxr-to-report-generation",
             "cxr-visual-qestion-answering"

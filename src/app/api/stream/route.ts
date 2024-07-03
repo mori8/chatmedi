@@ -6,7 +6,6 @@ export const config = {
 
 const TasksHandledByDefaultLLM = [
   "question-answering-about-medical-domain",
-  "conversational",
   "summarization"
 ];
 
@@ -53,10 +52,12 @@ export async function POST(req: NextRequest) {
           // Check if the task should be handled by the default LLM
           let selected_models;
           if (tasks.length === 1 && TasksHandledByDefaultLLM.includes(tasks[0].task)) {
-            selected_models = [{
-              id: "none",
-              reason: "none"
-            }];
+            selected_models = {
+              "1": {
+                id: "none",
+                reason: "none"
+              }
+            };
           } else {
             // Send the output_from_model part
             const modelSelectionRequest: ModelSelectionRequest = {
@@ -84,9 +85,9 @@ export async function POST(req: NextRequest) {
             selected_model: selected_models,
           });
 
-          if (selected_models[0].id !== "none") {
+          if (selected_models["1"].id !== "none") {
             // Send the output_from_model part
-            const modelExecutionResponse = await fetch('http://localhost:8000/execute-model', {
+            const modelExecutionResponse = await fetch('http://localhost:8000/execute-tasks', {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',

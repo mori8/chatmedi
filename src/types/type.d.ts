@@ -41,10 +41,16 @@ interface ModelSelectionResponse {
 }
 
 interface OutputFromModel {
-  model_name: string;
-  input: string;
-  text: string;
-  file?: string;
+  task: Task[],
+  model: string,
+  model_input: {
+    text?: string;
+    image?: string;
+  },
+  inference_result: {
+    text?: string;
+    image?: string;
+  }
 }
 
 interface FinalResponse {

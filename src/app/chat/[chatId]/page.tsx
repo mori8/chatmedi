@@ -12,6 +12,7 @@ import ChatTextArea from "@/components/ChatTextArea";
 import MarkdownWrapper from "@/components/MarkdownWrapper";
 import { fetchChatHistory, saveUserMessage, saveAIMessage } from "@/lib/redis";
 
+
 function ChatPage() {
   const { data: session, status } = useSession();
   const { chatId } = useParams<{ chatId: string }>();
@@ -128,7 +129,7 @@ function ChatPage() {
             </div>
           </div>
         )}
-        {response.selected_model && response.selected_model[0].id !== "none" ? (
+        {response.selected_model && response.selected_model["1"].id !== "none" ? (
           <div className="mt-4 text-sm">
             <p className="m-0 text-slate-400">I found an appropriate model!</p>
             {Object.entries(response.selected_model).map(([key, model]) => (
@@ -158,7 +159,7 @@ function ChatPage() {
           </div>
         
         )}
-        {response.selected_model && response.selected_model[0].id !== "none" && (
+        {response.selected_model && response.selected_model["1"].id !== "none" && (
           response.output_from_model ? (
             <div className="mt-4 text-sm">
               <p className="m-0 text-slate-400">Model run complete.</p>
@@ -170,20 +171,20 @@ function ChatPage() {
                   <p className="m-0 mb-2 text-slate-400 text-xs">
                     response from{" "}
                     <span className="ml-1 bg-slate-200 border border-slate-300 px-1 py-[2px] rounded text-slate-500">
-                      asdfasdf
+                      {output.model}
                     </span>
                   </p>
                   <p className="m-0 mb-1">
                     <span className="text-xs font-semibold bg-white px-1 py-[2px] rounded border border-slate-200 text-slate-500">
                       Input
                     </span>{" "}
-                    {output.input}
+                    {output.model_input.text ? output.model_input.text : output.model_input.image}
                   </p>
                   <p className="m-0">
                     <span className="text-xs font-semibold bg-white px-1 py-[2px] rounded border border-slate-200 text-slate-500">
                       Output
                     </span>{" "}
-                    {output.text}
+                    {output.inference_result.text ? output.inference_result.text : <span className="text-slate-400">Image generated below.</span>}
                   </p>
                 </div>
               ))}
@@ -196,12 +197,24 @@ function ChatPage() {
             )
           )
         )}
+        {
+          response.output_from_model && response.output_from_model.filter((output) => output.inference_result.image).map((output, index) => (
+              <div className="mt-4">
+              <img
+                src={`http://localhost:8000/files/${output.inference_result.image}`}
+                alt="Model output image"
+                className="rounded w-full h-auto"
+              />
+              </div>
+            ))
+            
+        }
         {response.final_response ? (
           <div className="mt-2">
             <MarkdownWrapper markdown={response.final_response.text} />
           </div>
         ) : (
-          response.selected_model && response.selected_model[0].id !== "none" && response.output_from_model && (
+          response.selected_model && response.selected_model["1"].id !== "none" && response.output_from_model && (
             <div className="mt-4 text-sm text-slate-400">
               Generating a result based on the model’s output <LoadingDots />
             </div>
