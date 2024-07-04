@@ -117,6 +117,7 @@ function ChatPage() {
       <div className="p-2">
         {response.planned_task && (
           <div className="text-sm">
+            <>{console.log(response.planned_task)}</>
             <p className="m-0 text-slate-400">
               To handle your request, we need to tackle these tasks:
             </p>
@@ -171,7 +172,7 @@ function ChatPage() {
                   <p className="m-0 mb-2 text-slate-400 text-xs">
                     response from{" "}
                     <span className="ml-1 bg-slate-200 border border-slate-300 px-1 py-[2px] rounded text-slate-500">
-                      {output.model}
+                      {output.model.id}
                     </span>
                   </p>
                   <p className="m-0 mb-1">

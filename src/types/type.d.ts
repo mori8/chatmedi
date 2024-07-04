@@ -41,12 +41,21 @@ interface ModelSelectionResponse {
 }
 
 interface OutputFromModel {
-  task: Task[],
-  model: string,
+  task: Task,
+  model: SelectedModel,
   model_input: {
     text?: string;
     image?: string;
   },
+  inference_result: {
+    text?: string;
+    image?: string;
+  }
+}
+
+interface TaskSummaries {
+  task: Task;
+  model: SelectedModel;
   inference_result: {
     text?: string;
     image?: string;
