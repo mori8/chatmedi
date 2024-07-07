@@ -64,24 +64,24 @@ export async function POST(req: NextRequest) {
             });
 
             const finalResponse = await fetch(
-              `${process.env.NEXT_PUBLIC_SERVER_URL}/chat`,
+              `${process.env.NEXT_PUBLIC_BASE_URL}/api/chat`,
               {
                 method: "POST",
                 headers: {
                   "Content-Type": "application/json",
                 },
                 body: JSON.stringify({
-                  user_input: prompt,
-                  task_summaries: [],
+                  userId: userId,
+                  prompt: prompt,
+                  chatId: chatId,
                 }),
               }
             );
-            const data = await finalResponse.json();
-            const aiFinalResponse = data.response;
-
+            const { response } = await finalResponse.json();
+            
             await sendData({
               final_response: {
-                text: aiFinalResponse,
+                text: response,
               },
             });
           } else {
