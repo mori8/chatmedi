@@ -88,18 +88,19 @@ export async function planTasks(
   const template = await loadJSON(
     "src/prompts/task-planning-few-shot-prompt.json"
   );
+  const exampleTemplate = await loadJSON(template.example_prompt_path);
   const examples = await loadJSON(template.examples);
 
   const examplePrompts = examples
     .map((example: { example_input: string; example_output: string }) =>
-      template.example_prompt_path
+      exampleTemplate.template
         .replace("{example_input}", example.example_input)
         .replace("{example_output}", example.example_output)
     )
     .join("\n");
 
   const fullPrompt = `${template.prefix}\n${examplePrompts}`;
-  console.log("fullPrompt:", fullPrompt);
+  // console.log("fullPrompt:", fullPrompt);
 
   const functionCallingModel = openai.bind({
     functions: [

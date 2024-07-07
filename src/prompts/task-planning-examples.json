@@ -22,5 +22,105 @@
   {
     "example_input": "What is the size of the pleural effusions? /cxr_image.jpg",
     "example_output": "[{{\"task\": \"cxr-vqa\", \"id\": 0, \"dep\": [-1], \"args\": {{\"text\": \"What is the size of the pleural effusions?\", \"image\": \"cxr_image.jpg\"}}}}]"
+  },
+  {
+    "example_input": "What is the treatment for high blood pressure?",
+    "example_output": "[{{\"task\": \"question-answering-about-medical-domain\", \"id\": 0, \"dep\": [-1], \"args\": {{\"question\": \"What is the treatment for high blood pressure?\", \"context\": \"High blood pressure, also known as hypertension, can be managed through lifestyle changes and medication. Common treatments include regular exercise, a healthy diet, reducing sodium intake, and prescribed medications such as ACE inhibitors, beta-blockers, and diuretics.\"}}}}]"
+  },
+  {
+    "example_input": "Describe the process of diagnosing asthma.",
+    "example_output": "[{{\"task\": \"question-answering-about-medical-domain\", \"id\": 0, \"dep\": [-1], \"args\": {{\"question\": \"Describe the process of diagnosing asthma.\", \"context\": \"Asthma is diagnosed through a combination of medical history, physical examination, and lung function tests. Doctors will inquire about symptoms, family history, and potential triggers. Pulmonary function tests such as spirometry are commonly used to measure lung capacity and airflow.\"}}}}]"
+  },
+  {
+    "example_input": "What are the potential side effects of taking statins?",
+    "example_output": "[{{\"task\": \"question-answering-about-medical-domain\", \"id\": 0, \"dep\": [-1], \"args\": {{\"question\": \"What are the potential side effects of taking statins?\", \"context\": \"Statins are medications used to lower cholesterol levels. Potential side effects include muscle pain, digestive problems, increased blood sugar levels, and, in rare cases, liver damage.\"}}}}]"
+  },
+  {
+    "example_input": "A patient presents with a persistent cough and night sweats. What might be the underlying condition?",
+    "example_output": "[{{\"task\": \"question-answering-about-medical-domain\", \"id\": 0, \"dep\": [-1], \"args\": {{\"question\": \"What might be the underlying condition?\", \"context\": \"A patient presents with a persistent cough and night sweats.\"}}}}]"
+  },
+  {
+    "example_input": "What is the function of the pancreas?",
+    "example_output": "[{{\"task\": \"question-answering-about-medical-domain\", \"id\": 0, \"dep\": [-1], \"args\": {{\"question\": \"What is the function of the pancreas?\", \"context\": \"The pancreas is an organ in the digestive system that produces enzymes to aid in digestion and hormones such as insulin and glucagon to regulate blood sugar levels.\"}}}}]"
+  },
+  {
+    "example_input": "Summarize the provided medical research article on Alzheimer's disease.",
+    "example_output": "[{{\"task\": \"summarization\", \"id\": 0, \"dep\": [-1], \"args\": {{\"text\": \"Summarize the provided medical research article on Alzheimer's disease.\"}}}}]"
+  },
+  {
+    "example_input": "Provide a summary of the patient's medical history and current condition.",
+    "example_output": "[{{\"task\": \"summarization\", \"id\": 0, \"dep\": [-1], \"args\": {{\"text\": \"Provide a summary of the patient's medical history and current condition.\"}}}}]"
+  },
+  {
+    "example_input": "Summarize the key points of the latest guidelines on managing diabetes.",
+    "example_output": "[{{\"task\": \"summarization\", \"id\": 0, \"dep\": [-1], \"args\": {{\"text\": \"Summarize the key points of the latest guidelines on managing diabetes.\"}}}}]"
+  },
+  {
+    "example_input": "Generate a summary of the clinical trial results for a new cancer treatment.",
+    "example_output": "[{{\"task\": \"summarization\", \"id\": 0, \"dep\": [-1], \"args\": {{\"text\": \"Generate a summary of the clinical trial results for a new cancer treatment.\"}}}}]"
+  },
+  {
+    "example_input": "Summarize the findings from the recent study on the effects of exercise on mental health.",
+    "example_output": "[{{\"task\": \"summarization\", \"id\": 0, \"dep\": [-1], \"args\": {{\"text\": \"Summarize the findings from the recent study on the effects of exercise on mental health.\"}}}}]"
+  },
+  {
+    "example_input": "Create a chest X-ray image showing clear lung fields.",
+    "example_output": "[{{\"task\": \"report-to-cxr-generation\", \"id\": 0, \"dep\": [-1], \"args\": {{\"text\": \"Create a chest X-ray image showing clear lung fields.\"}}}}]"
+  },
+  {
+    "example_input": "Generate a chest X-ray image demonstrating a collapsed lung.",
+    "example_output": "[{{\"task\": \"report-to-cxr-generation\", \"id\": 0, \"dep\": [-1], \"args\": {{\"text\": \"Generate a chest X-ray image demonstrating a collapsed lung.\"}}}}]"
+  },
+  {
+    "example_input": "Create a chest X-ray showing bilateral pleural effusions.",
+    "example_output": "[{{\"task\": \"report-to-cxr-generation\", \"id\": 0, \"dep\": [-1], \"args\": {{\"text\": \"Create a chest X-ray showing bilateral pleural effusions.\"}}}}]"
+  },
+  {
+    "example_input": "Generate an image of a chest X-ray with interstitial lung disease.",
+    "example_output": "[{{\"task\": \"report-to-cxr-generation\", \"id\": 0, \"dep\": [-1], \"args\": {{\"text\": \"Generate an image of a chest X-ray with interstitial lung disease.\"}}}}]"
+  },
+  {
+    "example_input": "Create a chest X-ray showing a lung mass in the left upper lobe.",
+    "example_output": "[{{\"task\": \"report-to-cxr-generation\", \"id\": 0, \"dep\": [-1], \"args\": {{\"text\": \"Create a chest X-ray showing a lung mass in the left upper lobe.\"}}}}]"
+  },
+  {
+    "example_input": "What are the radiographic signs of tuberculosis? /chest_xray_tuberculosis.jpg",
+    "example_output": "[{{\"task\": \"cxr-to-report-generation\", \"id\": 0, \"dep\": [-1], \"args\": {{\"text\": \"What are the radiographic signs of tuberculosis?\", \"image\": \"/chest_xray_tuberculosis.jpg\"}}}}]"
+  },
+  {
+    "example_input": "What abnormalities are present in this chest X-ray? /cxr_abnormalities.jpg",
+    "example_output": "[{{\"task\": \"cxr-to-report-generation\", \"id\": 0, \"dep\": [-1], \"args\": {{\"text\": \"What abnormalities are present in this chest X-ray?\", \"image\": \"/cxr_abnormalities.jpg\"}}}}]"
+  },
+  {
+    "example_input": "Interpret the chest X-ray and describe any findings. /patient_cxr.jpg",
+    "example_output": "[{{\"task\": \"cxr-to-report-generation\", \"id\": 0, \"dep\": [-1], \"args\": {{\"text\": \"Interpret the chest X-ray and describe any findings.\", \"image\": \"/patient_cxr.jpg\"}}}}]"
+  },
+  {
+    "example_input": "What does the chest X-ray indicate about the patient's lung condition? /patient_lung_cxr.jpg",
+    "example_output": "[{{\"task\": \"cxr-to-report-generation\", \"id\": 0, \"dep\": [-1], \"args\": {{\"text\": \"What does the chest X-ray indicate about the patient's lung condition?\", \"image\": \"/patient_lung_cxr.jpg\"}}}}]"
+  },
+  {
+    "example_input": "Identify the issues shown in this chest X-ray. /cxr_issues.jpg",
+    "example_output": "[{{\"task\": \"cxr-to-report-generation\", \"id\": 0, \"dep\": [-1], \"args\": {{\"text\": \"Identify the issues shown in this chest X-ray.\", \"image\": \"/cxr_issues.jpg\"}}}}]"
+  },
+  {
+    "example_input": "What is the extent of the pneumonia as seen in the X-ray? /pneumonia_cxr.jpg",
+    "example_output": "[{{\"task\": \"cxr-vqa\", \"id\": 0, \"dep\": [-1], \"args\": {{\"text\": \"What is the extent of the pneumonia as seen in the X-ray?\", \"image\": \"/pneumonia_cxr.jpg\"}}}}]"
+  },
+  {
+    "example_input": "How large is the lung nodule in this image? /lung_nodule.jpg",
+    "example_output": "[{{\"task\": \"cxr-vqa\", \"id\": 0, \"dep\": [-1], \"args\": {{\"text\": \"How large is the lung nodule in this image?\", \"image\": \"/lung_nodule.jpg\"}}}}]"
+  },
+  {
+    "example_input": "Are there any signs of pulmonary edema? /pulmonary_edema_cxr.jpg",
+    "example_output": "[{{\"task\": \"cxr-vqa\", \"id\": 0, \"dep\": [-1], \"args\": {{\"text\": \"Are there any signs of pulmonary edema?\", \"image\": \"/pulmonary_edema_cxr.jpg\"}}}}]"
+  },
+  {
+    "example_input": "What does the X-ray show about the state of the pleural cavity? /pleural_cavity_cxr.jpg",
+    "example_output": "[{{\"task\": \"cxr-vqa\", \"id\": 0, \"dep\": [-1], \"args\": {{\"text\": \"What does the X-ray show about the state of the pleural cavity?\", \"image\": \"/pleural_cavity_cxr.jpg\"}}}}]"
+  },
+  {
+    "example_input": "How severe is the lung congestion in this X-ray? /lung_congestion_cxr.jpg",
+    "example_output": "[{{\"task\": \"cxr-vqa\", \"id\": 0, \"dep\": [-1], \"args\": {{\"text\": \"How severe is the lung congestion in this X-ray?\", \"image\": \"/lung_congestion_cxr.jpg\"}}}}]"
   }
 ]

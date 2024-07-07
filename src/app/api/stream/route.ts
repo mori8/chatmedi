@@ -64,7 +64,7 @@ export async function POST(req: NextRequest) {
             });
 
             const finalResponse = await fetch(
-              `${process.env.NEXT_PUBLIC_SERVER_URL}/generate-response`,
+              `${process.env.NEXT_PUBLIC_SERVER_URL}/chat`,
               {
                 method: "POST",
                 headers: {

@@ -10,7 +10,7 @@ import { UpstashRedisChatMessageHistory } from "@langchain/community/stores/mess
 
 const getAIResponse = async (userId: string, prompt: string, chatId: string) => {
   const prompts = ChatPromptTemplate.fromMessages([
-    ["system", "You're an assistant who's good at medical QA."],
+    ["system", "You're an AI assistant with a strong medical background."],
     new MessagesPlaceholder("history"),
     ["human", "{question}"],
   ]);
