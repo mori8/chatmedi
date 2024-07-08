@@ -135,7 +135,7 @@ function ChatPage() {
           </div>
         )}
         {response.selected_model &&
-        response.selected_model["1"].id !== "none" ? (
+        response.selected_model["0"].id !== "none" ? (
           <div className="mt-4 text-sm">
             <p className="m-0 text-slate-400">I found an appropriate model!</p>
             {Object.entries(response.selected_model).map(([key, model]) => (
@@ -176,7 +176,7 @@ function ChatPage() {
           )
         )}
         {response.selected_model &&
-          response.selected_model["1"].id !== "none" &&
+          response.selected_model["0"].id !== "none" &&
           (response.output_from_model ? (
             <div className="mt-4 text-sm">
               <p className="m-0 text-slate-400">Model run complete.</p>
@@ -239,7 +239,7 @@ function ChatPage() {
           </div>
         ) : (
           response.selected_model &&
-          response.selected_model["1"].id !== "none" &&
+          response.selected_model["0"].id !== "none" &&
           response.output_from_model && (
             <div className="mt-4 text-sm text-slate-400">
               Generating a result based on the model’s output <LoadingDots />

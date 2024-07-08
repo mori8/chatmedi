@@ -53,7 +53,7 @@ export async function POST(req: NextRequest) {
             TasksHandledByDefaultLLM.includes(tasks[0].task)
           ) {
             selectedModels = {
-              "1": {
+              "0": {
                 id: "none",
                 reason: "none",
               },
@@ -101,7 +101,7 @@ export async function POST(req: NextRequest) {
 
             const { selected_models: selectedModelsResponse } = await modelSelectionResponse.json();
             selectedModels = selectedModelsResponse;
-            console.log("[stream/route.ts]: tasks", tasks);
+            console.log("[stream/route.ts]: selectedModels: ", selectedModels);
             await sendData({
               selected_model: selectedModels,
             });

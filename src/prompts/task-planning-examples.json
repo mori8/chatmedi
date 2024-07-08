@@ -76,6 +76,10 @@
     "example_output": "[{{\"task\": \"report-to-cxr-generation\", \"id\": 0, \"dep\": [-1], \"args\": {{\"text\": \"Create a chest X-ray showing bilateral pleural effusions.\"}}}}]"
   },
   {
+    "example_input": "Bilateral, diffuse, confluent pulmonary opacities. Differential diagnoses include severe pulmonary edema ARDS or hemorrhage.",
+    "example_output": "[{{\"task\": \"report-to-cxr-generation\", \"id\": 0, \"dep\": [-1], \"args\": {{\"text\": \"Create a chest X-ray showing bilateral pleural effusions.\"}}}}]"
+  },
+  {
     "example_input": "Generate an image of a chest X-ray with interstitial lung disease.",
     "example_output": "[{{\"task\": \"report-to-cxr-generation\", \"id\": 0, \"dep\": [-1], \"args\": {{\"text\": \"Generate an image of a chest X-ray with interstitial lung disease.\"}}}}]"
   },
@@ -85,23 +89,23 @@
   },
   {
     "example_input": "What are the radiographic signs of tuberculosis? /chest_xray_tuberculosis.jpg",
-    "example_output": "[{{\"task\": \"cxr-to-report-generation\", \"id\": 0, \"dep\": [-1], \"args\": {{\"text\": \"What are the radiographic signs of tuberculosis?\", \"image\": \"/chest_xray_tuberculosis.jpg\"}}}}]"
+    "example_output": "[{{\"task\": \"cxr-vqa\", \"id\": 0, \"dep\": [-1], \"args\": {{\"text\": \"What are the radiographic signs of tuberculosis?\", \"image\": \"/chest_xray_tuberculosis.jpg\"}}}}]"
   },
   {
     "example_input": "What abnormalities are present in this chest X-ray? /cxr_abnormalities.jpg",
-    "example_output": "[{{\"task\": \"cxr-to-report-generation\", \"id\": 0, \"dep\": [-1], \"args\": {{\"text\": \"What abnormalities are present in this chest X-ray?\", \"image\": \"/cxr_abnormalities.jpg\"}}}}]"
+    "example_output": "[{{\"task\": \"cxr-vqa\", \"id\": 0, \"dep\": [-1], \"args\": {{\"text\": \"What abnormalities are present in this chest X-ray?\", \"image\": \"/cxr_abnormalities.jpg\"}}}}]"
   },
   {
     "example_input": "Interpret the chest X-ray and describe any findings. /patient_cxr.jpg",
-    "example_output": "[{{\"task\": \"cxr-to-report-generation\", \"id\": 0, \"dep\": [-1], \"args\": {{\"text\": \"Interpret the chest X-ray and describe any findings.\", \"image\": \"/patient_cxr.jpg\"}}}}]"
+    "example_output": "[{{\"task\": \"cxr-vqa\", \"id\": 0, \"dep\": [-1], \"args\": {{\"text\": \"Interpret the chest X-ray and describe any findings.\", \"image\": \"/patient_cxr.jpg\"}}}}]"
   },
   {
     "example_input": "What does the chest X-ray indicate about the patient's lung condition? /patient_lung_cxr.jpg",
-    "example_output": "[{{\"task\": \"cxr-to-report-generation\", \"id\": 0, \"dep\": [-1], \"args\": {{\"text\": \"What does the chest X-ray indicate about the patient's lung condition?\", \"image\": \"/patient_lung_cxr.jpg\"}}}}]"
+    "example_output": "[{{\"task\": \"cxr-vqa\", \"id\": 0, \"dep\": [-1], \"args\": {{\"text\": \"What does the chest X-ray indicate about the patient's lung condition?\", \"image\": \"/patient_lung_cxr.jpg\"}}}}]"
   },
   {
     "example_input": "Identify the issues shown in this chest X-ray. /cxr_issues.jpg",
-    "example_output": "[{{\"task\": \"cxr-to-report-generation\", \"id\": 0, \"dep\": [-1], \"args\": {{\"text\": \"Identify the issues shown in this chest X-ray.\", \"image\": \"/cxr_issues.jpg\"}}}}]"
+    "example_output": "[{{\"task\": \"cxr-vqa\", \"id\": 0, \"dep\": [-1], \"args\": {{\"text\": \"Identify the issues shown in this chest X-ray.\", \"image\": \"/cxr_issues.jpg\"}}}}]"
   },
   {
     "example_input": "What is the extent of the pneumonia as seen in the X-ray? /pneumonia_cxr.jpg",
