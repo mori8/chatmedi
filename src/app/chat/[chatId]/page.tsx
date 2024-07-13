@@ -3,8 +3,6 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import { useSession } from "next-auth/react";
 import { useParams } from "next/navigation";
-import { useRecoilValue } from "recoil";
-import { chatState } from "@/recoil/atoms";
 import { SwatchIcon } from "@heroicons/react/24/outline";
 import { Tooltip } from "react-tooltip";
 import classNames from "classnames";
@@ -21,6 +19,7 @@ function ChatPage() {
   const user = session?.user;
   const userId = user?.email!;
   const [content, setContent] = useState("");
+  const [file, setFile] = useState<File | null>(null);
   const [messages, setMessages] = useState<(UserMessage | AIMessage)[]>([]);
   const [tempChatMediResponse, setTempChatMediResponse] =
     useState<ChatMediResponse | null>(null);
@@ -60,16 +59,19 @@ function ChatPage() {
 
   const fetchStreamResponse = async (prompt: string) => {
     try {
+      const formData = new FormData();
+      formData.append("userId", userId);
+      formData.append("chatId", chatId);
+      formData.append("prompt", prompt);
+      if (file) {
+        formData.append("file", file);
+      }
+
+      console.log("fetchStreamResponse called", userId, chatId, prompt, file ? "file attached" : "no file attached")
+
       const response = await fetch(`/api/stream`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          userId: userId,
-          chatId: chatId,
-          prompt: prompt,
-        }),
+        body: formData,
       });
 
       const reader = response.body?.getReader();
@@ -99,12 +101,13 @@ function ChatPage() {
     } finally {
       setIsFetching(false);
       setTempChatMediResponse(null);
+      setFile(null);  // 파일 초기화
     }
   };
 
   const handleSubmit = useCallback(async () => {
     if (content.trim() === "") return;
-    const savedUserMessage = await saveUserMessage(userId, chatId, content);
+    const savedUserMessage = await saveUserMessage(userId, chatId, content, file);
     console.log("savedUserMessage:", savedUserMessage);
     if (!savedUserMessage) {
       console.error("Failed to save user message");
@@ -112,7 +115,8 @@ function ChatPage() {
     }
     setMessages((prev) => [...prev, savedUserMessage]);
     setContent("");
-  }, [content, userId, chatId]);
+    setFile(null);  // 파일 초기화
+  }, [content, file, userId, chatId]);
 
   const renderChatMediResponse = (response: ChatMediResponse) => {
     return (
@@ -227,7 +231,7 @@ function ChatPage() {
             .map((output, index) => (
               <div className="mt-4" key={index}>
                 <img
-                  src={`${process.env.NEXT_PUBLIC_SERVER_URL}/files/${output.inference_result.image}`}
+                  src={output.inference_result.image}
                   alt="Model output image"
                   className="rounded w-full h-auto"
                 />
@@ -277,7 +281,12 @@ function ChatPage() {
               })}
             >
               {"prompt" in message ? (
+                <>
+                {message.prompt.files && message.prompt.files.length > 0 && (
+                  <img src={message.prompt.files[0]} alt="Prompt image" />
+                )}
                 <MarkdownWrapper markdown={message.prompt.text} />
+                </>
               ) : (
                 <>
                   {message.response ? (
@@ -313,6 +322,7 @@ function ChatPage() {
           content={content}
           setContent={setContent}
           handleSubmit={handleSubmit}
+          setFile={setFile}
         />
       </div>
       {isModalOpen && <ModelSwappingModal onClose={() => setIsModalOpen(false)} />}

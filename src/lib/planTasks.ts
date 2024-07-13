@@ -99,8 +99,8 @@ export async function planTasks(
     )
     .join("\n");
 
-  const fullPrompt = `${template.prefix}\n${examplePrompts}`;
-  // console.log("fullPrompt:", fullPrompt);
+  const fullPrompt = `${template.prefix}.\n Here are several cases for your reference. Use these references only to help you know which task to choose for which input. Never use the output of these examples verbatim: \n${examplePrompts}`;
+  console.log("fullPrompt:", fullPrompt);
 
   const functionCallingModel = openai.bind({
     functions: [
@@ -117,7 +117,8 @@ export async function planTasks(
   const prompt = ChatPromptTemplate.fromMessages([
     ["system", fullPrompt],
     new MessagesPlaceholder("history"),
-    ["human", "user_input"],
+    ["system", "Now you have the user's request, analyze it carefully and plan your task in JSON format to fit the form I described above. Pay attention to the input and output types of tasks and the dependencies between tasks."],
+    ["human", "{user_input}"],
   ]);
 
   const chain = prompt.pipe(functionCallingModel).pipe(outputParser);

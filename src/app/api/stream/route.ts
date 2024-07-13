@@ -10,7 +10,11 @@ const TasksHandledByDefaultLLM = [
 ];
 
 export async function POST(req: NextRequest) {
-  const { userId, chatId, prompt } = await req.json();
+  console.log("[stream/route.ts]: POST called");
+  const formData = await req.formData();
+  const userId = formData.get("userId") as string;
+  const chatId = formData.get("chatId") as string;
+  const prompt = formData.get("prompt") as string;
   console.log("[stream/route.ts]: ", userId, chatId, prompt);
   const chatMediResponse: ChatMediResponse = {};
 

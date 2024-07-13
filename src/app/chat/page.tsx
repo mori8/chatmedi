@@ -12,6 +12,7 @@ type Props = {};
 export default function Page({}: Props) {
   const { data: session, status } = useSession();
   const user = session?.user;
+  const [file, setFile] = useState<File | null>(null);
   const userId = user?.email!;
   const bestCaseExamples = [
     "Generate a chest X-ray image with specific characteristics",
@@ -31,7 +32,7 @@ export default function Page({}: Props) {
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ userId: userId, prompt: content }),
+      body: JSON.stringify({ userId: userId, prompt: content, file: file }),
     });
     // TODO:
     // 여기서 /api/chat/start가 저장된 첫 프롬프트의 messageId도 함께 반환한 다음
@@ -101,6 +102,7 @@ export default function Page({}: Props) {
         content={content}
         setContent={setContent}
         handleSubmit={handleSubmit}
+        setFile={setFile}
       />
     </div>
   );

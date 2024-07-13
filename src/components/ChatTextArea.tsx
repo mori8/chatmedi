@@ -7,9 +7,10 @@ type Props = {
   content: string;
   setContent: React.Dispatch<React.SetStateAction<string>>;
   handleSubmit: () => void;
+  setFile: React.Dispatch<React.SetStateAction<File | null>>;
 };
 
-function ChatTextArea({ content, setContent, handleSubmit }: Props) {
+function ChatTextArea({ content, setContent, handleSubmit, setFile }: Props) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -17,6 +18,12 @@ function ChatTextArea({ content, setContent, handleSubmit }: Props) {
     if (textareaRef.current) {
       textareaRef.current.style.height = 'auto';
       textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
+    }
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      setFile(e.target.files[0]);
     }
   };
 
@@ -47,7 +54,16 @@ function ChatTextArea({ content, setContent, handleSubmit }: Props) {
   return (
     <div className='flex flex-col w-full gap-4'>
       <div className='flex items-start border-2 border-palatinate rounded-2xl p-3 w-full gap-4'>
-        <ArrowUpOnSquareIcon width={24} height={24} className='text-slate-900' />
+        <label htmlFor="file-upload" className='cursor-pointer'>
+          <ArrowUpOnSquareIcon width={24} height={24} className='text-slate-900' />
+          <input
+            id="file-upload"
+            type="file"
+            accept=".jpg,.png,.jpeg"
+            className="hidden"
+            onChange={handleFileChange}
+          />
+        </label>
         <textarea
           ref={textareaRef}
           className="flex-1 outline-none resize-none overflow-auto"

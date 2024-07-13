@@ -1,3 +1,4 @@
+import AWS from 'aws-sdk';
 import { Redis } from "@upstash/redis";
 import { v4 as uuidv4 } from "uuid";
 
@@ -5,6 +6,30 @@ const redis = new Redis({
   url: process.env.NEXT_PUBLIC_UPSTASH_REDIS_REST_URL!,
   token: process.env.NEXT_PUBLIC_UPSTASH_REDIS_REST_TOKEN!,
 });
+
+const s3 = new AWS.S3({
+  accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+  secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+  region: process.env.AWS_REGION,
+});
+
+async function uploadToS3(file: File, userId: string, chatId: string): Promise<string> {
+  const params = {
+    Bucket: process.env.AWS_S3_BUCKET_NAME!,
+    Key: `${userId}/${chatId}/${file.name}`,
+    Body: file,
+    ContentType: file.type,
+  };
+
+  return new Promise((resolve, reject) => {
+    s3.upload(params, (err: Error, data: AWS.S3.ManagedUpload.SendData) => {
+      if (err) {
+        reject(err);
+      }
+      resolve(data.Location);
+    });
+  });
+}
 
 export async function fetchChatHistory(userId: string, chatId: string) {
   if (!userId || !chatId) {
@@ -66,7 +91,7 @@ export async function saveUserMessage(
   userId: string,
   chatId: string,
   text: string,
-  files?: string[]
+  file: File | null
 ): Promise<UserMessage> {
   if (!userId || !chatId || !text) {
     throw new Error("Invalid input");
@@ -75,12 +100,17 @@ export async function saveUserMessage(
   const messageId = uuidv4();
   const timestamp = new Date().toLocaleString("en-US", { timeZone: "Asia/Seoul" });
 
+  let fileUrl: string | null = null;
+  if (file) {
+    fileUrl = await uploadToS3(file, userId, chatId);
+  }
+
   const userMessage: UserMessage = {
     messageId,
     sender: "user",
     prompt: {
       text,
-      files,
+      files: fileUrl ? [fileUrl] : [],
     },
   };
 
@@ -88,7 +118,7 @@ export async function saveUserMessage(
     messageId: userMessage.messageId,
     sender: userMessage.sender,
     promptText: userMessage.prompt.text,
-    promptFiles: userMessage.prompt.files?.join(",") || "",
+    promptFiles: fileUrl || "",
     timestamp,
   });
 
@@ -127,7 +157,7 @@ export async function saveNewChat(
   userId: string,
   chatId: string,
   prompt: string,
-  files?: string[]
+  file: File | null
 ) {
   if (!userId || !chatId || !prompt) {
     throw new Error("[redis.ts/saveNewChat] Invalid input");
@@ -135,9 +165,9 @@ export async function saveNewChat(
 
   console.log("saveNewChat called", userId, chatId, prompt);
 
-  const savedMessage = await saveUserMessage(userId, chatId, prompt, files);
+  const savedMessage = await saveUserMessage(userId, chatId, prompt, file);
 
-  const timestamp = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Seoul" })).toLocaleDateString()
+  const timestamp = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Seoul" })).toLocaleDateString();
   await redis.hset(`chat:${userId}:history:${timestamp}:${chatId}`, { chatId, prompt });
   await redis.sadd(`user:${userId}:chats`, chatId);
 

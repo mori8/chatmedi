@@ -8,6 +8,7 @@ export async function POST(req: NextRequest) {
     const tasks: Task[] = await planTasks(prompt, sessionId);
     // 작업 우선순위에 따라 정렬
     tasks.sort((a, b) => Math.max(...b.dep) - Math.max(...a.dep));
+    console.log("[/plan-task]:", tasks)
     return NextResponse.json({ tasks });
   } catch (error) {
     console.error('Failed to plan tasks:', error);
