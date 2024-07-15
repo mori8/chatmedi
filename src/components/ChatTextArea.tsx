@@ -67,7 +67,7 @@ function ChatTextArea({ content, setContent, handleSubmit, setFile }: Props) {
     <div className="flex flex-col w-full gap-4">
       <div className="flex flex-col items-start border-2 border-palatinate rounded-2xl p-3 w-full gap-4">
         {uploadedFile && (
-          <div className="flex items-center bg-gray-100 border border-gray-200 rounded p-2 mb-2">
+          <div className="flex items-center bg-gray-100 border border-gray-200 rounded-xl p-2 mb-2">
             <span className="text-sm text-gray-700">{uploadedFile.name}</span>
             <XCircleIcon
               width={20}
