@@ -15,6 +15,8 @@ export async function POST(req: NextRequest) {
   const userId = formData.get("userId") as string;
   const chatId = formData.get("chatId") as string;
   const prompt = formData.get("prompt") as string;
+  const fileURL = formData.get("fileURL") as string | null;
+
   console.log("[stream/route.ts]: ", userId, chatId, prompt);
   const chatMediResponse: ChatMediResponse = {};
 
@@ -27,7 +29,8 @@ export async function POST(req: NextRequest) {
         // Append data to chatMediResponse object
         Object.assign(chatMediResponse, data);
       };
-
+      // TODO: plan-task에서 이미지 파일을 처리할 수 있도록 수정
+      // TODO: 백엔드에서는 이미지 URL을 받아서 처리하도록 수정
       (async () => {
         try {
           const plannedTaskData = await fetch(
@@ -39,6 +42,7 @@ export async function POST(req: NextRequest) {
               },
               body: JSON.stringify({
                 prompt: prompt,
+                fileURL: fileURL,
                 sessionId: chatId,
               }),
             }

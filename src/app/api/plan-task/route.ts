@@ -2,10 +2,10 @@ import { NextRequest, NextResponse } from 'next/server';
 import { planTasks } from '@/lib/planTasks';
 
 export async function POST(req: NextRequest) {
-  const { prompt, sessionId } = await req.json();
+  const { prompt, sessionId, fileURL } = await req.json();
 
   try {
-    const tasks: Task[] = await planTasks(prompt, sessionId);
+    const tasks: Task[] = await planTasks(prompt, sessionId, fileURL);
     // 작업 우선순위에 따라 정렬
     tasks.sort((a, b) => Math.max(...b.dep) - Math.max(...a.dep));
     console.log("[/plan-task]:", tasks)

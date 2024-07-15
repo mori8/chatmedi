@@ -79,7 +79,7 @@ export default function ChatSideBar({}: Props) {
             ))}
           </div>
         ) : (
-          <p>No chat history found.</p>
+          <p className="mt-2">No chat history found.</p>
         )}
       </div>
       <div className="flex-shrink-0 bg-white rounded-2xl text-black flex justify-between items-center px-3 py-2 gap-2">

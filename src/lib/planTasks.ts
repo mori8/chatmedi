@@ -53,7 +53,8 @@ async function loadJSON(filePath: string): Promise<any> {
 
 export async function planTasks(
   userInput: string,
-  sessionId: string
+  sessionId: string,
+  fileURL: string | null
 ): Promise<Task[]> {
   const openai = new ChatOpenAI({
     apiKey: process.env.NEXT_PUBLIC_OPENAI_API_KEY!,
@@ -69,8 +70,7 @@ export async function planTasks(
             "question-answering-about-medical-domain",
             "summarization",
             "report-to-cxr-generation",
-            "cxr-to-report-generation",
-            "cxr-visual-qestion-answering"
+            "cxr-to-report-generation"
           ]),
           id: z.number(),
           dep: z.array(z.number()),
@@ -138,7 +138,7 @@ export async function planTasks(
   });
 
   const response = await withHistory.invoke(
-    { user_input: userInput },
+    { user_input: `${userInput} ${fileURL}` },
     { configurable: { sessionId: sessionId } }
   );
 

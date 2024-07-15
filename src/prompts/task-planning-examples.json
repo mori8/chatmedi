@@ -12,8 +12,8 @@
     "example_output": "[{{\"task\": \"report-to-cxr-generation\", \"id\": 0, \"dep\": [-1], \"args\": {{\"text\": \"Create a chest X-ray showing signs of pneumonia.\"}}}}]"
   },
   {
-    "example_input": "What is the size of the pleural effusions? /cxr_image.jpg",
-    "example_output": "[{{\"task\": \"cxr-vqa\", \"id\": 0, \"dep\": [-1], \"args\": {{\"text\": \"What is the size of the pleural effusions?\", \"image\": \"cxr_image.jpg\"}}}}]"
+    "example_input": "What is the size of the pleural effusions? https://example.com/cxr-case-13.jpg",
+    "example_output": "[{{\"task\": \"cxr-to-report-generation\", \"id\": 0, \"dep\": [-1], \"args\": {{\"text\": \"What is the size of the pleural effusions?\", \"image\": \"https://example.com/cxr-case-13.jpg\"}}}}]"
   },
   {
     "example_input": "What is the treatment for high blood pressure?",
@@ -64,15 +64,15 @@
     "example_output": "[{{\"task\": \"report-to-cxr-generation\", \"id\": 0, \"dep\": [-1], \"args\": {{\"text\": \"Create a chest X-ray showing a lung mass in the left upper lobe.\"}}}}]"
   },
   {
-    "example_input": "Interpret the chest X-ray and describe any findings. /patient_cxr.jpg",
-    "example_output": "[{{\"task\": \"cxr-vqa\", \"id\": 0, \"dep\": [-1], \"args\": {{\"text\": \"Interpret the chest X-ray and describe any findings.\", \"image\": \"/patient_cxr.jpg\"}}}}]"
+    "example_input": "Interpret the chest X-ray and describe any findings. https://another.example.com/patient-cxr.png",
+    "example_output": "[{{\"task\": \"cxr-to-report-generation\", \"id\": 0, \"dep\": [-1], \"args\": {{\"text\": \"Interpret the chest X-ray and describe any findings.\", \"image\": \"https://another.example.com/patient-cxr.png\"}}}}]"
   },
   {
-    "example_input": "What does the chest X-ray indicate about the patient's lung condition? /patient_lung_cxr.jpg",
-    "example_output": "[{{\"task\": \"cxr-vqa\", \"id\": 0, \"dep\": [-1], \"args\": {{\"text\": \"What does the chest X-ray indicate about the patient's lung condition?\", \"image\": \"/patient_lung_cxr.jpg\"}}}}]"
+    "example_input": "What does the chest X-ray indicate about the patient's lung condition? https://chatmedi-s3.s3.ap-northeast-2.amazonaws.com/5526a693-d283-4696-8530-8232dce8a462.png",
+    "example_output": "[{{\"task\": \"cxr-to-report-generation\", \"id\": 0, \"dep\": [-1], \"args\": {{\"text\": \"What does the chest X-ray indicate about the patient's lung condition?\", \"image\": \"https://chatmedi-s3.s3.ap-northeast-2.amazonaws.com/5526a693-d283-4696-8530-8232dce8a462.png\"}}}}]"
   },
   {
-    "example_input": "Identify the issues shown in this chest X-ray. /cxr_issues.jpg",
-    "example_output": "[{{\"task\": \"cxr-vqa\", \"id\": 0, \"dep\": [-1], \"args\": {{\"text\": \"Identify the issues shown in this chest X-ray.\", \"image\": \"/cxr_issues.jpg\"}}}}]"
+    "example_input": "Identify the issues shown in this chest X-ray. https://chatmedi-s3.s3.ap-northeast-2.amazonaws.com/c763d3dc-0628-4dff-9663-518770ebed83.png",
+    "example_output": "[{{\"task\": \"cxr-to-report-generation\", \"id\": 0, \"dep\": [-1], \"args\": {{\"text\": \"Identify the issues shown in this chest X-ray.\", \"image\": \"https://chatmedi-s3.s3.ap-northeast-2.amazonaws.com/c763d3dc-0628-4dff-9663-518770ebed83.png\"}}}}]"
   }
 ]

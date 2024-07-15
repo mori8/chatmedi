@@ -5,6 +5,8 @@ import { useSession } from "next-auth/react";
 import { useParams } from "next/navigation";
 import { SwatchIcon } from "@heroicons/react/24/outline";
 import { Tooltip } from "react-tooltip";
+import { useRecoilState } from "recoil";
+import { chatState } from "@/recoil/atoms";
 import classNames from "classnames";
 
 import LoadingDots from "@/components/LoadingDots";
@@ -13,8 +15,10 @@ import MarkdownWrapper from "@/components/MarkdownWrapper";
 import { fetchChatHistory, saveUserMessage, saveAIMessage } from "@/lib/redis";
 import ModelSwappingModal from "@/components/ModelSwappingModal";
 
+
 function ChatPage() {
   const { data: session, status } = useSession();
+  const [chat, setChat] = useRecoilState(chatState);
   const { chatId } = useParams<{ chatId: string }>();
   const user = session?.user;
   const userId = user?.email!;
@@ -53,21 +57,21 @@ function ChatPage() {
     const lastMessage = messages[messages.length - 1];
     if (lastMessage && "prompt" in lastMessage && !isFetching) {
       setIsFetching(true);
-      fetchStreamResponse(lastMessage.prompt.text);
+      fetchStreamResponse(lastMessage.prompt.text, lastMessage.prompt.files?.[0]);
     }
   }, [messages]);
 
-  const fetchStreamResponse = async (prompt: string) => {
+  const fetchStreamResponse = async (prompt: string, fileURL?: string) => {
     try {
       const formData = new FormData();
       formData.append("userId", userId);
       formData.append("chatId", chatId);
       formData.append("prompt", prompt);
-      if (file) {
-        formData.append("file", file);
+      if (fileURL) {
+        formData.append("fileURL", fileURL);
       }
 
-      console.log("fetchStreamResponse called", userId, chatId, prompt, file ? "file attached" : "no file attached")
+      console.log("fetchStreamResponse called", userId, chatId, prompt, fileURL ? "file attached" : "no file attached")
 
       const response = await fetch(`/api/stream`, {
         method: "POST",
@@ -283,7 +287,7 @@ function ChatPage() {
               {"prompt" in message ? (
                 <>
                 {message.prompt.files && message.prompt.files.length > 0 && (
-                  <img src={message.prompt.files[0]} alt="Prompt image" />
+                  <img src={message.prompt.files[0]} alt="Prompt image" className="w-64 mt-2 rounded" />
                 )}
                 <MarkdownWrapper markdown={message.prompt.text} />
                 </>
