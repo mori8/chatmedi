@@ -1,6 +1,7 @@
 import AWS from 'aws-sdk';
 import { Redis } from "@upstash/redis";
 import { v4 as uuidv4 } from "uuid";
+import { extractImageURL } from '@/utils/utils';
 
 const redis = new Redis({
   url: process.env.NEXT_PUBLIC_UPSTASH_REDIS_REST_URL!,
@@ -14,18 +15,38 @@ const s3 = new AWS.S3({
 });
 
 async function uploadToS3(file: File, userId: string, chatId: string): Promise<string> {
+  const bucketName = process.env.AWS_S3_BUCKET_NAME;
+
+  if (!bucketName) {
+    throw new Error("Bucket name is not defined in environment variables");
+  }
+
+  // Convert Blob to ArrayBuffer
+  const arrayBuffer = await file.arrayBuffer();
+  // Convert ArrayBuffer to Buffer
+  const buffer = Buffer.from(arrayBuffer);
+
   const params = {
-    Bucket: process.env.AWS_S3_BUCKET_NAME!,
+    Bucket: bucketName,
     Key: `${userId}/${chatId}/${file.name}`,
-    Body: file,
+    Body: buffer,
     ContentType: file.type,
   };
 
+  console.log("Uploading to S3 with params:", params);
+
   return new Promise((resolve, reject) => {
-    s3.upload(params, (err: Error, data: AWS.S3.ManagedUpload.SendData) => {
+    s3.upload(params, (err: Error, data: any) => {
       if (err) {
-        reject(err);
+        console.error("Error uploading file:", err);
+        return reject(err);
       }
+      if (!data || !data.Location) {
+        const errorMsg = "Upload succeeded but 'Location' is missing in response";
+        console.error(errorMsg, data);
+        return reject(new Error(errorMsg));
+      }
+      console.log("File uploaded successfully:", data);
       resolve(data.Location);
     });
   });
@@ -103,6 +124,11 @@ export async function saveUserMessage(
   let fileUrl: string | null = null;
   if (file) {
     fileUrl = await uploadToS3(file, userId, chatId);
+  } else {
+    const extractedUrl = extractImageURL(text);
+    if (extractedUrl) {
+      fileUrl = extractedUrl[0];
+    }
   }
 
   const userMessage: UserMessage = {
