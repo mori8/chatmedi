@@ -16,11 +16,10 @@ const s3 = new AWS.S3({
 
 async function uploadToS3(file: File, userId: string, chatId: string): Promise<string> {
   const bucketName = process.env.AWS_S3_BUCKET_NAME;
-
   if (!bucketName) {
     throw new Error("Bucket name is not defined in environment variables");
   }
-
+  console.log("Uploading file to S3:", file);
   // Convert Blob to ArrayBuffer
   const arrayBuffer = await file.arrayBuffer();
   // Convert ArrayBuffer to Buffer
@@ -117,7 +116,7 @@ export async function saveUserMessage(
   if (!userId || !chatId || !text) {
     throw new Error("Invalid input");
   }
-  console.log("saveUserMessage called", userId, chatId, text);
+  console.log("saveUserMessage called", userId, chatId, text, file ? file.name : "");
   const messageId = uuidv4();
   const timestamp = new Date().toLocaleString("en-US", { timeZone: "Asia/Seoul" });
 

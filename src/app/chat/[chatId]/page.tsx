@@ -12,7 +12,8 @@ import classNames from "classnames";
 import LoadingDots from "@/components/LoadingDots";
 import ChatTextArea from "@/components/ChatTextArea";
 import MarkdownWrapper from "@/components/MarkdownWrapper";
-import { fetchChatHistory, saveUserMessage, saveAIMessage } from "@/lib/redis";
+import { fetchChatHistory } from "@/lib/redis";
+import { saveUserMessageForClient, saveAIMessageForClient } from "@/utils/utils";
 import ModelSwappingModal from "@/components/ModelSwappingModal";
 
 
@@ -100,7 +101,7 @@ function ChatPage() {
       }
 
       // Save the final response to Redis
-      const savedAIMessage = await saveAIMessage(userId, chatId, tempResponse);
+      const savedAIMessage = await saveAIMessageForClient(userId, chatId, tempResponse);
       setMessages((prevMessages) => [...prevMessages, savedAIMessage]);
     } finally {
       setIsFetching(false);
@@ -111,7 +112,7 @@ function ChatPage() {
 
   const handleSubmit = useCallback(async () => {
     if (content.trim() === "") return;
-    const savedUserMessage = await saveUserMessage(userId, chatId, content, file);
+    const savedUserMessage = await saveUserMessageForClient(userId, chatId, content, file);
     console.log("savedUserMessage:", savedUserMessage);
     if (!savedUserMessage) {
       console.error("Failed to save user message");

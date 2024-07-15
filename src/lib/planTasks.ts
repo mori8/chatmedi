@@ -100,7 +100,6 @@ export async function planTasks(
     .join("\n");
 
   const fullPrompt = `${template.prefix}.\n Here are several cases for your reference. Use these references only to help you know which task to choose for which input. Never use the output of these examples verbatim: \n${examplePrompts}`;
-  console.log("fullPrompt:", fullPrompt);
 
   const functionCallingModel = openai.bind({
     functions: [
