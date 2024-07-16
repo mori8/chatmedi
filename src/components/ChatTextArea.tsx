@@ -12,9 +12,10 @@ type Props = {
   setContent: React.Dispatch<React.SetStateAction<string>>;
   handleSubmit: () => void;
   setFile: React.Dispatch<React.SetStateAction<File | null>>;
+  isFetching: boolean;
 };
 
-function ChatTextArea({ content, setContent, handleSubmit, setFile }: Props) {
+function ChatTextArea({ content, setContent, handleSubmit, setFile, isFetching }: Props) {
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -78,11 +79,11 @@ function ChatTextArea({ content, setContent, handleSubmit, setFile }: Props) {
           </div>
         )}
         <div className="flex flex-row w-full gap-4 items-start">
-          <label htmlFor="file-upload" className="cursor-pointer">
+          <label htmlFor="file-upload" className={isFetching ? "cursor-not-allowed" : "cursor-pointer"}>
             <ArrowUpOnSquareIcon
               width={24}
               height={24}
-              className="text-slate-900"
+              className={`text-slate-900 ${isFetching ? "opacity-50" : ""}`}
             />
             <input
               id="file-upload"
@@ -90,22 +91,24 @@ function ChatTextArea({ content, setContent, handleSubmit, setFile }: Props) {
               accept=".jpg,.png,.jpeg"
               className="hidden"
               onChange={handleFileChange}
+              disabled={isFetching}
             />
           </label>
           <textarea
             ref={textareaRef}
             className="flex-1 outline-none resize-none overflow-auto"
-            placeholder="Ask me a question!"
+            placeholder={isFetching ? "Analyzing..." : "Ask me a question!"}
             value={content}
             onChange={handleChange}
             onKeyUp={handleKeyUp}
             rows={1}
             style={{ minHeight: "16px", maxHeight: "200px" }}
+            disabled={isFetching}
           />
           <PaperAirplaneIcon
             width={24}
             height={24}
-            className="text-slate-900 cursor-pointer"
+            className={`text-slate-900 cursor-pointer ${isFetching ? "opacity-50 cursor-not-allowed" : ""}`}
             onClick={submitAndResetHeight}
           />
         </div>

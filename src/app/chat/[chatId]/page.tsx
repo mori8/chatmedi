@@ -83,6 +83,7 @@ function ChatPage() {
             setContent={setContent}
             handleSubmit={handleSubmit}
             setFile={setFile}
+            isFetching={isFetching}
           />
         </div>
         {isModalOpen && <ModelSwappingModal onClose={() => setIsModalOpen(false)} />}
