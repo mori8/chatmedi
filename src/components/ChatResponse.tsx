@@ -3,16 +3,21 @@ import { SwatchIcon } from "@heroicons/react/24/outline";
 import { Tooltip } from "react-tooltip";
 import LoadingDots from "@/components/LoadingDots";
 import MarkdownWrapper from "@/components/MarkdownWrapper";
+import { TasksHandledByDefaultLLM } from "@/utils/utils";
 
 interface ChatResponseProps {
   response: ChatMediResponse;
   setIsModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
+const isNeedToHandleTask = (tasks: Task[]) => {
+  return !(tasks.length === 1 && TasksHandledByDefaultLLM.includes(tasks[0].task));
+}
+
 const ChatResponse: React.FC<ChatResponseProps> = ({ response, setIsModalOpen }) => {
   return (
     <div className="p-2">
-      {response.planned_task && (
+      {response.planned_task && isNeedToHandleTask(response.planned_task) && (
         <div className="text-sm">
           <p className="m-0 text-slate-400">
             To handle your request, we need to tackle these tasks:

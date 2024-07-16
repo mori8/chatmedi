@@ -1,13 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
+import { TasksHandledByDefaultLLM } from "@/utils/utils";
 
 export const config = {
   runtime: "edge",
 };
-
-const TasksHandledByDefaultLLM = [
-  "question-answering-about-medical-domain",
-  "summarization",
-];
 
 export async function POST(req: NextRequest) {
   console.log("[stream/route.ts]: POST called");

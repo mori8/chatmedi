@@ -60,3 +60,8 @@ export async function saveAIMessageForClient(userId: string, chatId: string, res
   const aiMessage = await res.json();
   return aiMessage;
 }
+
+export const TasksHandledByDefaultLLM = [
+  "question-answering-about-medical-domain",
+  "summarization",
+];
