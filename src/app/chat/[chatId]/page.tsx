@@ -1,68 +1,55 @@
 "use client";
 
-import React, { useState, useEffect, useCallback, useRef } from "react";
+import React, { useState, useEffect, useCallback, useRef, Suspense, lazy } from "react";
 import { useSession } from "next-auth/react";
 import { useParams } from "next/navigation";
 import { SwatchIcon } from "@heroicons/react/24/outline";
 import { Tooltip } from "react-tooltip";
-import { useRecoilState } from "recoil";
-import { chatState } from "@/recoil/atoms";
 import classNames from "classnames";
 
-import LoadingDots from "@/components/LoadingDots";
-import ChatTextArea from "@/components/ChatTextArea";
-import MarkdownWrapper from "@/components/MarkdownWrapper";
+const LoadingDots = lazy(() => import("@/components/LoadingDots"));
+const ChatTextArea = lazy(() => import("@/components/ChatTextArea"));
+const MarkdownWrapper = lazy(() => import("@/components/MarkdownWrapper"));
+const ModelSwappingModal = lazy(() => import("@/components/ModelSwappingModal"));
+
 import { fetchChatHistory } from "@/lib/redis";
 import { saveUserMessageForClient, saveAIMessageForClient } from "@/utils/utils";
-import ModelSwappingModal from "@/components/ModelSwappingModal";
-
 
 function ChatPage() {
-  const { data: session, status } = useSession();
-  const [chat, setChat] = useRecoilState(chatState);
+  const { data: session } = useSession();
   const { chatId } = useParams<{ chatId: string }>();
   const user = session?.user;
   const userId = user?.email!;
+  
   const [content, setContent] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const [messages, setMessages] = useState<(UserMessage | AIMessage)[]>([]);
-  const [tempChatMediResponse, setTempChatMediResponse] =
-    useState<ChatMediResponse | null>(null);
+  const [tempChatMediResponse, setTempChatMediResponse] = useState<ChatMediResponse | null>(null);
   const [isFetching, setIsFetching] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  const scrollToBottom = () => {
+  const scrollToBottom = useCallback(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  };
+  }, []);
 
   useEffect(() => {
     scrollToBottom();
-  }, [messages, tempChatMediResponse]);
+  }, [messages, tempChatMediResponse, scrollToBottom]);
 
   useEffect(() => {
-    async function initializeChat() {
-      const history: (UserMessage | AIMessage)[] = await fetchChatHistory(
-        userId,
-        chatId
-      );
-      console.log("history:", history);
+    const initializeChat = async () => {
+      const history = await fetchChatHistory(userId, chatId);
       setMessages(history);
-    }
+    };
 
-    initializeChat();
+    if (userId && chatId) {
+      initializeChat();
+    }
   }, [userId, chatId]);
 
-  useEffect(() => {
-    const lastMessage = messages[messages.length - 1];
-    if (lastMessage && "prompt" in lastMessage && !isFetching) {
-      setIsFetching(true);
-      fetchStreamResponse(lastMessage.prompt.text, lastMessage.prompt.files?.[0]);
-    }
-  }, [messages]);
-
-  const fetchStreamResponse = async (prompt: string, fileURL?: string) => {
+  const fetchStreamResponse = useCallback(async (prompt: string, fileURL?: string) => {
     try {
       const formData = new FormData();
       formData.append("userId", userId);
@@ -71,8 +58,6 @@ function ChatPage() {
       if (fileURL) {
         formData.append("fileURL", fileURL);
       }
-
-      console.log("fetchStreamResponse called", userId, chatId, prompt, fileURL ? "file attached" : "no file attached")
 
       const response = await fetch(`/api/stream`, {
         method: "POST",
@@ -100,30 +85,36 @@ function ChatPage() {
         }
       }
 
-      // Save the final response to Redis
       const savedAIMessage = await saveAIMessageForClient(userId, chatId, tempResponse);
       setMessages((prevMessages) => [...prevMessages, savedAIMessage]);
     } finally {
       setIsFetching(false);
       setTempChatMediResponse(null);
-      setFile(null);  // 파일 초기화
+      setFile(null);
     }
-  };
+  }, [userId, chatId]);
+
+  useEffect(() => {
+    const lastMessage = messages[messages.length - 1];
+    if (lastMessage && "prompt" in lastMessage && !isFetching) {
+      setIsFetching(true);
+      fetchStreamResponse(lastMessage.prompt.text, lastMessage.prompt.files?.[0]);
+    }
+  }, [messages, isFetching, fetchStreamResponse]);
 
   const handleSubmit = useCallback(async () => {
     if (content.trim() === "") return;
     const savedUserMessage = await saveUserMessageForClient(userId, chatId, content, file);
-    console.log("savedUserMessage:", savedUserMessage);
     if (!savedUserMessage) {
       console.error("Failed to save user message");
       return;
     }
     setMessages((prev) => [...prev, savedUserMessage]);
     setContent("");
-    setFile(null);  // 파일 초기화
+    setFile(null);
   }, [content, file, userId, chatId]);
 
-  const renderChatMediResponse = (response: ChatMediResponse) => {
+  const renderChatMediResponse = useCallback((response: ChatMediResponse) => {
     return (
       <div className="p-2">
         {response.planned_task && (
@@ -257,80 +248,82 @@ function ChatPage() {
         )}
       </div>
     );
-  };
+  }, []);
 
   return (
     <div className="flex flex-col h-full gap-4">
-      <div className="flex-1 overflow-scroll mt-4 rounded-lg flex flex-col gap-8">
-        {messages.map((message, index) => (
-          <div
-            key={index}
-            className={classNames("flex gap-4 justify-start", {
-              "flex-row-reverse": message.sender === "user",
-            })}
-          >
-            <div className="profile-image flex-shrink-0">
-              <img
-                className="rounded-full w-8 h-8"
-                src={
-                  message.sender === "user"
-                    ? user?.image!
-                    : "/images/robot-1.svg"
-                }
-                alt={message.sender}
-              />
-            </div>
-            <span
-              className={classNames("prose", {
-                "bg-slate-100 rounded-xl px-4 py-2": message.sender === "user",
+      <Suspense fallback={<div>Loading...</div>}>
+        <div className="flex-1 overflow-scroll mt-4 rounded-lg flex flex-col gap-8">
+          {messages.map((message, index) => (
+            <div
+              key={index}
+              className={classNames("flex gap-4 justify-start", {
+                "flex-row-reverse": message.sender === "user",
               })}
             >
-              {"prompt" in message ? (
-                <>
-                {message.prompt.files && message.prompt.files.length > 0 && (
-                  <img src={message.prompt.files[0]} alt="Prompt image" className="w-64 mt-2 rounded" />
-                )}
-                <MarkdownWrapper markdown={message.prompt.text} />
-                </>
-              ) : (
-                <>
-                  {message.response ? (
-                    renderChatMediResponse(message.response)
-                  ) : (
-                    <div className="text-sm text-slate-400">
-                      Analyzing <LoadingDots />
-                    </div>
+              <div className="profile-image flex-shrink-0">
+                <img
+                  className="rounded-full w-8 h-8"
+                  src={
+                    message.sender === "user"
+                      ? user?.image!
+                      : "/images/robot-1.svg"
+                  }
+                  alt={message.sender}
+                />
+              </div>
+              <span
+                className={classNames("prose", {
+                  "bg-slate-100 rounded-xl px-4 py-2": message.sender === "user",
+                })}
+              >
+                {"prompt" in message ? (
+                  <>
+                  {message.prompt.files && message.prompt.files.length > 0 && (
+                    <img src={message.prompt.files[0]} alt="Prompt image" className="w-64 mt-2 rounded" />
                   )}
-                </>
-              )}
-            </span>
-          </div>
-        ))}
-        {isFetching && tempChatMediResponse && (
-          <div className="flex gap-4 justify-start">
-            <div className="profile-image flex-shrink-0">
-              <img
-                className="rounded-full w-8 h-8"
-                src="/images/robot-1.svg"
-                alt="AI"
-              />
+                  <MarkdownWrapper markdown={message.prompt.text} />
+                  </>
+                ) : (
+                  <>
+                    {message.response ? (
+                      renderChatMediResponse(message.response)
+                    ) : (
+                      <div className="text-sm text-slate-400">
+                        Analyzing <LoadingDots />
+                      </div>
+                    )}
+                  </>
+                )}
+              </span>
             </div>
-            <span className="prose">
-              {renderChatMediResponse(tempChatMediResponse)}
-            </span>
-          </div>
-        )}
-        <div ref={messagesEndRef} />
-      </div>
-      <div className="flex-shrink-0">
-        <ChatTextArea
-          content={content}
-          setContent={setContent}
-          handleSubmit={handleSubmit}
-          setFile={setFile}
-        />
-      </div>
-      {isModalOpen && <ModelSwappingModal onClose={() => setIsModalOpen(false)} />}
+          ))}
+          {isFetching && tempChatMediResponse && (
+            <div className="flex gap-4 justify-start">
+              <div className="profile-image flex-shrink-0">
+                <img
+                  className="rounded-full w-8 h-8"
+                  src="/images/robot-1.svg"
+                  alt="AI"
+                />
+              </div>
+              <span className="prose">
+                {renderChatMediResponse(tempChatMediResponse)}
+              </span>
+            </div>
+          )}
+          <div ref={messagesEndRef} />
+        </div>
+        <div className="flex-shrink-0">
+          <ChatTextArea
+            content={content}
+            setContent={setContent}
+            handleSubmit={handleSubmit}
+            setFile={setFile}
+          />
+        </div>
+        {isModalOpen && <ModelSwappingModal onClose={() => setIsModalOpen(false)} />}
+      </Suspense>
     </div>
   );
 }
