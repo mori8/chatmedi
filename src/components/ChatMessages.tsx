@@ -37,14 +37,16 @@ const ChatMessages: React.FC<ChatMessagesProps> = ({
         >
           <div className="profile-image flex-shrink-0">
             <img
-              className="rounded-full w-8 h-8"
+              className={classNames("rounded-full w-8 h-8", {
+                "mt-8": message.sender === "ai",
+              })}
               src={
                 message.sender === "user" ? user?.image! : "/images/robot-1.svg"
               }
               alt={message.sender}
             />
           </div>
-          <span
+          <div
             className={classNames("prose", {
               "bg-slate-100 rounded-xl px-4 py-2": message.sender === "user",
             })}
@@ -74,7 +76,7 @@ const ChatMessages: React.FC<ChatMessagesProps> = ({
                 )}
               </>
             )}
-          </span>
+          </div>
         </div>
       ))}
       {isFetching && tempChatMediResponse && (
@@ -93,7 +95,7 @@ const ChatMessages: React.FC<ChatMessagesProps> = ({
             />
           </span>
           {isFetching && (
-            <div className="mt-2">
+            <div className="mt-5">
               <BeatLoader color="#cacaca" size={8} speedMultiplier={1} />
             </div>
           )}

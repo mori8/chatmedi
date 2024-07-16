@@ -1,7 +1,7 @@
-import AWS from 'aws-sdk';
+import AWS from "aws-sdk";
 import { Redis } from "@upstash/redis";
 import { v4 as uuidv4 } from "uuid";
-import { extractImageURL } from '@/utils/utils';
+import { extractImageURL, formatDate, parseTimestamp } from "@/utils/utils";
 
 const redis = new Redis({
   url: process.env.NEXT_PUBLIC_UPSTASH_REDIS_REST_URL!,
@@ -14,7 +14,11 @@ const s3 = new AWS.S3({
   region: process.env.AWS_REGION,
 });
 
-async function uploadToS3(file: File, userId: string, chatId: string): Promise<string> {
+async function uploadToS3(
+  file: File,
+  userId: string,
+  chatId: string
+): Promise<string> {
   const bucketName = process.env.AWS_S3_BUCKET_NAME;
   if (!bucketName) {
     throw new Error("Bucket name is not defined in environment variables");
@@ -41,7 +45,8 @@ async function uploadToS3(file: File, userId: string, chatId: string): Promise<s
         return reject(err);
       }
       if (!data || !data.Location) {
-        const errorMsg = "Upload succeeded but 'Location' is missing in response";
+        const errorMsg =
+          "Upload succeeded but 'Location' is missing in response";
         console.error(errorMsg, data);
         return reject(new Error(errorMsg));
       }
@@ -116,9 +121,17 @@ export async function saveUserMessage(
   if (!userId || !chatId || !text) {
     throw new Error("Invalid input");
   }
-  console.log("saveUserMessage called", userId, chatId, text, file ? file.name : "");
+  console.log(
+    "saveUserMessage called",
+    userId,
+    chatId,
+    text,
+    file ? file.name : ""
+  );
   const messageId = uuidv4();
-  const timestamp = new Date().toLocaleString("en-US", { timeZone: "Asia/Seoul" });
+  const timestamp = formatDate(
+    new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Seoul" }))
+  );
 
   let fileUrl: string | null = null;
   if (file) {
@@ -160,7 +173,9 @@ export async function saveAIMessage(
   }
   console.log("saveAIMessage called", userId, chatId, response);
   const messageId = uuidv4();
-  const timestamp = new Date().toLocaleString("en-US", { timeZone: "Asia/Seoul" });
+  const timestamp = formatDate(
+    new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Seoul" }))
+  );
 
   const aiMessage: AIMessage = {
     messageId,
@@ -192,8 +207,13 @@ export async function saveNewChat(
 
   const savedMessage = await saveUserMessage(userId, chatId, prompt, file);
 
-  const timestamp = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Seoul" })).toLocaleDateString();
-  await redis.hset(`chat:${userId}:history:${timestamp}:${chatId}`, { chatId, prompt });
+  const timestamp = formatDate(
+    new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Seoul" }))
+  );
+  await redis.hset(`chat:${userId}:history:${timestamp}:${chatId}`, {
+    chatId,
+    prompt,
+  });
   await redis.sadd(`user:${userId}:chats`, chatId);
 
   return savedMessage;
@@ -209,24 +229,31 @@ export async function fetchUserChats(
 
   // Get all keys related to user's chat history
   const keys = await redis.keys(`chat:${userId}:history:*`);
-  const chatsByDate: { [date: string]: { chatId: string; prompt: string }[] } =
-    {};
+  const chatsByDate: ChatHistory = {};
 
-  for (const key of keys) {
-    const chat = (await redis.hgetall(key)) as unknown as Record<
-      string,
-      string
-    >;
-    if (!chat) {
-      continue;
-    }
+  // Use pipelining to fetch all chat histories in parallel
+  const pipeline = redis.pipeline();
+  keys.forEach((key) => {
+    pipeline.hgetall(key);
+  });
 
-    const date = key.split(":")[3];
-    const chatId = chat.chatId;
+  const results:
+    {
+      chatId: string;
+      prompt: string;
+
+    }[] = await pipeline.exec();
+
+  results.forEach((result, index) => {
+    console.log(keys[index], result);
+    const dateTimeString = keys[index].split(":")[3];
+    const date = dateTimeString.split("  ")[0];
+    const chatId = result.chatId;
 
     const chatData = {
       chatId,
-      prompt: chat.prompt,
+      prompt: result.prompt,
+      timestamp: dateTimeString,
     };
 
     if (!chatsByDate[date]) {
@@ -234,7 +261,25 @@ export async function fetchUserChats(
     }
 
     chatsByDate[date].push(chatData);
-  }
+  });
 
-  return chatsByDate;
+  // Convert date keys to Date objects, sort by date, and convert back to string keys
+  const sortedChatsByDate = Object.entries(chatsByDate)
+    .map(([dateString, chats]) => {
+      const sortedChats = chats.sort((a, b) => parseTimestamp(b.timestamp).getTime() - parseTimestamp(a.timestamp).getTime());
+      return { date: dateString, sortedChats };
+    })
+    .sort((a, b) => {
+      const aTimestamp = parseTimestamp(a.sortedChats[0].timestamp).getTime();
+      const bTimestamp = parseTimestamp(b.sortedChats[0].timestamp).getTime();
+      return bTimestamp - aTimestamp;
+    })
+    .reduce((acc, { date, sortedChats }) => {
+      acc[date] = sortedChats;
+      return acc;
+    }, {} as ChatHistory);
+  
+  // console.log("fetchUserChats result:", sortedChatsByDate);
+
+  return sortedChatsByDate;
 }

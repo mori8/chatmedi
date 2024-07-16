@@ -83,7 +83,7 @@ function ChatPage() {
   return (
     <div className="flex flex-col h-full gap-4">
       <Suspense fallback={<div>Loading...</div>}>
-        <div className="flex-1 overflow-scroll mt-4 rounded-lg flex flex-col gap-8">
+        <div className="flex-1 overflow-scroll mt-4 rounded-lg flex flex-col gap-5">
           <ChatMessages
             messages={messages}
             user={user}

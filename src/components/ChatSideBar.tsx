@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { PlusIcon } from "@heroicons/react/20/solid";
@@ -12,27 +12,33 @@ import { Tooltip } from "react-tooltip";
 
 type Props = {};
 
-export default function ChatSideBar({}: Props) {
+const ChatSideBar: React.FC<Props> = React.memo(() => {
   const { chatId } = useParams<{ chatId: string }>();
   const { data: session, status } = useSession();
   const user = session?.user;
-  const today = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Seoul" })).toLocaleDateString()
+  const today = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Seoul" })).toLocaleDateString();
   const [chatHistory, setChatHistory] = useState<{
     [date: string]: { chatId: string; prompt: string }[];
   }>({});
+  const [loading, setLoading] = useState<boolean>(true);
 
-  useEffect(() => {
+  const loadChatHistory = useCallback(async () => {
     if (user?.email) {
-      fetchUserChats(user.email).then((data) => {
-        console.log("chat history data:", data);
-        const sortedData = Object.entries(data).sort((a, b) => {
-          return new Date(b[0]).getTime() - new Date(a[0]).getTime();
-        });
-        const sortedChatHistory = Object.fromEntries(sortedData);
-        setChatHistory(sortedChatHistory);
+      setLoading(true);
+      const data = await fetchUserChats(user.email);
+      console.log("chat history data:", data);
+      const sortedData = Object.entries(data).sort((a, b) => {
+        return new Date(b[0]).getTime() - new Date(a[0]).getTime();
       });
+      const sortedChatHistory = Object.fromEntries(sortedData);
+      setChatHistory(sortedChatHistory);
+      setLoading(false);
     }
   }, [user, chatId]);
+
+  useEffect(() => {
+    loadChatHistory();
+  }, [loadChatHistory]);
 
   return (
     <div className="bg-palatinate text-alabaster px-4 pt-5 pb-4 rounded-3xl h-full flex flex-col w-64 box-border text-sm">
@@ -49,7 +55,7 @@ export default function ChatSideBar({}: Props) {
         </div>
       </div>
       <div className="flex-1 overflow-auto">
-        {status === "loading" ? (
+        {status === "loading" || loading ? (
           <div className="animate-pulse mt-2">Loading chat history...</div>
         ) : Object.keys(chatHistory).length > 0 ? (
           <div>
@@ -118,4 +124,6 @@ export default function ChatSideBar({}: Props) {
       </div>
     </div>
   );
-}
+});
+
+export default ChatSideBar;

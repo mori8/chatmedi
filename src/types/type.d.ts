@@ -76,6 +76,7 @@ interface ChatMediResponse {
 interface Chat {
   chatId: string;
   prompt: string;
+  timestamp: string;
 }
 
 interface ChatHistory {

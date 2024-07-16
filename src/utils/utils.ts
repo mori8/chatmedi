@@ -78,3 +78,26 @@ export const TasksHandledByDefaultLLM = [
 export const isUserMessage = (message: Message) => {
   return "prompt" in message;
 };
+
+export const formatDate = (date: Date) => {
+  const year = date.getFullYear();
+  const month = date.getMonth() + 1;
+  const day = date.getDate();
+  const hours = String(date.getHours()).padStart(2, '0');
+  const minutes = String(date.getMinutes()).padStart(2, '0');
+  const seconds = String(date.getSeconds()).padStart(2, '0');
+
+  return `${year}. ${month}. ${day}.  ${hours}. ${minutes}. ${seconds}`;
+};
+
+export const parseTimestamp = (timestamp: string): Date => {
+  const [datePart, timePart] = timestamp.split("  ");
+  const [year, month, day] = datePart.split(". ").map(Number);
+
+  let hours = 0, minutes = 0, seconds = 0;
+  if (timePart) {
+    [hours, minutes, seconds] = timePart.split(". ").map(Number);
+  }
+
+  return new Date(year, month - 1, day, hours, minutes, seconds);
+};
