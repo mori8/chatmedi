@@ -97,7 +97,7 @@ function ChatTextArea({ content, setContent, handleSubmit, setFile, isFetching }
           <textarea
             ref={textareaRef}
             className="flex-1 outline-none resize-none overflow-auto"
-            placeholder={isFetching ? "Analyzing..." : "Ask me a question!"}
+            placeholder="Ask me a question!"
             value={content}
             onChange={handleChange}
             onKeyUp={handleKeyUp}

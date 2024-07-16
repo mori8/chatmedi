@@ -4,15 +4,12 @@ import React, { useState, useEffect, useRef, Suspense } from "react";
 import { useSession } from "next-auth/react";
 import { useParams } from "next/navigation";
 import { fetchChatHistory } from "@/lib/redis";
+import { saveUserMessageForClient } from "@/utils/utils";
 import ChatMessages from "@/components/ChatMessages";
 import ChatTextArea from "@/components/ChatTextArea";
 import useFetchStreamResponse from "@/hook/useFetchStreamResponse";
-import { saveUserMessageForClient } from "@/utils/utils";
-import BeatLoader from "react-spinners/BeatLoader";
 
-const ModelSwappingModal = React.lazy(
-  () => import("@/components/ModelSwappingModal")
-);
+const ModelSwappingModal = React.lazy(() => import("@/components/ModelSwappingModal"));
 
 function ChatPage() {
   const { data: session } = useSession();
@@ -25,8 +22,7 @@ function ChatPage() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
 
-  const { isFetching, tempChatMediResponse, fetchStreamResponse } =
-    useFetchStreamResponse(userId, chatId, setMessages);
+  const { isFetching, tempChatMediResponse, fetchStreamResponse } = useFetchStreamResponse(userId, chatId, setMessages);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -52,28 +48,36 @@ function ChatPage() {
   useEffect(() => {
     const lastMessage = messages[messages.length - 1];
     if (lastMessage && "prompt" in lastMessage && !isFetching) {
-      fetchStreamResponse(
-        lastMessage.prompt.text,
-        lastMessage.prompt.files?.[0]
-      );
+      fetchStreamResponse(lastMessage.prompt.text, lastMessage.prompt.files?.[0]);
     }
   }, [messages, isFetching, fetchStreamResponse]);
 
   const handleSubmit = async () => {
     if (content.trim() === "") return;
-    const savedUserMessage = await saveUserMessageForClient(
-      userId,
-      chatId,
-      content,
-      file
-    );
-    if (!savedUserMessage) {
-      console.error("Failed to save user message");
-      return;
-    }
-    setMessages((prev) => [...prev, savedUserMessage]);
+
+    // Create a new user message object
+    const newMessage: UserMessage = {
+      messageId: `${Date.now()}`,
+      sender: "user",
+      prompt: {
+        text: content,
+        files: file ? [URL.createObjectURL(file)] : []
+      }
+    };
+
+    // Update the messages state immediately
+    setMessages((prevMessages) => [...prevMessages, newMessage]);
     setContent("");
     setFile(null);
+
+    // Scroll to bottom after updating messages
+    scrollToBottom();
+
+    // Save the user message to Redis
+    const savedUserMessage = await saveUserMessageForClient(userId, chatId, content, file);
+    if (!savedUserMessage) {
+      console.error("Failed to save user message");
+    }
   };
 
   return (
@@ -98,9 +102,7 @@ function ChatPage() {
             isFetching={isFetching}
           />
         </div>
-        {isModalOpen && (
-          <ModelSwappingModal onClose={() => setIsModalOpen(false)} />
-        )}
+        {isModalOpen && <ModelSwappingModal onClose={() => setIsModalOpen(false)} />}
       </Suspense>
     </div>
   );
