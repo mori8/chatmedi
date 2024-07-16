@@ -103,6 +103,7 @@ export default function Page({}: Props) {
         setContent={setContent}
         handleSubmit={handleSubmit}
         setFile={setFile}
+        isFetching={false}
       />
     </div>
   );

@@ -14,17 +14,22 @@ export function extractImageURL(message: string): string[] {
   return imageUrls;
 }
 
-export async function saveUserMessageForClient(userId: string, chatId: string, text: string, file: File | null): Promise<UserMessage> {
+export async function saveUserMessageForClient(
+  userId: string,
+  chatId: string,
+  text: string,
+  file: File | null
+): Promise<UserMessage> {
   const formData = new FormData();
-  formData.append('userId', userId);
-  formData.append('chatId', chatId);
-  formData.append('text', text);
+  formData.append("userId", userId);
+  formData.append("chatId", chatId);
+  formData.append("text", text);
   if (file) {
-    formData.append('file', file);
+    formData.append("file", file);
   }
 
-  const response = await fetch('/api/message/user', {
-    method: 'POST',
+  const response = await fetch("/api/message/user", {
+    method: "POST",
     body: formData,
   });
 
@@ -37,17 +42,21 @@ export async function saveUserMessageForClient(userId: string, chatId: string, t
   return userMessage;
 }
 
-export async function saveAIMessageForClient(userId: string, chatId: string, response: ChatMediResponse): Promise<AIMessage> {
+export async function saveAIMessageForClient(
+  userId: string,
+  chatId: string,
+  response: ChatMediResponse
+): Promise<AIMessage> {
   const requestBody = {
     userId,
     chatId,
     response,
   };
 
-  const res = await fetch('/api/message/ai', {
-    method: 'POST',
+  const res = await fetch("/api/message/ai", {
+    method: "POST",
     headers: {
-      'Content-Type': 'application/json',
+      "Content-Type": "application/json",
     },
     body: JSON.stringify(requestBody),
   });
@@ -65,3 +74,7 @@ export const TasksHandledByDefaultLLM = [
   "question-answering-about-medical-domain",
   "summarization",
 ];
+
+export const isUserMessage = (message: Message) => {
+  return "prompt" in message;
+};
