@@ -3,7 +3,6 @@
 import React, { useState, useEffect, useRef, Suspense } from "react";
 import { useSession } from "next-auth/react";
 import { useParams } from "next/navigation";
-import { fetchChatHistory } from "@/lib/redis";
 import { saveUserMessageForClient } from "@/utils/utils";
 import ChatMessages from "@/components/ChatMessages";
 import ChatTextArea from "@/components/ChatTextArea";
@@ -36,8 +35,13 @@ function ChatPage() {
 
   useEffect(() => {
     const initializeChat = async () => {
-      const history: Message[] = await fetchChatHistory(userId, chatId);
-      setMessages(history);
+      const response = await fetch(`/api/chat-history?userId=${userId}&chatId=${chatId}`);
+      if (response.ok) {
+        const history: Message[] = await response.json();
+        setMessages(history);
+      } else {
+        console.error("Failed to fetch chat history");
+      }
     };
 
     if (userId && chatId) {

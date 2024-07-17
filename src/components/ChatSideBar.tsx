@@ -4,13 +4,17 @@ import React, { useState, useEffect, useCallback } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { PlusIcon } from "@heroicons/react/20/solid";
-import { Cog6ToothIcon, ArrowRightStartOnRectangleIcon } from "@heroicons/react/24/outline";
+import { ArrowRightOnRectangleIcon } from "@heroicons/react/24/outline";
 import { useSession } from "next-auth/react";
-import { fetchUserChats } from "@/lib/redis";
 import classNames from "classnames";
 import { Tooltip } from "react-tooltip";
 
 type Props = {};
+
+interface ChatData {
+  chatId: string;
+  prompt: string;
+}
 
 const ChatSideBar: React.FC<Props> = React.memo(() => {
   const { chatId } = useParams<{ chatId: string }>();
@@ -18,21 +22,35 @@ const ChatSideBar: React.FC<Props> = React.memo(() => {
   const user = session?.user;
   const today = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Seoul" })).toLocaleDateString();
   const [chatHistory, setChatHistory] = useState<{
-    [date: string]: { chatId: string; prompt: string }[];
+    [date: string]: ChatData[];
   }>({});
   const [loading, setLoading] = useState<boolean>(true);
 
   const loadChatHistory = useCallback(async () => {
     if (user?.email) {
       setLoading(true);
-      const data = await fetchUserChats(user.email);
-      console.log("chat history data:", data);
-      const sortedData = Object.entries(data).sort((a, b) => {
-        return new Date(b[0]).getTime() - new Date(a[0]).getTime();
-      });
-      const sortedChatHistory = Object.fromEntries(sortedData);
-      setChatHistory(sortedChatHistory);
-      setLoading(false);
+      try {
+        const response = await fetch(`/api/chat-list?userId=${user.email}`);
+        if (!response.ok) {
+          throw new Error('Failed to fetch chat history');
+        }
+        const data: { [date: string]: ChatData[] } = await response.json();
+        console.log("chat history data:", data);
+
+        const sortedData: [string, ChatData[]][] = Object.entries(data).sort((a, b) => {
+          return new Date(b[0]).getTime() - new Date(a[0]).getTime();
+        });
+
+        const sortedChatHistory: {
+          [k: string]: ChatData[];
+        } = Object.fromEntries(sortedData);
+
+        setChatHistory(sortedChatHistory);
+      } catch (error) {
+        console.error('Error loading chat history:', error);
+      } finally {
+        setLoading(false);
+      }
     }
   }, [user, chatId]);
 
@@ -116,7 +134,7 @@ const ChatSideBar: React.FC<Props> = React.memo(() => {
             <div>
               <Tooltip id="logout" />
               <a href="/api/auth/signout" data-tooltip-id="logout" data-tooltip-content="Logout">
-                <ArrowRightStartOnRectangleIcon width={24} height={24} />
+                <ArrowRightOnRectangleIcon width={24} height={24} />
               </a>
             </div>
           </>

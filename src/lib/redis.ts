@@ -4,8 +4,8 @@ import { v4 as uuidv4 } from "uuid";
 import { extractImageURL, formatDate, parseTimestamp } from "@/utils/utils";
 
 const redis = new Redis({
-  url: process.env.NEXT_PUBLIC_UPSTASH_REDIS_REST_URL!,
-  token: process.env.NEXT_PUBLIC_UPSTASH_REDIS_REST_TOKEN!,
+  url: process.env.UPSTASH_REDIS_REST_URL!,
+  token: process.env.UPSTASH_REDIS_REST_TOKEN!,
 });
 
 const s3 = new AWS.S3({
