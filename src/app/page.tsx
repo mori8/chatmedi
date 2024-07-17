@@ -1,11 +1,6 @@
-import { useEffect, useState } from 'react';
+import { redirect } from 'next/navigation';
 
-const Home = () => {
-  return (
-    <div>
-      <h1>Hello world</h1>
-    </div>
-  );
-};
-
-export default Home;
+export default function HomePage() {
+  redirect('/chat');
+  return null;
+}

@@ -50,7 +50,6 @@ async function uploadToS3(
         console.error(errorMsg, data);
         return reject(new Error(errorMsg));
       }
-      console.log("File uploaded successfully:", data);
       resolve(data.Location);
     });
   });
@@ -107,8 +106,6 @@ export async function fetchChatHistory(userId: string, chatId: string) {
       chats.push(aiMessage);
     }
   }
-  console.log("chats:", chats);
-  console.log("fetchChatHistory called");
   return chats;
 }
 
@@ -171,7 +168,6 @@ export async function saveAIMessage(
   if (!userId || !chatId || !response) {
     throw new Error("Invalid input");
   }
-  console.log("saveAIMessage called", userId, chatId, response);
   const messageId = uuidv4();
   const timestamp = formatDate(
     new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Seoul" }))
@@ -203,7 +199,6 @@ export async function saveNewChat(
     throw new Error("[redis.ts/saveNewChat] Invalid input");
   }
 
-  console.log("saveNewChat called", userId, chatId, prompt);
 
   const savedMessage = await saveUserMessage(userId, chatId, prompt, file);
 
@@ -225,7 +220,6 @@ export async function fetchUserChats(
   if (!userId) {
     return {};
   }
-  console.log("fetchUserChats called", userId);
 
   // Get all keys related to user's chat history
   const keys = await redis.keys(`chat:${userId}:history:*`);
@@ -245,7 +239,6 @@ export async function fetchUserChats(
     }[] = await pipeline.exec();
 
   results.forEach((result, index) => {
-    console.log(keys[index], result);
     const dateTimeString = keys[index].split(":")[3];
     const date = dateTimeString.split("  ")[0];
     const chatId = result.chatId;

@@ -35,7 +35,6 @@ const ChatSideBar: React.FC<Props> = React.memo(() => {
           throw new Error('Failed to fetch chat history');
         }
         const data: { [date: string]: ChatData[] } = await response.json();
-        console.log("chat history data:", data);
 
         const sortedData: [string, ChatData[]][] = Object.entries(data).sort((a, b) => {
           return new Date(b[0]).getTime() - new Date(a[0]).getTime();
