@@ -1,11 +1,15 @@
-import React from 'react'
-import ChatSideBar from '../../components/ChatSideBar'
+import React from 'react';
+import dynamic from 'next/dynamic';
+
+const ChatSideBar = dynamic(() => import('../../components/ChatSideBar'), {
+  ssr: false,
+});
 
 type Props = {
   children: React.ReactNode;
-}
+};
 
-export default function layout({ children }: Props) {
+export default function Layout({ children }: Props) {
   return (
     <div className="flex h-screen p-4 gap-10">
       <div className="flex-shrink-0">
@@ -15,5 +19,5 @@ export default function layout({ children }: Props) {
         {children}
       </div>
     </div>
-  )
+  );
 }
