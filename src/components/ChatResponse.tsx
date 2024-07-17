@@ -71,7 +71,7 @@ const ChatResponse: React.FC<ChatResponseProps> = ({ response, setIsModalOpen })
       ) : (
         !response.selected_model && (
           <div className="mt-4 text-sm text-slate-400">
-            I'm looking for the right model to help you <LoadingDots />
+            I&apos;m looking for the right model to help you <LoadingDots />
           </div>
         )
       )}

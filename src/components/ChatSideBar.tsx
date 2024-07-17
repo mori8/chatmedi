@@ -144,4 +144,6 @@ const ChatSideBar: React.FC<Props> = React.memo(() => {
   );
 });
 
+ChatSideBar.displayName = 'ChatSideBar';
+
 export default ChatSideBar;

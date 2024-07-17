@@ -54,13 +54,13 @@ export default function Page({}: Props) {
       <div className="flex-1"/>
       <div className="flex-shrink-0 overflow-auto">
         <h1 className="text-2xl font-bold">
-          Hello! I'm ChatMedi, your medical assistant AI.
+          Hello! I&apos;m ChatMedi, your medical assistant AI.
         </h1>
         <div className="flex items-center mt-5">
           <span role="img" aria-label="waving hand" className="text-xl mr-2">
             👋
           </span>
-          <p>I'm an AI that can perform general-purpose medical tasks!</p>
+          <p>I&apos;m an AI that can perform general-purpose medical tasks!</p>
         </div>
         <div className="flex items-center mt-5">
           <span role="img" aria-label="paper clip" className="text-xl mr-2">

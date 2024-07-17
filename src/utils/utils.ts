@@ -75,8 +75,8 @@ export const TasksHandledByDefaultLLM = [
   "summarization",
 ];
 
-export const isUserMessage = (message: Message) => {
-  return "prompt" in message;
+export const isUserMessage = (message: Message): message is UserMessage => {
+  return (message as UserMessage).prompt !== undefined;
 };
 
 export const formatDate = (date: Date) => {
