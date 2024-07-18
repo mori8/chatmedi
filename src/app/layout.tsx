@@ -9,7 +9,7 @@ const nunito = Nunito({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "ChatMedi",
-  description: "life is tough",
+  description: "KAIST DxD Lab",
 };
 
 export default function RootLayout({

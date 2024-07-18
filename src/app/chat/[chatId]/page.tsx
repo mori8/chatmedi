@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef, Suspense } from "react";
 import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 import { useParams } from "next/navigation";
 import { saveUserMessageForClient } from "@/utils/utils";
 import ChatMessages from "@/components/ChatMessages";
@@ -11,11 +12,18 @@ import useFetchStreamResponse from "@/hook/useFetchStreamResponse";
 const ModelSwappingModal = React.lazy(() => import("@/components/ModelSwappingModal"));
 
 function ChatPage() {
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (status === "unauthenticated") {
+      router.push("/api/auth/signin");
+    }
+  }, [status, router]);
+
   const { chatId } = useParams<{ chatId: string }>();
   const user = session?.user;
   const userId = user?.email!;
-
   const [content, setContent] = useState<string>("");
   const [file, setFile] = useState<File | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);

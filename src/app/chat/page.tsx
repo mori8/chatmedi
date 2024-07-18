@@ -11,6 +11,14 @@ type Props = {};
 
 export default function Page({}: Props) {
   const { data: session, status } = useSession();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (status === "unauthenticated") {
+      router.push("/api/auth/signin");
+    }
+  }, [status, router]);
+
   const user = session?.user;
   const [file, setFile] = useState<File | null>(null);
   const userId = user?.email!;
@@ -22,7 +30,7 @@ export default function Page({}: Props) {
 
   const [content, setContent] = useState("");
   const [chat, setChat] = useRecoilState(chatState);
-  const router = useRouter();
+
 
   const handleSubmit = async () => {
     if (content.trim() === "") return;

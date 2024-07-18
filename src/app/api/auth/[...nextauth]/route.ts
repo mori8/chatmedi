@@ -9,31 +9,6 @@ const redis = new Redis({
   token: process.env.UPSTASH_REDIS_REST_TOKEN,
 });
 
-// export const authOptions = {
-//   providers: [
-//     GoogleProvider({
-//       clientId: process.env.GOOGLE_CLIENT_ID!,
-//       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
-//     }),
-//   ],
-//   adapter: UpstashRedisAdapter(redis),
-//   secret: process.env.NEXTAUTH_SECRET,
-//   session: {
-//     strategy: "database",
-//     maxAge: 30 * 24 * 60 * 60,
-//   },
-//   callbacks: {
-//     async signIn({ user }: { user: User | AdapterUser }) {
-//       await redis.hset(`user:${user.email}`, {
-//         email: user.email,
-//         name: user.name,
-//         image: user.image,
-//       });
-//       return true;
-//     },
-//   },
-// };
-
 const handler = NextAuth({
   providers: [
     GoogleProvider({
