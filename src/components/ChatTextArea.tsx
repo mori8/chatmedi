@@ -53,7 +53,7 @@ function ChatTextArea({ content, setContent, handleSubmit, setFile, isFetching }
     setContent("");
     handleFileRemove(); // Clear the uploaded file after submission
     if (textareaRef.current) {
-      textareaRef.current.style.height = "auto";
+      textareaRef.current.style.height = "auto"; // Reset the height
     }
   }, [content, handleSubmit, setContent]);
 

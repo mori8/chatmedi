@@ -1,6 +1,8 @@
 "use client";
 
 import React, { useState, useEffect, useRef, Suspense } from "react";
+import { ErrorBoundary } from "react-error-boundary";
+import ErrorFallback from "@/components/ErrorFallback";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useParams } from "next/navigation";
@@ -9,7 +11,9 @@ import ChatMessages from "@/components/ChatMessages";
 import ChatTextArea from "@/components/ChatTextArea";
 import useFetchStreamResponse from "@/hook/useFetchStreamResponse";
 
-const ModelSwappingModal = React.lazy(() => import("@/components/ModelSwappingModal"));
+const ModelSwappingModal = React.lazy(
+  () => import("@/components/ModelSwappingModal")
+);
 
 function ChatPage() {
   const { data: session, status } = useSession();
@@ -29,7 +33,8 @@ function ChatPage() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
 
-  const { isFetching, tempChatMediResponse, fetchStreamResponse } = useFetchStreamResponse(userId, chatId, setMessages);
+  const { isFetching, tempChatMediResponse, fetchStreamResponse } =
+    useFetchStreamResponse(userId, chatId, setMessages);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -43,7 +48,9 @@ function ChatPage() {
 
   useEffect(() => {
     const initializeChat = async () => {
-      const response = await fetch(`/api/chat-history?userId=${userId}&chatId=${chatId}`);
+      const response = await fetch(
+        `/api/chat-history?userId=${userId}&chatId=${chatId}`
+      );
       if (response.ok) {
         const history: Message[] = await response.json();
         setMessages(history);
@@ -60,7 +67,10 @@ function ChatPage() {
   useEffect(() => {
     const lastMessage = messages[messages.length - 1];
     if (lastMessage && "prompt" in lastMessage && !isFetching) {
-      fetchStreamResponse(lastMessage.prompt.text, lastMessage.prompt.files?.[0]);
+      fetchStreamResponse(
+        lastMessage.prompt.text,
+        lastMessage.prompt.files?.[0]
+      );
     }
   }, [messages, isFetching, fetchStreamResponse]);
 
@@ -73,8 +83,8 @@ function ChatPage() {
       sender: "user",
       prompt: {
         text: content,
-        files: file ? [URL.createObjectURL(file)] : []
-      }
+        files: file ? [URL.createObjectURL(file)] : [],
+      },
     };
 
     // Update the messages state immediately
@@ -86,7 +96,12 @@ function ChatPage() {
     scrollToBottom();
 
     // Save the user message to Redis
-    const savedUserMessage = await saveUserMessageForClient(userId, chatId, content, file);
+    const savedUserMessage = await saveUserMessageForClient(
+      userId,
+      chatId,
+      content,
+      file
+    );
     if (!savedUserMessage) {
       console.error("Failed to save user message");
     }
@@ -96,14 +111,16 @@ function ChatPage() {
     <div className="flex flex-col h-full gap-4">
       <Suspense fallback={<div>Loading...</div>}>
         <div className="flex-1 overflow-scroll mt-4 rounded-lg flex flex-col gap-5">
-          <ChatMessages
-            messages={messages}
-            user={user}
-            tempChatMediResponse={tempChatMediResponse}
-            isFetching={isFetching}
-            setIsModalOpen={setIsModalOpen}
-          />
-          <div ref={messagesEndRef} />
+          <ErrorBoundary fallback={<ErrorFallback />}>
+            <ChatMessages
+              messages={messages}
+              user={user}
+              tempChatMediResponse={tempChatMediResponse}
+              isFetching={isFetching}
+              setIsModalOpen={setIsModalOpen}
+            />
+            <div ref={messagesEndRef} />
+          </ErrorBoundary>
         </div>
         <div className="flex-shrink-0">
           <ChatTextArea
@@ -114,7 +131,9 @@ function ChatPage() {
             isFetching={isFetching}
           />
         </div>
-        {isModalOpen && <ModelSwappingModal onClose={() => setIsModalOpen(false)} />}
+        {isModalOpen && (
+          <ModelSwappingModal onClose={() => setIsModalOpen(false)} />
+        )}
       </Suspense>
     </div>
   );

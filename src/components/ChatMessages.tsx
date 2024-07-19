@@ -95,13 +95,12 @@ const ChatMessages: React.FC<ChatMessagesProps> = ({
             />
           </span>
           {isFetching && (
-            <div className="mt-5">
+            <div className="mt-3">
               <BeatLoader color="#cacaca" size={8} speedMultiplier={1} />
             </div>
           )}
         </div>
       )}
-      
     </>
   );
 };
