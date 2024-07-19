@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import React, { useState, useEffect, useCallback } from "react";
 import { useParams } from "next/navigation";
@@ -20,7 +20,9 @@ const ChatSideBar: React.FC<Props> = React.memo(() => {
   const { chatId } = useParams<{ chatId: string }>();
   const { data: session, status } = useSession();
   const user = session?.user;
-  const today = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Seoul" })).toLocaleDateString();
+  const today = new Date(
+    new Date().toLocaleString("en-US", { timeZone: "Asia/Seoul" })
+  ).toLocaleDateString();
   const [chatHistory, setChatHistory] = useState<{
     [date: string]: ChatData[];
   }>({});
@@ -32,13 +34,15 @@ const ChatSideBar: React.FC<Props> = React.memo(() => {
       try {
         const response = await fetch(`/api/chat-list?userId=${user.email}`);
         if (!response.ok) {
-          throw new Error('Failed to fetch chat history');
+          throw new Error("Failed to fetch chat history");
         }
         const data: { [date: string]: ChatData[] } = await response.json();
 
-        const sortedData: [string, ChatData[]][] = Object.entries(data).sort((a, b) => {
-          return new Date(b[0]).getTime() - new Date(a[0]).getTime();
-        });
+        const sortedData: [string, ChatData[]][] = Object.entries(data).sort(
+          (a, b) => {
+            return new Date(b[0]).getTime() - new Date(a[0]).getTime();
+          }
+        );
 
         const sortedChatHistory: {
           [k: string]: ChatData[];
@@ -46,7 +50,7 @@ const ChatSideBar: React.FC<Props> = React.memo(() => {
 
         setChatHistory(sortedChatHistory);
       } catch (error) {
-        console.error('Error loading chat history:', error);
+        console.error("Error loading chat history:", error);
       } finally {
         setLoading(false);
       }
@@ -73,7 +77,17 @@ const ChatSideBar: React.FC<Props> = React.memo(() => {
       </div>
       <div className="flex-1 overflow-auto">
         {status === "loading" || loading ? (
-          <div className="animate-pulse mt-2">Loading chat history...</div>
+          <div className="mt-6 opacity-40">
+            <div className="animate-pulse flex flex-col gap-2 ">
+              <div className="h-8 bg-gray-300 rounded-xl w-full"></div>
+              <div className="h-8 bg-gray-300 rounded-xl w-full"></div>
+              <div className="h-8 bg-gray-300 rounded-xl w-full"></div>
+              <div className="h-8 bg-gray-300 rounded-xl w-full"></div>
+              <div className="h-8 bg-gray-300 rounded-xl w-full"></div>
+              <div className="h-8 bg-gray-300 rounded-xl w-full"></div>
+              <div className="h-8 bg-gray-300 rounded-xl w-full"></div>
+            </div>
+          </div>
         ) : Object.keys(chatHistory).length > 0 ? (
           <div>
             {Object.entries(chatHistory).map(([date, chats]) => (
@@ -83,19 +97,23 @@ const ChatSideBar: React.FC<Props> = React.memo(() => {
                 </h2>
                 <ul className="mt-2">
                   {chats.map((chat) => (
-                    <li
+                    <a
+                      href={`/chat/${chat.chatId}`}
                       key={chat.chatId}
-                      className={classNames(
-                        "px-3 py-2 rounded-xl hover:bg-alabaster hover:bg-opacity-30 truncate",
-                        {
-                          "bg-alabaster bg-opacity-30": chat.chatId === chatId,
-                        }
-                      )}
+                      className="text-sm"
                     >
-                      <a href={`/chat/${chat.chatId}`} className="text-sm">
+                      <li
+                        className={classNames(
+                          "px-3 py-2 rounded-xl hover:bg-alabaster hover:bg-opacity-30 truncate",
+                          {
+                            "bg-alabaster bg-opacity-30":
+                              chat.chatId === chatId,
+                          }
+                        )}
+                      >
                         {chat.prompt}
-                      </a>
-                    </li>
+                      </li>
+                    </a>
                   ))}
                 </ul>
               </div>
@@ -132,7 +150,11 @@ const ChatSideBar: React.FC<Props> = React.memo(() => {
             </div>
             <div>
               <Tooltip id="logout" />
-              <a href="/api/auth/signout" data-tooltip-id="logout" data-tooltip-content="Logout">
+              <a
+                href="/api/auth/signout"
+                data-tooltip-id="logout"
+                data-tooltip-content="Logout"
+              >
                 <ArrowRightOnRectangleIcon width={24} height={24} />
               </a>
             </div>
@@ -143,6 +165,6 @@ const ChatSideBar: React.FC<Props> = React.memo(() => {
   );
 });
 
-ChatSideBar.displayName = 'ChatSideBar';
+ChatSideBar.displayName = "ChatSideBar";
 
 export default ChatSideBar;
