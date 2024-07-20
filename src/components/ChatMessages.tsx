@@ -16,7 +16,6 @@ interface ChatMessagesProps {
     | undefined;
   tempChatMediResponse: ChatMediResponse | null;
   isFetching: boolean;
-  setIsModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 const ChatMessages: React.FC<ChatMessagesProps> = ({
@@ -24,7 +23,6 @@ const ChatMessages: React.FC<ChatMessagesProps> = ({
   user,
   tempChatMediResponse,
   isFetching,
-  setIsModalOpen,
 }) => {
   return (
     <>
@@ -67,7 +65,6 @@ const ChatMessages: React.FC<ChatMessagesProps> = ({
                 {message.response ? (
                   <ChatResponse
                     response={message.response}
-                    setIsModalOpen={setIsModalOpen}
                   />
                 ) : (
                   <div className="text-sm text-slate-400">
@@ -91,7 +88,6 @@ const ChatMessages: React.FC<ChatMessagesProps> = ({
           <span className="prose">
             <ChatResponse
               response={tempChatMediResponse}
-              setIsModalOpen={setIsModalOpen}
             />
           </span>
           {isFetching && (

@@ -1,16 +1,33 @@
-// components/Modal.tsx
 import React, { useEffect, useState } from "react";
 
 interface ModalProps {
   onClose: () => void;
+  task: string | undefined;
+  currentModelId: string | undefined;
 }
 
-const ModelSwappingModal: React.FC<ModalProps> = ({ onClose }) => { 
-  const [alternativeModels, setAlternativeModels] = useState<string[]>([
-    "DxD-KAIST/mindful-cxr-reporter",
-    "DxD-KAIST/mindful-cxr-reporter-v2",
-  ]);
-  const task = "report-to-cxr-generation";
+const ModelSwappingModal: React.FC<ModalProps> = ({ onClose, task, currentModelId }) => {
+  const [alternativeModels, setAlternativeModels] = useState<string[]>([]);
+
+  useEffect(() => {
+    if (task) {
+      const fetchAlternativeModels = async () => {
+        try {
+          const response = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/available-models?task=${task}`);
+          if (response.ok) {
+            const models = await response.json();
+            setAlternativeModels(models);
+          } else {
+            console.error("Failed to fetch alternative models");
+          }
+        } catch (error) {
+          console.error("Error fetching alternative models:", error);
+        }
+      };
+
+      fetchAlternativeModels();
+    }
+  }, [task]);
 
   useEffect(() => {
     const handleOutsideClick = (event: MouseEvent) => {
@@ -26,16 +43,26 @@ const ModelSwappingModal: React.FC<ModalProps> = ({ onClose }) => {
     };
   }, [onClose]);
 
+  if (!task || !currentModelId) return null;
+
   return (
     <div className="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white p-4 rounded-xl max-w-md w-full flex flex-col">
-        <h2 className="text-xl font-semibold mb-1">Select Alternative Model</h2>
-        <p className="text-sm mb-4 text-slate-600">Here you can choose another model to process <span className="font-bold">{task}</span> task.</p>
+      <div className="bg-white p-6 rounded-xl max-w-md w-full flex flex-col">
+        <h2 className="text-xl font-semibold mb-1 mt-0">Select Alternative Model</h2>
+        <p className="text-sm mb-4 text-slate-600">
+          Here you can choose another model to process <span className="font-bold">{task}</span> task.
+        </p>
         <div className="flex flex-col gap-2">
           {alternativeModels.map((model) => (
-            <div key={model} className="flex items-center justify-between pl-3 pr-2 py-1 text-sm bg-slate-100 rounded-xl">
-              <span>{model}</span>
-              <button className="bg-xanthous px-3 py-2 rounded-xl">Select</button>
+            <div key={model} className="flex items-center justify-between pl-3 pr-2 py-2 text-sm bg-slate-100 rounded-xl">
+              <span className="leading-4">{model}</span>
+              {model === currentModelId ? (
+                <span className="text-xs text-slate-400 px-3 py-2 rounded-xl flex-shrink-0">current model</span>
+              ) : (
+                <button className="text-xs bg-xanthous text-white px-3 py-2 rounded-xl flex-shrink-0">
+                  rerun with this model
+                </button>
+              )}
             </div>
           ))}
         </div>

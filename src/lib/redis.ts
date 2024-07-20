@@ -276,3 +276,53 @@ export async function fetchUserChats(
 
   return sortedChatsByDate;
 }
+
+export async function getMessageById(
+  userId: string,
+  chatId: string,
+  messageId: string
+): Promise<UserMessage | AIMessage | null> {
+  if (!userId || !chatId || !messageId) {
+    throw new Error("Invalid input");
+  }
+
+  const keys = await redis.keys(`chat:${userId}:${chatId}:*`);
+  for (const key of keys) {
+    const chat = (await redis.hgetall(key)) as unknown as Record<string, string>;
+    if (chat.messageId === messageId) {
+      if (chat.sender === "user") {
+        const userMessage: UserMessage & { timestamp: string } = {
+          messageId: chat.messageId,
+          sender: "user",
+          prompt: {
+            text: chat.promptText,
+            files: chat.promptFiles ? chat.promptFiles.split(",") : [],
+          },
+          timestamp: chat.timestamp,
+        };
+        return userMessage;
+      } else if (chat.sender === "ai") {
+        let response: ChatMediResponse;
+        try {
+          response =
+            typeof chat.response === "string"
+              ? JSON.parse(chat.response)
+              : chat.response;
+        } catch (error) {
+          console.error("Failed to parse response:", chat.response);
+          continue;
+        }
+
+        const aiMessage: AIMessage & { timestamp: string } = {
+          messageId: chat.messageId,
+          sender: "ai",
+          response: response,
+          timestamp: chat.timestamp,
+        };
+        return aiMessage;
+      }
+    }
+  }
+
+  return null;
+}

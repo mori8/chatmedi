@@ -11,9 +11,6 @@ import ChatMessages from "@/components/ChatMessages";
 import ChatTextArea from "@/components/ChatTextArea";
 import useFetchStreamResponse from "@/hook/useFetchStreamResponse";
 
-const ModelSwappingModal = React.lazy(
-  () => import("@/components/ModelSwappingModal")
-);
 
 function ChatPage() {
   const { data: session, status } = useSession();
@@ -31,7 +28,6 @@ function ChatPage() {
   const [content, setContent] = useState<string>("");
   const [file, setFile] = useState<File | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
-  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
 
   const { isFetching, tempChatMediResponse, fetchStreamResponse } =
     useFetchStreamResponse(userId, chatId, setMessages);
@@ -107,6 +103,29 @@ function ChatPage() {
     }
   };
 
+  const changeModelAndRestartStream = async (userId: string, chatId: string, messageId: string, task: string, modelId: string) => {
+    const response = await fetch("/api/change-model", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        userId,
+        chatId,
+        modelId,
+      }),
+    });
+
+    if (response.ok) {
+      const data: { chatId: string } = await response.json();
+      if (data.chatId) {
+        router.push(`/chat/${data.chatId}`);
+      }
+    } else {
+      console.error("Failed to change model");
+    }
+  }
+
   return (
     <div className="flex flex-col h-full gap-4">
       <Suspense fallback={<div>Loading...</div>}>
@@ -117,7 +136,6 @@ function ChatPage() {
               user={user}
               tempChatMediResponse={tempChatMediResponse}
               isFetching={isFetching}
-              setIsModalOpen={setIsModalOpen}
             />
             <div ref={messagesEndRef} />
           </ErrorBoundary>
@@ -131,9 +149,6 @@ function ChatPage() {
             isFetching={isFetching}
           />
         </div>
-        {isModalOpen && (
-          <ModelSwappingModal onClose={() => setIsModalOpen(false)} />
-        )}
       </Suspense>
     </div>
   );

@@ -1,20 +1,36 @@
-import React from "react";
+'use client';
+
+import React, { useState } from "react";
 import { SwatchIcon } from "@heroicons/react/24/outline";
 import { Tooltip } from "react-tooltip";
 import LoadingDots from "@/components/LoadingDots";
 import MarkdownWrapper from "@/components/MarkdownWrapper";
 import { TasksHandledByDefaultLLM } from "@/utils/utils";
 
+const ModelSwappingModal = React.lazy(
+  () => import("@/components/ModelSwappingModal")
+);
+
+
 interface ChatResponseProps {
   response: ChatMediResponse;
-  setIsModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 const isNeedToHandleTask = (tasks: Task[]) => {
-  return !(tasks.length === 1 && TasksHandledByDefaultLLM.includes(tasks[0].task));
-}
+  return !(
+    tasks.length === 1 && TasksHandledByDefaultLLM.includes(tasks[0].task)
+  );
+};
 
-const ChatResponse: React.FC<ChatResponseProps> = ({ response, setIsModalOpen }) => {
+
+
+const ChatResponse: React.FC<ChatResponseProps> = ({
+  response,
+}) => {
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  const [selectedTask, setSelectedTask] = useState<string | undefined>();
+  const [currentModelId, setCurrentModelId] = useState<string | undefined>();
+
   return (
     <div className="p-2">
       {response.planned_task && isNeedToHandleTask(response.planned_task) && (
@@ -34,8 +50,7 @@ const ChatResponse: React.FC<ChatResponseProps> = ({ response, setIsModalOpen })
           </div>
         </div>
       )}
-      {response.selected_model &&
-      response.selected_model["0"].id !== "none" ? (
+      {response.selected_model && response.selected_model["0"].id !== "none" ? (
         <div className="mt-4 text-sm">
           <p className="m-0 text-slate-400">I found an appropriate model!</p>
           {Object.entries(response.selected_model).map(([key, model]) => (
@@ -61,7 +76,16 @@ const ChatResponse: React.FC<ChatResponseProps> = ({ response, setIsModalOpen })
                   <span className="text-slate-500">{model.reason}</span>
                 </p>
               </div>
-              <div className=" bg-white rounded-full p-1 cursor-pointer" data-tooltip-id="alternative-models" data-tooltip-content="Show alternative models" onClick={() => setIsModalOpen(true)}>
+              <div
+                className=" bg-white rounded-full p-1 cursor-pointer"
+                data-tooltip-id="alternative-models"
+                data-tooltip-content="Show alternative models"
+                onClick={() => {
+                  setIsModalOpen(true);
+                  setSelectedTask(response?.planned_task?.[0].task);
+                  setCurrentModelId(model.id);
+                }}
+              >
                 <Tooltip id="alternative-models" />
                 <SwatchIcon className="w-5 h-5 text-slate-500" />
               </div>
@@ -145,6 +169,9 @@ const ChatResponse: React.FC<ChatResponseProps> = ({ response, setIsModalOpen })
             Generating a result based on the model’s output <LoadingDots />
           </div>
         )
+      )}
+      {isModalOpen && (
+        <ModelSwappingModal onClose={() => setIsModalOpen(false)} task={selectedTask} currentModelId={currentModelId} />
       )}
     </div>
   );
