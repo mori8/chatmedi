@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import React, { useState } from "react";
 import { SwatchIcon } from "@heroicons/react/24/outline";
@@ -6,14 +6,20 @@ import { Tooltip } from "react-tooltip";
 import LoadingDots from "@/components/LoadingDots";
 import MarkdownWrapper from "@/components/MarkdownWrapper";
 import { TasksHandledByDefaultLLM } from "@/utils/utils";
+import classNames from "classnames";
 
 const ModelSwappingModal = React.lazy(
   () => import("@/components/ModelSwappingModal")
 );
 
-
 interface ChatResponseProps {
   response: ChatMediResponse;
+  messageId?: string;
+  fetchReStreamResponse: (
+    prompt: string,
+    task: Task,
+    modelSelectedByUser: string
+  ) => void;
 }
 
 const isNeedToHandleTask = (tasks: Task[]) => {
@@ -22,13 +28,13 @@ const isNeedToHandleTask = (tasks: Task[]) => {
   );
 };
 
-
-
 const ChatResponse: React.FC<ChatResponseProps> = ({
   response,
+  messageId,
+  fetchReStreamResponse,
 }) => {
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
-  const [selectedTask, setSelectedTask] = useState<string | undefined>();
+  const [selectedTask, setSelectedTask] = useState<Task | undefined>();
   const [currentModelId, setCurrentModelId] = useState<string | undefined>();
 
   return (
@@ -56,9 +62,9 @@ const ChatResponse: React.FC<ChatResponseProps> = ({
           {Object.entries(response.selected_model).map(([key, model]) => (
             <div
               key={key}
-              className="bg-slate-100 my-2 px-4 py-3 rounded-xl leading-snug flex flex-row items-start"
+              className="bg-slate-100 my-2 px-4 py-3 rounded-xl leading-snug flex flex-row items-start justify-between"
             >
-              <div className="">
+              <div className="flex-1">
                 <p className="m-0 mb-1 flex items-start gap-1">
                   <span className="w-14 flex-shrink-0">
                     <span className="text-xs font-semibold bg-white px-1 py-[2px] rounded border border-slate-200 text-slate-500 inline-block">
@@ -77,12 +83,14 @@ const ChatResponse: React.FC<ChatResponseProps> = ({
                 </p>
               </div>
               <div
-                className=" bg-white rounded-full p-1 cursor-pointer"
+                className={classNames("bg-white rounded-full p-1 cursor-pointer flex-shrink-0", {
+                  "hidden": !messageId
+                })}
                 data-tooltip-id="alternative-models"
                 data-tooltip-content="Show alternative models"
                 onClick={() => {
                   setIsModalOpen(true);
-                  setSelectedTask(response?.planned_task?.[0].task);
+                  setSelectedTask(response?.planned_task?.[0]);
                   setCurrentModelId(model.id);
                 }}
               >
@@ -130,8 +138,8 @@ const ChatResponse: React.FC<ChatResponseProps> = ({
                   {output.inference_result.text ? (
                     output.inference_result.text
                   ) : (
-                    <span className="text-slate-400">
-                      Image generated below.
+                    <span>
+                      <a href={output.inference_result.image} className="text-slate-400" target="_blank">{output.inference_result.image}</a>
                     </span>
                   )}
                 </p>
@@ -145,7 +153,7 @@ const ChatResponse: React.FC<ChatResponseProps> = ({
             </div>
           )
         ))}
-      {response.output_from_model &&
+      {/* {response.output_from_model &&
         response.output_from_model
           .filter((output) => output.inference_result.image)
           .map((output, index) => (
@@ -156,7 +164,7 @@ const ChatResponse: React.FC<ChatResponseProps> = ({
                 className="rounded w-full h-auto"
               />
             </div>
-          ))}
+          ))} */}
       {response.final_response ? (
         <div className="mt-2">
           <MarkdownWrapper markdown={response.final_response.text} />
@@ -171,7 +179,13 @@ const ChatResponse: React.FC<ChatResponseProps> = ({
         )
       )}
       {isModalOpen && (
-        <ModelSwappingModal onClose={() => setIsModalOpen(false)} task={selectedTask} currentModelId={currentModelId} />
+        <ModelSwappingModal
+          onClose={() => setIsModalOpen(false)}
+          prompt={response.prompt}
+          task={selectedTask}
+          currentModelId={currentModelId}
+          fetchReStreamResponse={fetchReStreamResponse}
+        />
       )}
     </div>
   );

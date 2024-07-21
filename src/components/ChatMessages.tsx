@@ -16,6 +16,11 @@ interface ChatMessagesProps {
     | undefined;
   tempChatMediResponse: ChatMediResponse | null;
   isFetching: boolean;
+  fetchReStreamResponse: (
+    prompt: string,
+    task: Task,
+    modelSelectedByUser: string
+  ) => void;
 }
 
 const ChatMessages: React.FC<ChatMessagesProps> = ({
@@ -23,6 +28,7 @@ const ChatMessages: React.FC<ChatMessagesProps> = ({
   user,
   tempChatMediResponse,
   isFetching,
+  fetchReStreamResponse,
 }) => {
   return (
     <>
@@ -35,9 +41,7 @@ const ChatMessages: React.FC<ChatMessagesProps> = ({
         >
           <div className="profile-image flex-shrink-0">
             <img
-              className={classNames("rounded-full w-8 h-8", {
-                "mt-8": message.sender === "ai",
-              })}
+              className={classNames("rounded-full w-8 h-8")}
               src={
                 message.sender === "user" ? user?.image! : "/images/robot-1.svg"
               }
@@ -65,6 +69,8 @@ const ChatMessages: React.FC<ChatMessagesProps> = ({
                 {message.response ? (
                   <ChatResponse
                     response={message.response}
+                    messageId={message.messageId}
+                    fetchReStreamResponse={fetchReStreamResponse}
                   />
                 ) : (
                   <div className="text-sm text-slate-400">
@@ -85,16 +91,19 @@ const ChatMessages: React.FC<ChatMessagesProps> = ({
               alt="AI"
             />
           </div>
-          <span className="prose">
-            <ChatResponse
-              response={tempChatMediResponse}
-            />
-          </span>
-          {isFetching && (
-            <div className="mt-3">
-              <BeatLoader color="#cacaca" size={8} speedMultiplier={1} />
-            </div>
-          )}
+          <div>
+            <span className="prose">
+              <ChatResponse
+                response={tempChatMediResponse}
+                fetchReStreamResponse={fetchReStreamResponse}
+              />
+            </span>
+            {isFetching && (
+              <div className="mt-3">
+                <BeatLoader color="#cacaca" size={8} speedMultiplier={1} />
+              </div>
+            )}
+          </div>
         </div>
       )}
     </>

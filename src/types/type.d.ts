@@ -37,6 +37,7 @@ interface SelectedModel {
 }
 
 interface ModelSelectionResponse {
+  prompt?: string;
   selected_models: { [key: number]: SelectedModel };
 }
 
@@ -67,6 +68,7 @@ interface FinalResponse {
 }
 
 interface ChatMediResponse {
+  prompt?: string;
   planned_task?: Task[];
   selected_model?: { [key: number]: SelectedModel };
   output_from_model?: OutputFromModel[];

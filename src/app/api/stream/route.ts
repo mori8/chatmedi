@@ -101,10 +101,12 @@ export async function POST(req: NextRequest) {
               }
             );
 
-            const { selected_models: selectedModelsResponse } = await modelSelectionResponse.json();
+            const { selected_models: selectedModelsResponse, prompt: userInput } = await modelSelectionResponse.json();
             selectedModels = selectedModelsResponse;
             console.log("[stream/route.ts]: selectedModels: ", selectedModels);
+            
             await sendData({
+              prompt: userInput,
               selected_model: selectedModels,
             });
 

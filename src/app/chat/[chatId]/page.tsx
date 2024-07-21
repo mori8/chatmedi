@@ -4,8 +4,7 @@ import React, { useState, useEffect, useRef, Suspense } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import ErrorFallback from "@/components/ErrorFallback";
 import { useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
-import { useParams } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 import { saveUserMessageForClient } from "@/utils/utils";
 import ChatMessages from "@/components/ChatMessages";
 import ChatTextArea from "@/components/ChatTextArea";
@@ -29,7 +28,7 @@ function ChatPage() {
   const [file, setFile] = useState<File | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
 
-  const { isFetching, tempChatMediResponse, fetchStreamResponse } =
+  const { isFetching, tempChatMediResponse, fetchStreamResponse, fetchReStreamResponse } =
     useFetchStreamResponse(userId, chatId, setMessages);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -103,29 +102,6 @@ function ChatPage() {
     }
   };
 
-  const changeModelAndRestartStream = async (userId: string, chatId: string, messageId: string, task: string, modelId: string) => {
-    const response = await fetch("/api/change-model", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        userId,
-        chatId,
-        modelId,
-      }),
-    });
-
-    if (response.ok) {
-      const data: { chatId: string } = await response.json();
-      if (data.chatId) {
-        router.push(`/chat/${data.chatId}`);
-      }
-    } else {
-      console.error("Failed to change model");
-    }
-  }
-
   return (
     <div className="flex flex-col h-full gap-4">
       <Suspense fallback={<div>Loading...</div>}>
@@ -136,6 +112,7 @@ function ChatPage() {
               user={user}
               tempChatMediResponse={tempChatMediResponse}
               isFetching={isFetching}
+              fetchReStreamResponse={fetchReStreamResponse}
             />
             <div ref={messagesEndRef} />
           </ErrorBoundary>

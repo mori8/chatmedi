@@ -2,18 +2,33 @@ import React, { useEffect, useState } from "react";
 
 interface ModalProps {
   onClose: () => void;
-  task: string | undefined;
+  prompt: string | undefined;
+  task: Task | undefined;
   currentModelId: string | undefined;
+  fetchReStreamResponse: (
+    prompt: string,
+    task: Task,
+    modelSelectedByUser: string
+  ) => void;
 }
 
-const ModelSwappingModal: React.FC<ModalProps> = ({ onClose, task, currentModelId }) => {
+const ModelSwappingModal: React.FC<ModalProps> = ({
+  onClose,
+  task,
+  prompt,
+  currentModelId,
+  fetchReStreamResponse,
+}) => {
+  if (!task || !currentModelId || !prompt) return null;
   const [alternativeModels, setAlternativeModels] = useState<string[]>([]);
 
   useEffect(() => {
     if (task) {
       const fetchAlternativeModels = async () => {
         try {
-          const response = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/available-models?task=${task}`);
+          const response = await fetch(
+            `${process.env.NEXT_PUBLIC_SERVER_URL}/available-models?task=${task.task}`
+          );
           if (response.ok) {
             const models = await response.json();
             setAlternativeModels(models);
@@ -48,25 +63,41 @@ const ModelSwappingModal: React.FC<ModalProps> = ({ onClose, task, currentModelI
   return (
     <div className="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white p-6 rounded-xl max-w-md w-full flex flex-col">
-        <h2 className="text-xl font-semibold mb-1 mt-0">Select Alternative Model</h2>
+        <h2 className="text-xl font-semibold mb-1 mt-0">
+          Select Alternative Model
+        </h2>
         <p className="text-sm mb-4 text-slate-600">
-          Here you can choose another model to process <span className="font-bold">{task}</span> task.
+          Here you can choose another model to process{" "}
+          <span className="font-bold">{task.task}</span> task.
         </p>
         <div className="flex flex-col gap-2">
           {alternativeModels.map((model) => (
-            <div key={model} className="flex items-center justify-between pl-3 pr-2 py-2 text-sm bg-slate-100 rounded-xl">
+            <div
+              key={model}
+              className="flex items-center justify-between pl-3 pr-2 py-2 text-sm bg-slate-100 rounded-xl"
+            >
               <span className="leading-4">{model}</span>
               {model === currentModelId ? (
-                <span className="text-xs text-slate-400 px-3 py-2 rounded-xl flex-shrink-0">current model</span>
+                <span className="text-xs text-slate-400 px-3 py-2 rounded-xl flex-shrink-0">
+                  current model
+                </span>
               ) : (
-                <button className="text-xs bg-xanthous text-white px-3 py-2 rounded-xl flex-shrink-0">
+                <button
+                  className="text-xs bg-xanthous text-white px-3 py-2 rounded-xl flex-shrink-0"
+                  onClick={() => {
+                    fetchReStreamResponse(task.args.text, task, model);
+                  }}
+                >
                   rerun with this model
                 </button>
               )}
             </div>
           ))}
         </div>
-        <button onClick={onClose} className="mt-4 bg-slate-200 text-slate-600 px-4 py-2 rounded-xl self-end">
+        <button
+          onClick={onClose}
+          className="mt-4 bg-slate-200 text-slate-600 px-4 py-2 rounded-xl self-end"
+        >
           Close
         </button>
       </div>
