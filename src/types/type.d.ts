@@ -68,6 +68,7 @@ interface FinalResponse {
 }
 
 interface ChatMediResponse {
+  isRegenerated?: boolean;
   prompt?: string;
   planned_task?: Task[];
   selected_model?: { [key: number]: SelectedModel };

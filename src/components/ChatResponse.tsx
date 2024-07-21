@@ -39,6 +39,11 @@ const ChatResponse: React.FC<ChatResponseProps> = ({
 
   return (
     <div className="p-2">
+      {response.isRegenerated && (
+        <div className="text-xs text-blue-400 font-bold bg-blue-100 px-2 py-1 inline-block rounded-lg border border-blue-200">
+          REGENERATED RESPONSE
+        </div>
+      )}
       {response.planned_task && isNeedToHandleTask(response.planned_task) && (
         <div className="text-sm">
           <p className="m-0 text-slate-400">
@@ -153,18 +158,6 @@ const ChatResponse: React.FC<ChatResponseProps> = ({
             </div>
           )
         ))}
-      {/* {response.output_from_model &&
-        response.output_from_model
-          .filter((output) => output.inference_result.image)
-          .map((output, index) => (
-            <div className="mt-4" key={index}>
-              <img
-                src={output.inference_result.image}
-                alt="Model output image"
-                className="rounded w-full h-auto"
-              />
-            </div>
-          ))} */}
       {response.final_response ? (
         <div className="mt-2">
           <MarkdownWrapper markdown={response.final_response.text} />

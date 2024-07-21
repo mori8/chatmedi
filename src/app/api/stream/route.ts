@@ -23,10 +23,12 @@ export async function POST(req: NextRequest) {
         // Append data to chatMediResponse object
         Object.assign(chatMediResponse, data);
       };
-      // TODO: plan-task에서 이미지 파일을 처리할 수 있도록 수정
-      // TODO: 백엔드에서는 이미지 URL을 받아서 처리하도록 수정
       (async () => {
         try {
+          await sendData({
+            isRegenerated: false,
+          });
+
           const plannedTaskData = await fetch(
             `${process.env.NEXT_PUBLIC_BASE_URL}/api/plan-task`,
             {

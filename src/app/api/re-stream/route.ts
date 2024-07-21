@@ -20,6 +20,10 @@ export async function POST(req: NextRequest) {
       };
       (async () => {
         try {
+          await sendData({
+            isRegenerated: true,
+          });
+
           const selectedModels = {
             [task.id]: {
               id: modelSelectedByUser,
