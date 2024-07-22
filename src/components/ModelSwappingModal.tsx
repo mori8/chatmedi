@@ -19,9 +19,8 @@ const ModelSwappingModal: React.FC<ModalProps> = ({
   currentModelId,
   fetchReStreamResponse,
 }) => {
-  if (!task || !currentModelId || !prompt) return null;
   const [alternativeModels, setAlternativeModels] = useState<string[]>([]);
-
+  // TODO: 이미 재생성된 답변에 대해서도 모델 변경이 가능하도록 구현
   useEffect(() => {
     if (task) {
       const fetchAlternativeModels = async () => {
@@ -58,7 +57,7 @@ const ModelSwappingModal: React.FC<ModalProps> = ({
     };
   }, [onClose]);
 
-  if (!task || !currentModelId) return null;
+  if (!task || !currentModelId || !prompt) return null;
 
   return (
     <div className="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">

@@ -94,6 +94,7 @@ const ChatResponse: React.FC<ChatResponseProps> = ({
                 data-tooltip-id="alternative-models"
                 data-tooltip-content="Show alternative models"
                 onClick={() => {
+                  console.log(isModalOpen);
                   setIsModalOpen(true);
                   setSelectedTask(response?.planned_task?.[0]);
                   setCurrentModelId(model.id);
