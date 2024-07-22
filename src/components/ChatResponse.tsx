@@ -38,7 +38,7 @@ const ChatResponse: React.FC<ChatResponseProps> = ({
   const [currentModelId, setCurrentModelId] = useState<string | undefined>();
 
   return (
-    <div className="p-2">
+    <div className="p-2" id={messageId}>
       {response.isRegenerated && (
         <div className="text-xs text-blue-400 font-bold bg-blue-100 px-2 py-1 inline-block rounded-lg border border-blue-200">
           REGENERATED RESPONSE
@@ -88,9 +88,12 @@ const ChatResponse: React.FC<ChatResponseProps> = ({
                 </p>
               </div>
               <div
-                className={classNames("bg-white rounded-full p-1 cursor-pointer flex-shrink-0", {
-                  "hidden": !messageId
-                })}
+                className={classNames(
+                  "bg-white rounded-full p-1 cursor-pointer flex-shrink-0",
+                  {
+                    hidden: !messageId,
+                  }
+                )}
                 data-tooltip-id="alternative-models"
                 data-tooltip-content="Show alternative models"
                 onClick={() => {
@@ -121,7 +124,7 @@ const ChatResponse: React.FC<ChatResponseProps> = ({
             {response.output_from_model.map((output, index) => (
               <div
                 key={index}
-                className="my-2 px-4 py-3 rounded-xl bg-slate-100"
+                className="my-2 p-4 rounded-xl bg-slate-100"
               >
                 <p className="m-0 mb-2 text-slate-400 text-xs">
                   response from{" "}
@@ -129,26 +132,39 @@ const ChatResponse: React.FC<ChatResponseProps> = ({
                     {output.model.id}
                   </span>
                 </p>
-                <p className="m-0 mb-1">
-                  <span className="text-xs font-semibold bg-white px-1 py-[2px] rounded border border-slate-200 text-slate-500">
-                    Input
-                  </span>{" "}
-                  {output.model_input.text
+                <div className="mt-3">
+                  <p className="m-0 mb-1 flex items-start gap-1">
+                    <span className="w-14 flex-shrink-0">
+                      <span className="text-xs font-semibold bg-white px-1 py-[2px] rounded border border-slate-200 text-slate-500 inline-block">
+                        Input
+                      </span>
+                    </span>
+                    <span className="font-semibold">{output.model_input.text
                     ? output.model_input.text
-                    : output.model_input.image}
-                </p>
-                <p className="m-0">
-                  <span className="text-xs font-semibold bg-white px-1 py-[2px] rounded border border-slate-200 text-slate-500">
-                    Output
-                  </span>{" "}
-                  {output.inference_result.text ? (
+                    : output.model_input.image}</span>
+                  </p>
+                  <p className="m-0 flex items-start gap-1">
+                    <span className="w-14 flex-shrink-0">
+                      <span className="text-xs font-semibold bg-white px-1 py-[2px] rounded border border-slate-200 text-slate-500 inline-block">
+                        Output
+                      </span>
+                    </span>
+                    <span className="text-slate-500">{output.inference_result.text ? (
                     output.inference_result.text
                   ) : (
                     <span>
-                      <a href={output.inference_result.image} className="text-slate-400" target="_blank">{output.inference_result.image}</a>
+                      <a
+                        href={output.inference_result.image}
+                        className="text-slate-400"
+                        target="_blank"
+                      >
+                        {output.inference_result.image}
+                      </a>
                     </span>
-                  )}
-                </p>
+                  )}</span>
+                  </p>
+                </div>
+
               </div>
             ))}
           </div>
