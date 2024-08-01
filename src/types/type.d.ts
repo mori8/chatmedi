@@ -28,38 +28,18 @@ interface ConversationHistory {
 
 interface ModelSelectionRequest {
   user_input: string;
-  tasks: TaskModel[];
 }
 
 interface SelectedModel {
   id: string;
   reason: string;
+  task: string;
+  model_args: any;
 }
 
-interface ModelSelectionResponse {
-  prompt?: string;
-  selected_models: { [key: number]: SelectedModel };
-}
-
-interface OutputFromModel {
-  task: Task,
-  model: SelectedModel,
-  model_input: {
-    text?: string;
-    image?: string;
-  },
+interface ExecutionResult {
   inference_result: {
-    text?: string;
-    image?: string;
-  }
-}
-
-interface TaskSummaries {
-  task: Task;
-  model: SelectedModel;
-  inference_result: {
-    text?: string;
-    image?: string;
+    [key: string]: string;
   }
 }
 
@@ -70,9 +50,8 @@ interface FinalResponse {
 interface ChatMediResponse {
   isRegenerated?: boolean;
   prompt?: string;
-  planned_task?: Task[];
-  selected_model?: { [key: number]: SelectedModel };
-  output_from_model?: OutputFromModel[];
+  selected_model?: SelectedModel;
+  execution_result?: ExecutionResult;
   final_response?: FinalResponse;
 }
 

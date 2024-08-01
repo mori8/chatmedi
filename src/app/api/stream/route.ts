@@ -9,6 +9,7 @@ export async function POST(req: NextRequest) {
   const userId = formData.get("userId") as string;
   const chatId = formData.get("chatId") as string;
   const prompt = formData.get("prompt") as string;
+  // fileURL: saveUserMessage에서 파일 -> S3에 저장한 후 생성되는 URL
   const fileURL = formData.get("fileURL") as string | null;
 
   console.log("[stream/route.ts]: ", userId, chatId, prompt);
@@ -27,144 +28,74 @@ export async function POST(req: NextRequest) {
         try {
           await sendData({
             isRegenerated: false,
+            prompt: prompt,
           });
 
-          const plannedTaskData = await fetch(
-            `${process.env.NEXT_PUBLIC_BASE_URL}/api/plan-task`,
+          const modelSelectionResponse = await fetch(
+            `${process.env.NEXT_PUBLIC_SERVER_URL}/select-model`,
             {
               method: "POST",
               headers: {
                 "Content-Type": "application/json",
               },
               body: JSON.stringify({
-                prompt: prompt,
-                fileURL: fileURL,
-                sessionId: chatId,
+                user_input: `${prompt} ${fileURL}`,
               }),
             }
           );
-          const { tasks } = await plannedTaskData.json();
-          console.log("[stream/route.ts]: tasks", JSON.stringify(tasks));
+
+          const selectedModel = await modelSelectionResponse.json();
+
+          console.log("[stream/route.ts]: selectedModels: ", selectedModel);
 
           await sendData({
-            planned_task: tasks,
+            selected_model: modelSelectionResponse,
           });
 
-          let selectedModels: { [key: number]: SelectedModel };
-
-          if (
-            tasks.length === 1 &&
-            TasksHandledByDefaultLLM.includes(tasks[0].task)
-          ) {
-            selectedModels = {
-              "0": {
-                id: "none",
-                reason: "none",
+          const modelExecutionResponse = await fetch(
+            `${process.env.NEXT_PUBLIC_SERVER_URL}/execute-model`,
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
               },
-            };
+              body: JSON.stringify({
+                user_input: prompt,
+                selected_model: selectedModel,
+              }),
+            }
+          );
 
-            await sendData({
-              selected_model: selectedModels,
-            });
+          const executionResult = await modelExecutionResponse.json();
 
-            const finalResponse = await fetch(
-              `${process.env.NEXT_PUBLIC_BASE_URL}/api/chat`,
-              {
-                method: "POST",
-                headers: {
-                  "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                  userId: userId,
-                  prompt: prompt,
-                  chatId: chatId,
-                }),
-              }
-            );
-            const { response } = await finalResponse.json();
-            
-            await sendData({
-              final_response: {
-                text: response,
+          await sendData({
+            output_from_model: executionResult,
+          });
+          console.log(
+            "[stream/route.ts]: executionResult",
+            executionResult
+          );
+
+          const finalResponse = await fetch(
+            `${process.env.NEXT_PUBLIC_SERVER_URL}/generate-response`,
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
               },
-            });
-          } else {
-            const modelSelectionResponse = await fetch(
-              `${process.env.NEXT_PUBLIC_SERVER_URL}/select-model`,
-              {
-                method: "POST",
-                headers: {
-                  "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                  user_input: prompt,
-                  tasks: tasks,
-                }),
-              }
-            );
+              body: JSON.stringify({
+                user_input: prompt,
+                execution_result: executionResult,
+              }),
+            }
+          );
+          const { response } = await finalResponse.json();
 
-            const { selected_models: selectedModelsResponse, prompt: userInput } = await modelSelectionResponse.json();
-            selectedModels = selectedModelsResponse;
-            console.log("[stream/route.ts]: selectedModels: ", selectedModels);
-            
-            await sendData({
-              prompt: userInput,
-              selected_model: selectedModels,
-            });
-
-            const modelExecutionResponse = await fetch(
-              `${process.env.NEXT_PUBLIC_SERVER_URL}/execute-tasks`,
-              {
-                method: "POST",
-                headers: {
-                  "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                  user_input: prompt,
-                  tasks: tasks,
-                  selected_models: selectedModels,
-                }),
-              }
-            );
-
-            const modelExecutionData = await modelExecutionResponse.json();
-            await sendData({
-              output_from_model: modelExecutionData,
-            });
-            console.log("[stream/route.ts]: modelExecutionData", modelExecutionData);
-            const TaskSummaries = modelExecutionData.map(
-              (executionItem: any) => {
-                const taskId = executionItem.task.id.toString();
-                if (selectedModels[taskId]) {
-                  executionItem.model = selectedModels[taskId];
-                }
-                return executionItem;
-              }
-            );
-
-            delete TaskSummaries.model_input;
-
-            const finalResponse = await fetch(
-              `${process.env.NEXT_PUBLIC_SERVER_URL}/generate-response`,
-              {
-                method: "POST",
-                headers: {
-                  "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                  user_input: prompt,
-                  task_summaries: TaskSummaries,
-                })
-              }
-            );
-            const { response } = await finalResponse.json();
-            
-            await sendData({
-              final_response: {
-                text: response,
-              },
-            });
-          }
+          await sendData({
+            final_response: {
+              text: response,
+            },
+          });
 
           controller.close();
         } catch (error) {
