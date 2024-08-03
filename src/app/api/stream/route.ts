@@ -46,10 +46,21 @@ export async function POST(req: NextRequest) {
 
           const selectedModel = await modelSelectionResponse.json();
 
+        //   selectedModel:
+        //   {
+        //     "id": "llm-dxr",
+        //     "reason": "This model is specifically designed for chest X-ray image understanding and generation tasks, including report-to-CXR generation which matches the given task. It is described as an instruction-finetuned LLM, suggesting it can handle complex text inputs like the provided radiology report. The model also supports multiple CXR-related tasks, indicating a more comprehensive understanding of chest X-ray imagery. While both models support the required task, the BISPL-KAIST/llm-cxr model appears to be more specialized and versatile for medical imaging tasks.",
+        //     "task": "report-to-cxr-generation",
+        //     "input_args": {
+        //         "instruction": "Generate a report based on the given chest X-ray image.",
+        //         "input": "Bilateral, diffuse, confluent pulmonary opacities. Differential diagnoses include severe pulmonary edema ARDS or hemorrhage."
+        //     }
+        // }
+
           console.log("[stream/route.ts]: selectedModels: ", selectedModel);
 
           await sendData({
-            selected_model: modelSelectionResponse,
+            selected_model: selectedModel,
           });
 
           const modelExecutionResponse = await fetch(
@@ -59,25 +70,31 @@ export async function POST(req: NextRequest) {
               headers: {
                 "Content-Type": "application/json",
               },
-              body: JSON.stringify({
-                user_input: prompt,
-                selected_model: selectedModel,
-              }),
+              body: JSON.stringify(selectedModel),
             }
           );
 
-          const executionResult = await modelExecutionResponse.json();
+          const { inference_result: inferenceResult } = await modelExecutionResponse.json();
 
+          // inferenceResult:
+          // {
+          //   "inference_result": {
+          //       "image": "https://chatmedi-s3.s3.ap-northeast-2.amazonaws.com/a377d40d-b06f-4e12-8108-8a9bbce35bba.png",
+          //       "text": ""
+          //   }
+          // }
+          
           await sendData({
-            output_from_model: executionResult,
+            output_from_model: inferenceResult,
           });
+
           console.log(
-            "[stream/route.ts]: executionResult",
-            executionResult
+            "[stream/route.ts]: inferenceResult",
+            inferenceResult
           );
 
-          const finalResponse = await fetch(
-            `${process.env.NEXT_PUBLIC_SERVER_URL}/generate-response`,
+          const finalReport = await fetch(
+            `${process.env.NEXT_PUBLIC_SERVER_URL}/final-resport`,
             {
               method: "POST",
               headers: {
@@ -85,15 +102,16 @@ export async function POST(req: NextRequest) {
               },
               body: JSON.stringify({
                 user_input: prompt,
-                execution_result: executionResult,
+                selected_model: selectedModel,
+                inference_result: inferenceResult,
               }),
             }
           );
-          const { response } = await finalResponse.json();
+          const { result } = await finalReport.json();
 
           await sendData({
             final_response: {
-              text: response,
+              text: result,
             },
           });
 
