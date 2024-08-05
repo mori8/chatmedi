@@ -40,7 +40,23 @@ const ChatResponse: React.FC<ChatResponseProps> = ({
           REGENERATED RESPONSE
         </div>
       )}
-      {response.selected_model && !isHaveToBeHandledByDefaultLLM(response.selected_model.task) ? (
+
+      {response.planned_task && !isHaveToBeHandledByDefaultLLM(response.planned_task.task) && (
+        <div className="text-sm">
+          <p className="m-0 text-slate-400">
+            To handle your request, we need to tackle these tasks:
+          </p>
+          <div className="flex flex-row my-2 flex-wrap gap-2">
+              <span
+                className="m-0 py-1 px-2 rounded-xl bg-blue-50 border border-blue-200 text-slate-600 font-semibold flex-shrink-0"
+              >
+                {response.planned_task.task}
+              </span>
+          </div>
+        </div>
+      )}
+      {response.selected_model &&
+      !isHaveToBeHandledByDefaultLLM(response.selected_model.task) ? (
         <div className="mt-4 text-sm">
           <p className="m-0 text-slate-400">I found an appropriate model!</p>
           <div className="bg-slate-100 my-2 px-4 py-3 rounded-xl leading-snug flex flex-row items-start justify-between">

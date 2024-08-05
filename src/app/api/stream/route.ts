@@ -31,6 +31,23 @@ export async function POST(req: NextRequest) {
             prompt: prompt,
           });
 
+          const planTaskResponse = await fetch(
+            `${process.env.NEXT_PUBLIC_BASE_URL}/plan-task`,
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                prompt: prompt,
+                sessionId: chatId,
+                fileURL: fileURL || "",
+              }),
+            }
+          );
+
+          const task: TaskResponse = await planTaskResponse.json();
+
           const modelSelectionResponse = await fetch(
             `${process.env.NEXT_PUBLIC_SERVER_URL}/select-model`,
             {
@@ -39,6 +56,8 @@ export async function POST(req: NextRequest) {
                 "Content-Type": "application/json",
               },
               body: JSON.stringify({
+                task: task.task,
+                context: task.context,
                 user_input: `${prompt} ${fileURL}`,
               }),
             }

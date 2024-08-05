@@ -51,6 +51,7 @@ interface FinalResponse {
 interface ChatMediResponse {
   isRegenerated?: boolean;
   prompt?: string;
+  planned_task?: TaskResponse;
   selected_model?: SelectedModel;
   inference_result?: ExecutionResult;
   final_response?: FinalResponse;
