@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { TasksHandledByDefaultLLM } from "@/utils/utils";
+import { isHaveToBeHandledByDefaultLLM } from "@/utils/utils";
 
 export const runtime = "edge";
 
@@ -63,6 +63,35 @@ export async function POST(req: NextRequest) {
             selected_model: selectedModel,
           });
 
+          if (isHaveToBeHandledByDefaultLLM(selectedModel.task)) {
+            const chatResponse = await fetch(
+              `${process.env.NEXT_PUBLIC_BASE_URL}/api/chat`,
+              {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                  userId: userId,
+                  prompt: prompt,
+                  chatId: chatId,
+                }),
+              }
+            );
+
+            const chatData = await chatResponse.json();
+            const { response } = chatData;
+
+            await sendData({
+              final_response: {
+                text: response,
+              },
+            });
+
+            controller.close();
+            return;
+          }
+
           const modelExecutionResponse = await fetch(
             `${process.env.NEXT_PUBLIC_SERVER_URL}/execute-model`,
             {
@@ -85,7 +114,7 @@ export async function POST(req: NextRequest) {
           // }
           
           await sendData({
-            output_from_model: inferenceResult,
+            inference_result: inferenceResult,
           });
 
           console.log(
@@ -94,7 +123,7 @@ export async function POST(req: NextRequest) {
           );
 
           const finalReport = await fetch(
-            `${process.env.NEXT_PUBLIC_SERVER_URL}/final-resport`,
+            `${process.env.NEXT_PUBLIC_SERVER_URL}/final-report`,
             {
               method: "POST",
               headers: {
@@ -107,11 +136,11 @@ export async function POST(req: NextRequest) {
               }),
             }
           );
-          const { result } = await finalReport.json();
+          const { report } = await finalReport.json();
 
           await sendData({
             final_response: {
-              text: result,
+              text: report,
             },
           });
 

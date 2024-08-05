@@ -18,7 +18,7 @@ interface ChatMessagesProps {
   isFetching: boolean;
   fetchReStreamResponse: (
     prompt: string,
-    task: Task,
+    task: string,
     modelSelectedByUser: string
   ) => void;
 }

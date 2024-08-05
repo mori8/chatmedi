@@ -54,7 +54,7 @@ const useFetchStreamResponse = (
     }
   }, [userId, chatId, setMessages]);
 
-  const fetchReStreamResponse = useCallback(async (prompt: string, task: Task, modelSelectedByUser: string) => {
+  const fetchReStreamResponse = useCallback(async (prompt: string, task: string, modelSelectedByUser: string) => {
     try {
       setIsFetching(true);
       const response = await fetch(`/api/re-stream`, {
