@@ -1,17 +1,15 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { planTasks } from '@/lib/planTasks';
+import { NextRequest, NextResponse } from "next/server";
+import { planTask } from "@/lib/planTask";
 
 export async function POST(req: NextRequest) {
   const { prompt, sessionId, fileURL } = await req.json();
-
+  // console.log("[/plan-task]:", prompt, sessionId, fileURL);
   try {
-    const tasks: Task[] = await planTasks(prompt, sessionId, fileURL);
-    // 작업 우선순위에 따라 정렬
-    tasks.sort((a, b) => Math.max(...b.dep) - Math.max(...a.dep));
-    console.log("[/plan-task]:", tasks)
-    return NextResponse.json({ tasks });
+    const taskResponse = await planTask(prompt, sessionId, fileURL);
+    console.log("[/plan-task]:", taskResponse);
+    return NextResponse.json(taskResponse);
   } catch (error) {
-    console.error('Failed to plan tasks:', error);
-    return NextResponse.json({ error: 'Failed to plan tasks' }, { status: 500 });
+    console.error("Failed to plan task:", error);
+    return NextResponse.json({ error: "Failed to plan task" }, { status: 500 });
   }
 }

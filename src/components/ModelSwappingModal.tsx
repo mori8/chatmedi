@@ -3,11 +3,11 @@ import React, { useEffect, useState } from "react";
 interface ModalProps {
   onClose: () => void;
   prompt: string | undefined;
-  task: Task | undefined;
+  task: string | undefined;
   currentModelId: string | undefined;
   fetchReStreamResponse: (
     prompt: string,
-    task: Task,
+    task: string,
     modelSelectedByUser: string
   ) => void;
 }
@@ -26,7 +26,7 @@ const ModelSwappingModal: React.FC<ModalProps> = ({
       const fetchAlternativeModels = async () => {
         try {
           const response = await fetch(
-            `${process.env.NEXT_PUBLIC_SERVER_URL}/available-models?task=${task.task}`
+            `${process.env.NEXT_PUBLIC_SERVER_URL}/available-models?task=${task}`
           );
           if (response.ok) {
             const models = await response.json();
@@ -67,7 +67,7 @@ const ModelSwappingModal: React.FC<ModalProps> = ({
         </h2>
         <p className="text-sm mb-4 text-slate-600">
           Here you can choose another model to process{" "}
-          <span className="font-bold">{task.task}</span> task.
+          <span className="font-bold">{task}</span> task.
         </p>
         <div className="flex flex-col gap-2">
           {alternativeModels.map((model) => (
@@ -83,8 +83,9 @@ const ModelSwappingModal: React.FC<ModalProps> = ({
               ) : (
                 <button
                   className="text-xs bg-xanthous text-white px-3 py-2 rounded-xl flex-shrink-0"
-                  onClick={() => {
-                    fetchReStreamResponse(task.args.text, task, model);
+                    onClick={() => {
+                    // TODO: 수정필요, prompt 넣어도됨?
+                    fetchReStreamResponse(prompt, task, model);
                   }}
                 >
                   rerun with this model

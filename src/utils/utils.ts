@@ -101,3 +101,7 @@ export const parseTimestamp = (timestamp: string): Date => {
 
   return new Date(year, month - 1, day, hours, minutes, seconds);
 };
+
+export const isHaveToBeHandledByDefaultLLM = (task: string): boolean => {
+  return TasksHandledByDefaultLLM.includes(task);
+}

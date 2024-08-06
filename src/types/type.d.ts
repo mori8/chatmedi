@@ -15,11 +15,14 @@ interface AIMessage {
 
 type Message = UserMessage | AIMessage;
 
-interface Task {
+interface TaskContext {
+  file?: string;
+  text?: string;
+}
+
+interface TaskResponse {
   task: string;
-  id: number;
-  dep: number[];
-  args: { [key: string]: string };
+  context: TaskContext;
 }
 
 interface ConversationHistory {
@@ -28,39 +31,17 @@ interface ConversationHistory {
 
 interface ModelSelectionRequest {
   user_input: string;
-  tasks: TaskModel[];
 }
 
 interface SelectedModel {
   id: string;
   reason: string;
+  task: string;
+  input_args: any;
 }
 
-interface ModelSelectionResponse {
-  prompt?: string;
-  selected_models: { [key: number]: SelectedModel };
-}
-
-interface OutputFromModel {
-  task: Task,
-  model: SelectedModel,
-  model_input: {
-    text?: string;
-    image?: string;
-  },
-  inference_result: {
-    text?: string;
-    image?: string;
-  }
-}
-
-interface TaskSummaries {
-  task: Task;
-  model: SelectedModel;
-  inference_result: {
-    text?: string;
-    image?: string;
-  }
+interface inferenceResult {
+    [key: string]: string;
 }
 
 interface FinalResponse {
@@ -70,9 +51,9 @@ interface FinalResponse {
 interface ChatMediResponse {
   isRegenerated?: boolean;
   prompt?: string;
-  planned_task?: Task[];
-  selected_model?: { [key: number]: SelectedModel };
-  output_from_model?: OutputFromModel[];
+  planned_task?: TaskResponse;
+  selected_model?: SelectedModel;
+  inference_result?: ExecutionResult;
   final_response?: FinalResponse;
 }
 

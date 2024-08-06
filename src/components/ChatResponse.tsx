@@ -5,7 +5,7 @@ import { SwatchIcon } from "@heroicons/react/24/outline";
 import { Tooltip } from "react-tooltip";
 import LoadingDots from "@/components/LoadingDots";
 import MarkdownWrapper from "@/components/MarkdownWrapper";
-import { TasksHandledByDefaultLLM } from "@/utils/utils";
+import { isHaveToBeHandledByDefaultLLM } from "@/utils/utils";
 import classNames from "classnames";
 
 const ModelSwappingModal = React.lazy(
@@ -17,16 +17,10 @@ interface ChatResponseProps {
   messageId?: string;
   fetchReStreamResponse: (
     prompt: string,
-    task: Task,
+    task: string,
     modelSelectedByUser: string
   ) => void;
 }
-
-const isNeedToHandleTask = (tasks: Task[]) => {
-  return !(
-    tasks.length === 1 && TasksHandledByDefaultLLM.includes(tasks[0].task)
-  );
-};
 
 const ChatResponse: React.FC<ChatResponseProps> = ({
   response,
@@ -34,8 +28,10 @@ const ChatResponse: React.FC<ChatResponseProps> = ({
   fetchReStreamResponse,
 }) => {
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
-  const [selectedTask, setSelectedTask] = useState<Task | undefined>();
+  const [selectedTask, setSelectedTask] = useState<string | undefined>();
   const [currentModelId, setCurrentModelId] = useState<string | undefined>();
+
+  console.log(response);
 
   return (
     <div className="p-2" id={messageId}>
@@ -44,70 +40,66 @@ const ChatResponse: React.FC<ChatResponseProps> = ({
           REGENERATED RESPONSE
         </div>
       )}
-      {response.planned_task && isNeedToHandleTask(response.planned_task) && (
-        <div className="text-sm">
-          <p className="m-0 text-slate-400">
-            To handle your request, we need to tackle these tasks:
-          </p>
-          <div className="flex flex-row my-2 flex-wrap gap-2">
-            {response.planned_task.map((task, index) => (
-              <span
-                className="m-0 py-1 px-2 rounded-xl bg-blue-50 border border-blue-200 text-slate-600 font-semibold flex-shrink-0"
-                key={index}
-              >
-                {task.task}
+      {response.planned_task &&
+        !isHaveToBeHandledByDefaultLLM(response.planned_task.task) && (
+          <div className="text-sm">
+            <p className="m-0 text-slate-400">
+              To handle your request, we need to tackle these tasks:
+            </p>
+            <div className="flex flex-row my-2 flex-wrap gap-2">
+              <span className="m-0 py-1 px-2 rounded-xl bg-blue-50 border border-blue-200 text-slate-600 font-semibold flex-shrink-0">
+                {response.planned_task.task}
               </span>
-            ))}
+            </div>
           </div>
-        </div>
-      )}
-      {response.selected_model && response.selected_model["0"].id !== "none" ? (
+        )}
+      {response.selected_model &&
+      !isHaveToBeHandledByDefaultLLM(response.selected_model.task) ? (
         <div className="mt-4 text-sm">
           <p className="m-0 text-slate-400">I found an appropriate model!</p>
-          {Object.entries(response.selected_model).map(([key, model]) => (
-            <div
-              key={key}
-              className="bg-slate-100 my-2 px-4 py-3 rounded-xl leading-snug flex flex-row items-start justify-between"
-            >
-              <div className="flex-1">
-                <p className="m-0 mb-1 flex items-start gap-1">
-                  <span className="w-14 flex-shrink-0">
-                    <span className="text-xs font-semibold bg-white px-1 py-[2px] rounded border border-slate-200 text-slate-500 inline-block">
-                      Model
-                    </span>
+          <div className="bg-slate-100 my-2 px-4 py-3 rounded-xl leading-snug flex flex-row items-start justify-between">
+            <div className="flex-1">
+              <p className="m-0 mb-1 flex items-start gap-1">
+                <span className="w-14 flex-shrink-0">
+                  <span className="text-xs font-semibold bg-white px-1 py-[2px] rounded border border-slate-200 text-slate-500 inline-block">
+                    Model
                   </span>
-                  <span className="font-semibold">{model.id}</span>
-                </p>
-                <p className="m-0 flex items-start gap-1">
-                  <span className="w-14 flex-shrink-0">
-                    <span className="text-xs font-semibold bg-white px-1 py-[2px] rounded border border-slate-200 text-slate-500 inline-block">
-                      Reason
-                    </span>
+                </span>
+                <span className="font-semibold">
+                  {response.selected_model.id}
+                </span>
+              </p>
+              <p className="m-0 flex items-start gap-1">
+                <span className="w-14 flex-shrink-0">
+                  <span className="text-xs font-semibold bg-white px-1 py-[2px] rounded border border-slate-200 text-slate-500 inline-block">
+                    Reason
                   </span>
-                  <span className="text-slate-500">{model.reason}</span>
-                </p>
-              </div>
-              <div
-                className={classNames(
-                  "bg-white rounded-full p-1 cursor-pointer flex-shrink-0",
-                  {
-                    hidden: !messageId,
-                  }
-                )}
-                data-tooltip-id="alternative-models"
-                data-tooltip-content="Show alternative models"
-                onClick={() => {
-                  console.log(isModalOpen);
-                  setIsModalOpen(true);
-                  setSelectedTask(response?.planned_task?.[0]);
-                  setCurrentModelId(model.id);
-                }}
-              >
-                <Tooltip id="alternative-models" />
-                <SwatchIcon className="w-5 h-5 text-slate-500" />
-              </div>
+                </span>
+                <span className="text-slate-500">
+                  {response.selected_model.reason}
+                </span>
+              </p>
             </div>
-          ))}
+            <div
+              className={classNames(
+                "bg-white rounded-full p-1 cursor-pointer flex-shrink-0",
+                {
+                  hidden: !messageId,
+                }
+              )}
+              data-tooltip-id="alternative-models"
+              data-tooltip-content="Show alternative models"
+              onClick={() => {
+                console.log(isModalOpen);
+                setIsModalOpen(true);
+                setSelectedTask(response.selected_model?.task);
+                setCurrentModelId(response.selected_model?.id);
+              }}
+            >
+              <Tooltip id="alternative-models" />
+              <SwatchIcon className="w-5 h-5 text-slate-500" />
+            </div>
+          </div>
         </div>
       ) : (
         !response.selected_model && (
@@ -117,56 +109,63 @@ const ChatResponse: React.FC<ChatResponseProps> = ({
         )
       )}
       {response.selected_model &&
-        response.selected_model["0"].id !== "none" &&
-        (response.output_from_model ? (
+        !isHaveToBeHandledByDefaultLLM(response.selected_model.task) &&
+        (response.inference_result ? (
           <div className="mt-4 text-sm">
             <p className="m-0 text-slate-400">Model run complete.</p>
-            {response.output_from_model.map((output, index) => (
-              <div
-                key={index}
-                className="my-2 p-4 rounded-xl bg-slate-100"
-              >
-                <p className="m-0 mb-2 text-slate-400 text-xs">
-                  response from{" "}
-                  <span className="ml-1 bg-slate-200 border border-slate-300 px-1 py-[2px] rounded text-slate-500">
-                    {output.model.id}
+            <div className="my-2 p-4 rounded-xl bg-slate-100">
+              <p className="m-0 mb-2 text-slate-400 text-xs">
+                response from{" "}
+                <span className="ml-1 bg-slate-200 border border-slate-300 px-1 py-[2px] rounded text-slate-500">
+                  {response.selected_model.id}
+                </span>
+              </p>
+              <div className="mt-3">
+                <p className="m-0 mb-1 flex items-start gap-1">
+                  <span className="w-14 flex-shrink-0">
+                    <span className="text-xs font-semibold bg-white px-1 py-[2px] rounded border border-slate-200 text-slate-500 inline-block">
+                      Input
+                    </span>
+                  </span>
+                  <span className="">
+                    {typeof response.selected_model.input_args === "string" ? (
+                      response.selected_model.input_args
+                    ) : (
+                      <div>
+                        {Object.entries(response.selected_model.input_args).map(([key, value]) => (
+                          <div key={key}>
+                            <strong>{key}: </strong>
+                            <span>{JSON.stringify(value)}</span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </span>
                 </p>
-                <div className="mt-3">
-                  <p className="m-0 mb-1 flex items-start gap-1">
-                    <span className="w-14 flex-shrink-0">
-                      <span className="text-xs font-semibold bg-white px-1 py-[2px] rounded border border-slate-200 text-slate-500 inline-block">
-                        Input
+                <p className="m-0 flex items-start gap-1">
+                  <span className="w-14 flex-shrink-0">
+                    <span className="text-xs font-semibold bg-white px-1 py-[2px] rounded border border-slate-200 text-slate-500 inline-block">
+                      Output
+                    </span>
+                  </span>
+                  <span className="text-slate-500">
+                    {response.inference_result.text ? (
+                      response.inference_result.text
+                    ) : (
+                      <span>
+                        <a
+                          href={response.inference_result.image}
+                          className="text-slate-400"
+                          target="_blank"
+                        >
+                          {response.inference_result.image}
+                        </a>
                       </span>
-                    </span>
-                    <span className="font-semibold">{output.model_input.text
-                    ? output.model_input.text
-                    : output.model_input.image}</span>
-                  </p>
-                  <p className="m-0 flex items-start gap-1">
-                    <span className="w-14 flex-shrink-0">
-                      <span className="text-xs font-semibold bg-white px-1 py-[2px] rounded border border-slate-200 text-slate-500 inline-block">
-                        Output
-                      </span>
-                    </span>
-                    <span className="text-slate-500">{output.inference_result.text ? (
-                    output.inference_result.text
-                  ) : (
-                    <span>
-                      <a
-                        href={output.inference_result.image}
-                        className="text-slate-400"
-                        target="_blank"
-                      >
-                        {output.inference_result.image}
-                      </a>
-                    </span>
-                  )}</span>
-                  </p>
-                </div>
-
+                    )}
+                  </span>
+                </p>
               </div>
-            ))}
+            </div>
           </div>
         ) : (
           response.selected_model && (
@@ -181,8 +180,8 @@ const ChatResponse: React.FC<ChatResponseProps> = ({
         </div>
       ) : (
         response.selected_model &&
-        response.selected_model["0"].id !== "none" &&
-        response.output_from_model && (
+        !isHaveToBeHandledByDefaultLLM(response.selected_model.task) &&
+        response.inference_result && (
           <div className="mt-4 text-sm text-slate-400">
             Generating a result based on the model’s output <LoadingDots />
           </div>

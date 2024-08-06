@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { TasksHandledByDefaultLLM } from "@/utils/utils";
+import { isHaveToBeHandledByDefaultLLM } from "@/utils/utils";
 
 export const runtime = "edge";
 
@@ -9,6 +9,7 @@ export async function POST(req: NextRequest) {
   const userId = formData.get("userId") as string;
   const chatId = formData.get("chatId") as string;
   const prompt = formData.get("prompt") as string;
+  // fileURL: saveUserMessage에서 파일 -> S3에 저장한 후 생성되는 URL
   const fileURL = formData.get("fileURL") as string | null;
 
   console.log("[stream/route.ts]: ", userId, chatId, prompt);
@@ -27,9 +28,10 @@ export async function POST(req: NextRequest) {
         try {
           await sendData({
             isRegenerated: false,
+            prompt: prompt,
           });
 
-          const plannedTaskData = await fetch(
+          const planTaskResponse = await fetch(
             `${process.env.NEXT_PUBLIC_BASE_URL}/api/plan-task`,
             {
               method: "POST",
@@ -38,36 +40,54 @@ export async function POST(req: NextRequest) {
               },
               body: JSON.stringify({
                 prompt: prompt,
-                fileURL: fileURL,
                 sessionId: chatId,
+                fileURL: fileURL || "",
               }),
             }
           );
-          const { tasks } = await plannedTaskData.json();
-          console.log("[stream/route.ts]: tasks", JSON.stringify(tasks));
+
+          const task: TaskResponse = await planTaskResponse.json();
 
           await sendData({
-            planned_task: tasks,
+            planned_task: task,
           });
 
-          let selectedModels: { [key: number]: SelectedModel };
-
-          if (
-            tasks.length === 1 &&
-            TasksHandledByDefaultLLM.includes(tasks[0].task)
-          ) {
-            selectedModels = {
-              "0": {
-                id: "none",
-                reason: "none",
+          const modelSelectionResponse = await fetch(
+            `${process.env.NEXT_PUBLIC_SERVER_URL}/select-model`,
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
               },
-            };
+              body: JSON.stringify({
+                task: task.task,
+                context: task.context,
+                user_input: `${prompt} ${fileURL}`,
+              }),
+            }
+          );
 
-            await sendData({
-              selected_model: selectedModels,
-            });
+          const selectedModel = await modelSelectionResponse.json();
 
-            const finalResponse = await fetch(
+        //   selectedModel:
+        //   {
+        //     "id": "llm-dxr",
+        //     "reason": "This model is specifically designed for chest X-ray image understanding and generation tasks, including report-to-CXR generation which matches the given task. It is described as an instruction-finetuned LLM, suggesting it can handle complex text inputs like the provided radiology report. The model also supports multiple CXR-related tasks, indicating a more comprehensive understanding of chest X-ray imagery. While both models support the required task, the BISPL-KAIST/llm-cxr model appears to be more specialized and versatile for medical imaging tasks.",
+        //     "task": "report-to-cxr-generation",
+        //     "input_args": {
+        //         "instruction": "Generate a report based on the given chest X-ray image.",
+        //         "input": "Bilateral, diffuse, confluent pulmonary opacities. Differential diagnoses include severe pulmonary edema ARDS or hemorrhage."
+        //     }
+        // }
+
+          console.log("[stream/route.ts]: selectedModels: ", selectedModel);
+
+          await sendData({
+            selected_model: selectedModel,
+          });
+
+          if (isHaveToBeHandledByDefaultLLM(selectedModel.task)) {
+            const chatResponse = await fetch(
               `${process.env.NEXT_PUBLIC_BASE_URL}/api/chat`,
               {
                 method: "POST",
@@ -81,90 +101,71 @@ export async function POST(req: NextRequest) {
                 }),
               }
             );
-            const { response } = await finalResponse.json();
-            
+
+            const chatData = await chatResponse.json();
+            const { response } = chatData;
+
             await sendData({
               final_response: {
                 text: response,
               },
             });
-          } else {
-            const modelSelectionResponse = await fetch(
-              `${process.env.NEXT_PUBLIC_SERVER_URL}/select-model`,
-              {
-                method: "POST",
-                headers: {
-                  "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                  user_input: prompt,
-                  tasks: tasks,
-                }),
-              }
-            );
 
-            const { selected_models: selectedModelsResponse, prompt: userInput } = await modelSelectionResponse.json();
-            selectedModels = selectedModelsResponse;
-            console.log("[stream/route.ts]: selectedModels: ", selectedModels);
-            
-            await sendData({
-              prompt: userInput,
-              selected_model: selectedModels,
-            });
-
-            const modelExecutionResponse = await fetch(
-              `${process.env.NEXT_PUBLIC_SERVER_URL}/execute-tasks`,
-              {
-                method: "POST",
-                headers: {
-                  "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                  user_input: prompt,
-                  tasks: tasks,
-                  selected_models: selectedModels,
-                }),
-              }
-            );
-
-            const modelExecutionData = await modelExecutionResponse.json();
-            await sendData({
-              output_from_model: modelExecutionData,
-            });
-            console.log("[stream/route.ts]: modelExecutionData", modelExecutionData);
-            const TaskSummaries = modelExecutionData.map(
-              (executionItem: any) => {
-                const taskId = executionItem.task.id.toString();
-                if (selectedModels[taskId]) {
-                  executionItem.model = selectedModels[taskId];
-                }
-                return executionItem;
-              }
-            );
-
-            delete TaskSummaries.model_input;
-
-            const finalResponse = await fetch(
-              `${process.env.NEXT_PUBLIC_SERVER_URL}/generate-response`,
-              {
-                method: "POST",
-                headers: {
-                  "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                  user_input: prompt,
-                  task_summaries: TaskSummaries,
-                })
-              }
-            );
-            const { response } = await finalResponse.json();
-            
-            await sendData({
-              final_response: {
-                text: response,
-              },
-            });
+            controller.close();
+            return;
           }
+
+          const modelExecutionResponse = await fetch(
+            `${process.env.NEXT_PUBLIC_SERVER_URL}/execute-model`,
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify(selectedModel),
+            }
+          );
+
+          const { inference_result: inferenceResult } = await modelExecutionResponse.json();
+
+          // inferenceResult:
+          // {
+          //   "inference_result": {
+          //       "image": "https://chatmedi-s3.s3.ap-northeast-2.amazonaws.com/a377d40d-b06f-4e12-8108-8a9bbce35bba.png",
+          //       "text": ""
+          //   }
+          // }
+          
+          await sendData({
+            inference_result: inferenceResult,
+          });
+
+          console.log(
+            "[stream/route.ts]: inferenceResult",
+            inferenceResult
+          );
+
+          const finalReport = await fetch(
+            `${process.env.NEXT_PUBLIC_SERVER_URL}/final-report`,
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                user_input: prompt,
+                selected_model: selectedModel,
+                inference_result: inferenceResult,
+              }),
+            }
+          );
+          const { report } = await finalReport.json();
+
+          await sendData({
+            final_response: {
+              text: report,
+            },
+          });
 
           controller.close();
         } catch (error) {
