@@ -16,7 +16,7 @@ interface AIMessage {
 type Message = UserMessage | AIMessage;
 
 interface TaskContext {
-  file?: string | null;
+  file?: string;
   text?: string;
 }
 
@@ -37,7 +37,7 @@ interface SelectedModel {
   id: string;
   reason: string;
   task: string;
-  model_args: any;
+  input_args: any;
 }
 
 interface inferenceResult {

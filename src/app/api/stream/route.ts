@@ -32,7 +32,7 @@ export async function POST(req: NextRequest) {
           });
 
           const planTaskResponse = await fetch(
-            `${process.env.NEXT_PUBLIC_BASE_URL}/plan-task`,
+            `${process.env.NEXT_PUBLIC_BASE_URL}/api/plan-task`,
             {
               method: "POST",
               headers: {
@@ -47,6 +47,10 @@ export async function POST(req: NextRequest) {
           );
 
           const task: TaskResponse = await planTaskResponse.json();
+
+          await sendData({
+            planned_task: task,
+          });
 
           const modelSelectionResponse = await fetch(
             `${process.env.NEXT_PUBLIC_SERVER_URL}/select-model`,

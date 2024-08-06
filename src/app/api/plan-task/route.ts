@@ -5,7 +5,7 @@ export async function POST(req: NextRequest) {
   const { prompt, sessionId, fileURL } = await req.json();
   // console.log("[/plan-task]:", prompt, sessionId, fileURL);
   try {
-    const taskResponse = await planTask(prompt, sessionId, fileURL || "");
+    const taskResponse = await planTask(prompt, sessionId, fileURL);
     console.log("[/plan-task]:", taskResponse);
     return NextResponse.json(taskResponse);
   } catch (error) {

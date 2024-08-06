@@ -40,21 +40,19 @@ const ChatResponse: React.FC<ChatResponseProps> = ({
           REGENERATED RESPONSE
         </div>
       )}
-
-      {response.planned_task && !isHaveToBeHandledByDefaultLLM(response.planned_task.task) && (
-        <div className="text-sm">
-          <p className="m-0 text-slate-400">
-            To handle your request, we need to tackle these tasks:
-          </p>
-          <div className="flex flex-row my-2 flex-wrap gap-2">
-              <span
-                className="m-0 py-1 px-2 rounded-xl bg-blue-50 border border-blue-200 text-slate-600 font-semibold flex-shrink-0"
-              >
+      {response.planned_task &&
+        !isHaveToBeHandledByDefaultLLM(response.planned_task.task) && (
+          <div className="text-sm">
+            <p className="m-0 text-slate-400">
+              To handle your request, we need to tackle these tasks:
+            </p>
+            <div className="flex flex-row my-2 flex-wrap gap-2">
+              <span className="m-0 py-1 px-2 rounded-xl bg-blue-50 border border-blue-200 text-slate-600 font-semibold flex-shrink-0">
                 {response.planned_task.task}
               </span>
+            </div>
           </div>
-        </div>
-      )}
+        )}
       {response.selected_model &&
       !isHaveToBeHandledByDefaultLLM(response.selected_model.task) ? (
         <div className="mt-4 text-sm">
@@ -129,10 +127,19 @@ const ChatResponse: React.FC<ChatResponseProps> = ({
                       Input
                     </span>
                   </span>
-                  <span className="font-semibold">
-                    {response.inference_result.text
-                      ? response.inference_result.text
-                      : response.inference_result.image}
+                  <span className="">
+                    {typeof response.selected_model.input_args === "string" ? (
+                      response.selected_model.input_args
+                    ) : (
+                      <div>
+                        {Object.entries(response.selected_model.input_args).map(([key, value]) => (
+                          <div key={key}>
+                            <strong>{key}: </strong>
+                            <span>{JSON.stringify(value)}</span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </span>
                 </p>
                 <p className="m-0 flex items-start gap-1">
