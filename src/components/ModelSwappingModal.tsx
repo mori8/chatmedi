@@ -4,11 +4,13 @@ interface ModalProps {
   onClose: () => void;
   prompt: string | undefined;
   task: string | undefined;
+  context: any;
   currentModelId: string | undefined;
   fetchReStreamResponse: (
     prompt: string,
     task: string,
-    modelSelectedByUser: string
+    modelSelectedByUser: string,
+    context: any
   ) => void;
 }
 
@@ -17,6 +19,7 @@ const ModelSwappingModal: React.FC<ModalProps> = ({
   task,
   prompt,
   currentModelId,
+  context,
   fetchReStreamResponse,
 }) => {
   const [alternativeModels, setAlternativeModels] = useState<string[]>([]);
@@ -85,7 +88,7 @@ const ModelSwappingModal: React.FC<ModalProps> = ({
                   className="text-xs bg-xanthous text-white px-3 py-2 rounded-xl flex-shrink-0"
                     onClick={() => {
                     // TODO: 수정필요, prompt 넣어도됨?
-                    fetchReStreamResponse(prompt, task, model);
+                    fetchReStreamResponse(prompt, task, model, context);
                   }}
                 >
                   rerun with this model

@@ -4,7 +4,7 @@ export const runtime = "edge";
 
 export async function POST(req: NextRequest) {
   console.log("[re-stream/route.ts]: POST called");
-  const { prompt, task, modelSelectedByUser } = await req.json();
+  const { prompt, context, task, modelSelectedByUser } = await req.json();
 
   // 기존 대화의 task -> 선택된 모델 사용 -> 모델 실행 결과 -> 최종 응답
   const chatMediResponse: ChatMediResponse = {};
@@ -22,54 +22,72 @@ export async function POST(req: NextRequest) {
         try {
           await sendData({
             isRegenerated: true,
+            prompt: prompt,
           });
 
-          const selectedModels = {
-            [task.id]: {
-              id: modelSelectedByUser,
-              reason: "User selected model",
-            },
-          };
-          console.log("[re-stream/route.ts]: selectedModels: ", selectedModels);
+          const selectedModelArgsData = await fetch(
+            `${process.env.NEXT_PUBLIC_SERVER_URL}/model-args`,
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                user_input: prompt,
+                model_id: modelSelectedByUser,
+                task: task,
+                context: context,
+              }),
+            }
+          );
+
+          const selectedModelArgs = await selectedModelArgsData.json();
+
+          const selectedModel = {
+            "id": modelSelectedByUser,
+            "reason": "User selected this model",
+            "task": task,
+            "input_args": selectedModelArgs,
+          }
+
+          console.log("[re-stream/route.ts]: selectedModel: ", selectedModel);
+          
           await sendData({
-            selected_model: selectedModels,
+            selected_model: selectedModel,
           });
 
           const modelExecutionResponse = await fetch(
-            `${process.env.NEXT_PUBLIC_SERVER_URL}/execute-tasks`,
+            `${process.env.NEXT_PUBLIC_SERVER_URL}/execute-model`,
             {
               method: "POST",
               headers: {
                 "Content-Type": "application/json",
               },
-              body: JSON.stringify({
-                user_input: prompt,
-                tasks: [task],
-                selected_models: selectedModels,
-              }),
+              body: JSON.stringify(selectedModel),
             }
           );
 
-          const modelExecutionData = await modelExecutionResponse.json();
+          const { inference_result: inferenceResult } = await modelExecutionResponse.json();
+
+          // inferenceResult:
+          // {
+          //   "inference_result": {
+          //       "image": "https://chatmedi-s3.s3.ap-northeast-2.amazonaws.com/a377d40d-b06f-4e12-8108-8a9bbce35bba.png",
+          //       "text": ""
+          //   }
+          // }
+          
           await sendData({
-            output_from_model: modelExecutionData,
+            inference_result: inferenceResult,
           });
+
           console.log(
-            "[re-stream/route.ts]: modelExecutionData",
-            modelExecutionData
+            "[stream/route.ts]: inferenceResult",
+            inferenceResult
           );
-          const TaskSummaries = modelExecutionData.map((executionItem: any) => {
-            const taskId = executionItem.task.id.toString();
-            if (selectedModels[taskId]) {
-              executionItem.model = selectedModels[taskId];
-            }
-            return executionItem;
-          });
 
-          delete TaskSummaries.model_input;
-
-          const finalResponse = await fetch(
-            `${process.env.NEXT_PUBLIC_SERVER_URL}/generate-response`,
+          const finalReport = await fetch(
+            `${process.env.NEXT_PUBLIC_SERVER_URL}/final-report`,
             {
               method: "POST",
               headers: {
@@ -77,15 +95,16 @@ export async function POST(req: NextRequest) {
               },
               body: JSON.stringify({
                 user_input: prompt,
-                task_summaries: TaskSummaries,
+                selected_model: selectedModel,
+                inference_result: inferenceResult,
               }),
             }
           );
-          const { response } = await finalResponse.json();
+          const { report } = await finalReport.json();
 
           await sendData({
             final_response: {
-              text: response,
+              text: report,
             },
           });
 

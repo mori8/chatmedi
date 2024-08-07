@@ -19,7 +19,8 @@ interface ChatMessagesProps {
   fetchReStreamResponse: (
     prompt: string,
     task: string,
-    modelSelectedByUser: string
+    modelSelectedByUser: string,
+    context: any
   ) => void;
 }
 
@@ -91,13 +92,11 @@ const ChatMessages: React.FC<ChatMessagesProps> = ({
               alt="AI"
             />
           </div>
-          <div>
-            <span className="prose">
+          <div className="prose">
               <ChatResponse
                 response={tempChatMediResponse}
                 fetchReStreamResponse={fetchReStreamResponse}
               />
-            </span>
             {isFetching && (
               <div className="mt-3">
                 <BeatLoader color="#cacaca" size={8} speedMultiplier={1} />

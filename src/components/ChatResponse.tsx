@@ -1,6 +1,4 @@
-"use client";
-
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { SwatchIcon } from "@heroicons/react/24/outline";
 import { Tooltip } from "react-tooltip";
 import LoadingDots from "@/components/LoadingDots";
@@ -18,7 +16,8 @@ interface ChatResponseProps {
   fetchReStreamResponse: (
     prompt: string,
     task: string,
-    modelSelectedByUser: string
+    modelSelectedByUser: string,
+    context: any
   ) => void;
 }
 
@@ -30,6 +29,13 @@ const ChatResponse: React.FC<ChatResponseProps> = ({
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [selectedTask, setSelectedTask] = useState<string | undefined>();
   const [currentModelId, setCurrentModelId] = useState<string | undefined>();
+  const [context, setContext] = useState<any>({});
+
+  useEffect(() => {
+    if (response.planned_task && response.planned_task.context) {
+      setContext(response.planned_task.context);
+    }
+  }, [response.planned_task]);
 
   console.log(response);
 
@@ -192,6 +198,7 @@ const ChatResponse: React.FC<ChatResponseProps> = ({
           onClose={() => setIsModalOpen(false)}
           prompt={response.prompt}
           task={selectedTask}
+          context={context}
           currentModelId={currentModelId}
           fetchReStreamResponse={fetchReStreamResponse}
         />
