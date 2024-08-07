@@ -138,12 +138,14 @@ const ChatResponse: React.FC<ChatResponseProps> = ({
                       response.selected_model.input_args
                     ) : (
                       <div>
-                        {Object.entries(response.selected_model.input_args).map(([key, value]) => (
-                          <div key={key}>
-                            <strong>{key}: </strong>
-                            <span>{JSON.stringify(value)}</span>
-                          </div>
-                        ))}
+                        {Object.entries(response.selected_model.input_args).map(
+                          ([key, value]) => (
+                            <div key={key}>
+                              <strong>{key}: </strong>
+                              <span>{JSON.stringify(value)}</span>
+                            </div>
+                          )
+                        )}
                       </div>
                     )}
                   </span>
@@ -154,11 +156,13 @@ const ChatResponse: React.FC<ChatResponseProps> = ({
                       Output
                     </span>
                   </span>
-                  <span className="text-slate-500">
-                    {response.inference_result.text ? (
-                      response.inference_result.text
-                    ) : (
-                      <span>
+                  {response.inference_result.error ? (
+                    <span className="text-red-400">
+                      An error occurred. Please try again.
+                    </span>
+                  ) : (
+                    <span className="text-slate-500">
+                      {response.inference_result.text || (
                         <a
                           href={response.inference_result.image}
                           className="text-slate-400"
@@ -166,9 +170,9 @@ const ChatResponse: React.FC<ChatResponseProps> = ({
                         >
                           {response.inference_result.image}
                         </a>
-                      </span>
-                    )}
-                  </span>
+                      )}
+                    </span>
+                  )}
                 </p>
               </div>
             </div>

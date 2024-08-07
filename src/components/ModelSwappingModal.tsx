@@ -86,9 +86,9 @@ const ModelSwappingModal: React.FC<ModalProps> = ({
               ) : (
                 <button
                   className="text-xs bg-xanthous text-white px-3 py-2 rounded-xl flex-shrink-0"
-                    onClick={() => {
-                    // TODO: 수정필요, prompt 넣어도됨?
+                  onClick={() => {
                     fetchReStreamResponse(prompt, task, model, context);
+                    onClose();
                   }}
                 >
                   rerun with this model
