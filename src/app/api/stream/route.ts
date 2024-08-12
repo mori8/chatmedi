@@ -68,25 +68,13 @@ export async function POST(req: NextRequest) {
           );
 
           const selectedModel = await modelSelectionResponse.json();
-
-        //   selectedModel:
-        //   {
-        //     "id": "llm-dxr",
-        //     "reason": "This model is specifically designed for chest X-ray image understanding and generation tasks, including report-to-CXR generation which matches the given task. It is described as an instruction-finetuned LLM, suggesting it can handle complex text inputs like the provided radiology report. The model also supports multiple CXR-related tasks, indicating a more comprehensive understanding of chest X-ray imagery. While both models support the required task, the BISPL-KAIST/llm-cxr model appears to be more specialized and versatile for medical imaging tasks.",
-        //     "task": "report-to-cxr-generation",
-        //     "input_args": {
-        //         "instruction": "Generate a report based on the given chest X-ray image.",
-        //         "input": "Bilateral, diffuse, confluent pulmonary opacities. Differential diagnoses include severe pulmonary edema ARDS or hemorrhage."
-        //     }
-        // }
-
           console.log("[stream/route.ts]: selectedModels: ", selectedModel);
 
           await sendData({
             selected_model: selectedModel,
           });
 
-          if (isHaveToBeHandledByDefaultLLM(selectedModel.task)) {
+          if (isHaveToBeHandledByDefaultLLM(selectedModel.task) || selectedModel.input_args.error) {
             const chatResponse = await fetch(
               `${process.env.NEXT_PUBLIC_BASE_URL}/api/chat`,
               {
@@ -98,6 +86,7 @@ export async function POST(req: NextRequest) {
                   userId: userId,
                   prompt: prompt,
                   chatId: chatId,
+                  error: selectedModel.input_args.error,
                 }),
               }
             );
