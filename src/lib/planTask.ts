@@ -28,7 +28,8 @@ export async function planTask(
       "question-answering-about-medical-domain",
       "summarization",
       "report-to-cxr-generation",
-      "cxr-to-report-generation"
+      "cxr-to-report-generation",
+      "clinical-note-analysis"
     ]),
     context: z.object({
       file: z.string().nullable().optional(),
@@ -38,7 +39,7 @@ export async function planTask(
 
   const jsonSchema = zodToJsonSchema(zodSchema);
 
-  const fullPrompt = "Please analyze the user's input and determine the most appropriate task and context needed to fulfill the command. The task MUST be selected from the following options: \"question-answering-about-medical-domain\", \"summarization\", \"report-to-cxr-generation\", \"cxr-to-report-generation\". If no task is suitable to fulfill the user's command, create a \"question-answering-about-medical-domain\" task. If the user's command does not require additional context or the input already contains sufficient context, the context should be an empty object. DO NOT recreate any task that has already been completed and has produced a result.";
+  const fullPrompt = "Please analyze the user's input and determine the most appropriate task and context needed to fulfill the command. The task MUST be selected from the following options: \"question-answering-about-medical-domain\", \"summarization\", \"report-to-cxr-generation\", \"cxr-to-report-generation\", \"clinical-note-analysis\". If no task is suitable to fulfill the user's command, create a \"question-answering-about-medical-domain\" task. If the user's command does not require additional context or the input already contains sufficient context, the context should be an empty object. DO NOT recreate any task that has already been completed and has produced a result.";
   
   const functionCallingModel = openai.bind({
     functions: [
