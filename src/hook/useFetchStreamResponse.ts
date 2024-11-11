@@ -65,6 +65,7 @@ const useFetchStreamResponse = (
         body: JSON.stringify({
           prompt,
           task,
+          chatId,
           modelSelectedByUser,
           context
         }),

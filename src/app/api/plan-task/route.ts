@@ -2,11 +2,11 @@ import { NextRequest, NextResponse } from "next/server";
 import { planTask } from "@/lib/planTask";
 
 export async function POST(req: NextRequest) {
-  const { prompt, sessionId, fileURL } = await req.json();
+  const { userId, prompt, sessionId, fileURL } = await req.json();
   // console.log("[/plan-task]:", prompt, sessionId, fileURL);
+  console.log("[/plan-task]:", userId, prompt, sessionId, fileURL);
   try {
-    const taskResponse = await planTask(prompt, sessionId, fileURL);
-    console.log("[/plan-task]:", taskResponse);
+    const taskResponse = await planTask(userId, prompt, sessionId, fileURL);
     return NextResponse.json(taskResponse);
   } catch (error) {
     console.error("Failed to plan task:", error);

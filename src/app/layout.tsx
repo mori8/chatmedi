@@ -5,7 +5,7 @@ import NextAuthContext from "@/context/NextAuthContext";
 import 'react-tooltip/dist/react-tooltip.css'
 import "./globals.css";
 
-const nunito = Nunito({ subsets: ["latin"] });
+const nunito = Nunito({ subsets: ["latin"], display: 'swap' });
 
 export const metadata: Metadata = {
   title: "ChatMedi",

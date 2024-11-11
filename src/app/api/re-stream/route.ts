@@ -4,7 +4,7 @@ export const runtime = "edge";
 
 export async function POST(req: NextRequest) {
   console.log("[re-stream/route.ts]: POST called");
-  const { prompt, context, task, modelSelectedByUser } = await req.json();
+  const { prompt, context, task, modelSelectedByUser, chatId } = await req.json();
 
   // 기존 대화의 task -> 선택된 모델 사용 -> 모델 실행 결과 -> 최종 응답
   const chatMediResponse: ChatMediResponse = {};
@@ -95,6 +95,7 @@ export async function POST(req: NextRequest) {
               },
               body: JSON.stringify({
                 user_input: prompt,
+                session_id: req.headers.get("x-session-id"),
                 selected_model: selectedModel,
                 inference_result: inferenceResult,
               }),

@@ -39,6 +39,7 @@ export async function POST(req: NextRequest) {
                 "Content-Type": "application/json",
               },
               body: JSON.stringify({
+                userId: userId,
                 prompt: prompt,
                 sessionId: chatId,
                 fileURL: fileURL || "",
@@ -143,6 +144,7 @@ export async function POST(req: NextRequest) {
               },
               body: JSON.stringify({
                 user_input: prompt,
+                session_id: chatId,
                 selected_model: selectedModel,
                 inference_result: inferenceResult,
               }),

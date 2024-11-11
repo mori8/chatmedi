@@ -10,7 +10,6 @@ import ChatMessages from "@/components/ChatMessages";
 import ChatTextArea from "@/components/ChatTextArea";
 import useFetchStreamResponse from "@/hook/useFetchStreamResponse";
 
-
 function ChatPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
@@ -28,8 +27,12 @@ function ChatPage() {
   const [file, setFile] = useState<File | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
 
-  const { isFetching, tempChatMediResponse, fetchStreamResponse, fetchReStreamResponse } =
-    useFetchStreamResponse(userId, chatId, setMessages);
+  const {
+    isFetching,
+    tempChatMediResponse,
+    fetchStreamResponse,
+    fetchReStreamResponse,
+  } = useFetchStreamResponse(userId, chatId, setMessages);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
